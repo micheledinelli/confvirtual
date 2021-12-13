@@ -1,0 +1,150 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: sans-serif;
+    margin: 0 auto;
+}
+
+.menu-bar {
+    background-color: #52a9fa;
+    text-align: center;
+}
+
+.menu-bar ul {
+    display: inline-flex;
+    list-style: none;
+}
+
+.menu-bar ul li {
+    margin: 15px;
+    padding: 15px;
+    width: 120px;
+}
+
+.menu-bar ul li a {
+    text-decoration: none;
+    color: black;
+}
+
+.menu-bar ul li:hover{
+    background: aliceblue;
+    border-radius: 3px;
+}
+
+.sub-menu-1{
+    list-style: none;
+    text-decoration: none;
+    display: none;
+}
+
+.menu-bar ul li:hover .sub-menu-1 {
+    display: block;
+    position: absolute;
+    background:  #52a9fa;
+    margin-top: 10px;
+    margin-left: -15px;
+}
+
+.menu-bar ul li:hover .sub-menu-1 ul {
+    display: block;
+    margin: 10px;
+    padding: 10px;
+}
+
+.menu-bar ul li:hover .sub-menu-1 ul li{
+    border-bottom: 1px dotted #fff;
+    text-align: left;
+}
+
+input {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    opacity: 0.7;
+}
+
+input:hover {
+    opacity: 1;
+}
+
+.login-btn {
+    background-color: #52a9fa;
+    color: black;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    opacity: 0.7;
+}
+
+.login-btn:hover {
+    color: blue;
+    opacity: 0.7;
+}
+
+
+.popup {
+    background: rgba(0,0,0,0.6);
+    align-items: center;
+    justify-content: center;
+    display: none;
+    position: absolute;
+    top: 0px;
+    height: 100%;
+    width: 100%;
+}
+
+#close {
+    top: -15px;
+    position: absolute;
+    right: -15px;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    border-radius: 50%;
+    background: #fff;
+}
+
+#close:hover {
+    cursor: pointer;
+}
+
+#close-succesfull-login {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    border-radius: 50%;
+    background: #fff;
+    top: -15px;
+    right: 10px;
+}
+
+#close-succesfull-login:hover {
+    cursor: pointer;
+}
+
+.popup-succesfull-login {
+    margin: 0 auto;
+    top: 20px;
+    background-color: rgb(87, 240, 87);
+    height: 50px;
+    padding: 20px;
+    border-radius: 5px;
+    position: relative;
+    text-align: center;
+    width: 200px;
+    display: flex;
+}
+
+
+
+
