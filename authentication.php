@@ -15,32 +15,32 @@
         $_SESSION['name'] = $_POST["uname"];
         $_SESSION['psw'] = $_POST["psw"] ;
 
-        $name = $_POST["uname"];
+        $uname = $_POST["uname"];
         $password = $_POST["psw"];
 
         // Connection to db to save data
         try {
-            $pdo = new PDO('mysql:host=localhost;dbname=AUTHENTICATION', $user = 'root', $pass = 'Squidy.77');
+            $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'Squidy.77');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
 
             // Check if the user exists in the DB
-            $query = ("SELECT Nome FROM AUTHENTICATION.UTENTE WHERE Nome = :lab1");
+            $query = ("SELECT Username FROM CONFVIRTUAL.UTENTE WHERE Username = :lab1");
             $res = $pdo -> prepare($query);
             $res -> bindValue(":lab1", $name);
             $res -> execute();
            
             while($row = $res -> fetch() ){
-                if($row["Nome"] == $name) {
+                if($row["Nome"] == $uname) {
                     $checked = true;
                 } 
             }
             
             if( $checked ){
                 // Check if the password is ok for that user
-                $query = ("SELECT Password FROM AUTHENTICATION.UTENTE WHERE Nome = :lab1");
+                $query = ("SELECT Password FROM CONFVIRTUAL.UTENTE WHERE Username = :lab1");
                 $res = $pdo -> prepare($query);
-                $res -> bindValue(":lab1", $name);
+                $res -> bindValue(":lab1", $uname);
                 $res -> execute();
                 
                 while($row = $res -> fetch() ){

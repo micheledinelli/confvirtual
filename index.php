@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="index_style.css">
+    <link rel="stylesheet" href="style.css">
     <title>Demo</title>
 </head>
 <body>
@@ -17,7 +17,7 @@
                 <div class="sub-menu-1">
                     <ul>
                         <li><a href="#" id="login">Login</a></li>
-                        <li><a href="signup.php" id="register">Register</a></li>
+                        <li><a href="signup.html" id="register">Register</a></li>
                     </ul>
                 </div>
             </li>
@@ -27,7 +27,7 @@
         </ul>
     </div>
 
-    <div class="popup">
+    <div class="pop-up">
         <div class="pop-up-content">
             <form action="authentication.php" method="post">
                 <label for="uname"><b>Username</b></label>

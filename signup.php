@@ -4,48 +4,64 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="signup.css">
-    <title>Sign-Up</title>
+    <title>Document</title>
 </head>
 <body>
-    <div class="container">
-        <form action="registration.php" method="post">
-            
-            <label for="uname"><b>Username</b></label>
-            <span id="check-username"></span>
-            <input type="text" placeholder="Enter Username" id="username" name="username" required autocomplete="off" onInput="checkUsername()">    
-            
-            <label for="psw"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="psw" required>
-            
-            <label for="name"><b>Enter yuor name</b></label>
-            <input type="text" placeholder="Mario" name="name" required>
-            
-            <label for="surname"><b>Enter your surname</b></label>
-            <input type="text" placeholder="Rossi" name="surname" required>
-            
-            <label for="bday"><b>Select your birthday</b></label>
-            <input type="date" name="bday" required>
-            
-            <button type="submit" class="signup-btn"><strong>Sign Up</strong></button>
-        </form>
-    </div>
+    <?php
+        
+        session_start();
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-function checkUsername() {
+        // Retrieve data from signup.html
+        $uname = $_POST["uname"];
+        $password = $_POST["psw"];
+        $name = $_POST["name"];
+        $surname = $_POST["surname"];
+        $bday = $_POST["bday"];
+
+        // Connection to db and logic to store data
+        try {
+            $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'Squidy.77');
+            $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo -> exec('SET NAMES "utf8"');
+
+            // Check if the username does not exist in the DB
+            $query = ("SELECT Username FROM CONFVIRTUAL.UTENTE WHERE Username = :lab1");
+            $res = $pdo -> prepare($query);
+            $res -> bindValue(":lab1", $name);
+            $res -> execute();
+           
+            while($row = $res -> fetch() ){
+                if($row["Nome"] == $uname) {
+                    $checked = true;
+                } 
+            }
+
+            if($checked == true ){
+                // TO DO: handle error 
+            }  else {
+                // User added to the database
+                $query = ('INSERT INTO UTENTE(Username, Password, Nome, Cognome, DataNascita) VALUES(:lab1, :lab2, :lab3, :lab4, :lab5)');
+                $res = $pdo -> prepare($query);
+                $res -> bindValue(":lab1", $uname);
+                $res -> bindValue(":lab2", $password);
+                $res -> bindValue(":lab3", $name);
+                $res -> bindValue(":lab4", $surname);
+                $res -> bindValue(":lab5", $bday);
+
+                $res -> execute();
+                echo 'User inserted into table UTENTE';
+            
+            }
+        
+            $pdo = null;
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage() . "<br/>";
+            // equivalent to exit();
+            die();
+        }
+        
     
-    jQuery.ajax({
-    url: "check_availability.php",
-    data:'username='+$("#username").val(),
-    type: "POST",
-    success:function(data){
-        $("#check-username").html(data);
-    },
-    error:function (){}
-    });
-}
-</script> 
-
+    
+    ?>
 </body>
 </html>
