@@ -16,7 +16,7 @@
             <li><a>Start</a>
                 <div class="sub-menu-1">
                     <ul>
-                        <li><a href="#" id="login">Login</a></li>
+                        <li><a href="login.html" id="login">Login</a></li>
                         <li><a href="signup.html" id="register">Register</a></li>
                     </ul>
                 </div>
@@ -25,19 +25,6 @@
             <li><a href="contact.asp">Contact</a></li>
             <li><a href="about.html">About</a></li>
         </ul>
-    </div>
-
-    <div class="pop-up">
-        <div class="pop-up-content">
-            <form action="authentication.php" method="post">
-                <label for="uname"><b>Username</b></label>
-                <input type="text" placeholder="Enter Username" name="uname" required autocomplete="off">
-                <label for="psw"><b>Password</b></label>
-                <input type="password" placeholder="Enter Password" name="psw" required>
-                <button type="submit" class="login-btn"><strong>Login</strong></button>
-            </form>
-            <div id="close">x</div>
-        </div>
     </div>
 
     <?php
