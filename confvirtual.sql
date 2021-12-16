@@ -46,7 +46,7 @@ CREATE TABLE REGISTRAZIONE(
 ) ENGINE="INNODB";
 
 CREATE TABLE ADMIN(
-    Username VARCHAR(30)
+    Username VARCHAR(30),
     PRIMARY KEY (Username),
     FOREIGN KEY (Username) REFERENCES UTENTE(Username)
 ) ENGINE="INNODB";
@@ -78,27 +78,56 @@ CREATE TABLE CREAZIONE(
     FOREIGN KEY (AcronimoConferenza, AnnoEdizione) REFERENCES CONFERENZA(Acronimo, AnnoEdizione)
 ) ENGINE="INNODB";
 
-CREATE TABLE DATASVOLGIMENTO(
+
+# TO DO : Considerare di incorporate l'entità DATASVOLGIMENTO
+# L'attributo Data di DATASVOLGIMENTO deve essere soggetto al vincolo UNIQUE
+# (not null ed unico nella tabella) perché SESSIONE.Data è in vincolo di integrità
+# con DATASVOLGIMENTO.Data
+# Consideriamo se accorpare tutto in SESSIONE che a questo punto aggiungerebbe
+# due campi ovvero AcronimoConferenza e AnnoEdizione oppure mantenere questa situazione
+# (per me fragile) 
+# Accorpando in SESSIONE avremmo
+
+#################  SESSIONE SE ACCORPIAMO   ################################################
+/*
+CREATE TABLE SESSIONE(
     AcronimoConferenza VARCHAR(10),
     AnnoEdizione INT,
-    Data DATETIME,
-    PRIMARY KEY (AcronimoConferenza, AnnoEdizione, Data),
-    FOREIGN KEY (AcronimoConferenza, AnnoEdizione) REFERENCES CONFERENZA(Acronimo, AnnoEdizione)
-) ENGINE="INNODB";
-
-CREATE TABLE SESSIONE(
-    Data DATETIME, 
+    Data DATE, 
     Codice VARCHAR(10),
     Titolo VARCHAR(30),
     Numero_Presentazioni INT,
     OraInizio DATETIME,
     OraFine DATETIME, 
-    Link VARCHAR(50)
+    Link VARCHAR(50),
     PRIMARY KEY (Codice),
-    FOREIGN KEY (Data) REFERENCES DATASVOLGIMENTO(Data)
+    FOREIGN KEY(AcronimoConferenza, AnnoEdizione) REFERENCES CONFERENZA(Acronimo, AnnoEdizione) ON DELETE CASCADE,
+) ENGINE="INNODB";
+
+*/
+
+CREATE TABLE DATASVOLGIMENTO(
+    AcronimoConferenza VARCHAR(10),
+    AnnoEdizione INT,
+    Data DATE UNIQUE,
+    PRIMARY KEY (AcronimoConferenza, AnnoEdizione, Data),
+    FOREIGN KEY (AcronimoConferenza, AnnoEdizione) REFERENCES CONFERENZA(Acronimo, AnnoEdizione)
+) ENGINE="INNODB";
+
+CREATE TABLE SESSIONE(
+    Data DATE, 
+    Codice VARCHAR(10),
+    Titolo VARCHAR(30),
+    Numero_Presentazioni INT,
+    OraInizio DATETIME,
+    OraFine DATETIME, 
+    Link VARCHAR(50),
+    PRIMARY KEY (Codice),
+	FOREIGN KEY (Data) REFERENCES DATASVOLGIMENTO(Data)
 ) ENGINE="INNODB";
 
 CREATE TABLE PRESENTAZIONEARTICOLO(
+    Codice INT,
     CodiceSessione VARCHAR(10),
     OraInizio DATETIME,
     OraFine DATETIME,
