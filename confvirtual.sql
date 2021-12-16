@@ -53,8 +53,8 @@ CREATE TABLE ADMIN(
 
 CREATE TABLE PRESENTER(
     Username VARCHAR(30),
-    CurriculumVitae,
-    Foto,
+    CurriculumVitae BLOB,
+    Foto BLOB,
     NomeUniversità VARCHAR(30),
     PRIMARY KEY (Username),
     FOREIGN KEY (Username) REFERENCES UTENTE(Username)
@@ -62,8 +62,8 @@ CREATE TABLE PRESENTER(
 
 CREATE TABLE SPEAKER(
     Username VARCHAR(30),
-    CurriculumVitae,
-    Foto,
+    CurriculumVitae BLOB,
+    Foto BLOB,
     NomeUniversità VARCHAR(30),
     PRIMARY KEY (Username),
     FOREIGN KEY (Username) REFERENCES UTENTE(Username)
@@ -72,7 +72,7 @@ CREATE TABLE SPEAKER(
 CREATE TABLE CREAZIONE(
     UsernameAdmin VARCHAR(30),
     AcronimoConferenza VARCHAR(10), 
-    AnnoEdizione int,
+    AnnoEdizione INT,
     PRIMARY KEY (UsernameAdmin, AcronimoConferenza, AnnoEdizione),
     FOREIGN KEY (UsernameAdmin) REFERENCES ADMIN(Username),
     FOREIGN KEY (AcronimoConferenza, AnnoEdizione) REFERENCES CONFERENZA(Acronimo, AnnoEdizione)
@@ -80,7 +80,7 @@ CREATE TABLE CREAZIONE(
 
 CREATE TABLE DATASVOLGIMENTO(
     AcronimoConferenza VARCHAR(10),
-    AnnoEdizione int,
+    AnnoEdizione INT,
     Data DATETIME,
     PRIMARY KEY (AcronimoConferenza, AnnoEdizione, Data),
     FOREIGN KEY (AcronimoConferenza, AnnoEdizione) REFERENCES CONFERENZA(Acronimo, AnnoEdizione)
@@ -90,7 +90,7 @@ CREATE TABLE SESSIONE(
     Data DATETIME, 
     Codice VARCHAR(10),
     Titolo VARCHAR(30),
-    Numero_Presentazioni int,
+    Numero_Presentazioni INT,
     OraInizio DATETIME,
     OraFine DATETIME, 
     Link VARCHAR(50)
@@ -100,10 +100,9 @@ CREATE TABLE SESSIONE(
 
 CREATE TABLE PRESENTAZIONEARTICOLO(
     CodiceSessione VARCHAR(10),
-    Codice
     OraInizio DATETIME,
     OraFine DATETIME,
-    NumeroSequenza int,
+    NumeroSequenza INT,
     Tipo VARCHAR(10),
     PRIMARY KEY (Codice),
     FOREIGN KEY (CodiceSessione) REFERENCES SESSIONE(Codice)
