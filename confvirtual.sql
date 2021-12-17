@@ -33,6 +33,7 @@ CREATE TABLE UTENTE(
     Nome VARCHAR(25),
     Cognome VARCHAR(25),
     DataNascita DATE,
+    Tipo ENUM("ADMIN","PRESENTER", "SPEAKER","BASE"),
     PRIMARY KEY(Username)
 ) ENGINE="INNODB";
 
