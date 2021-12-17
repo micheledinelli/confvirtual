@@ -126,7 +126,7 @@ CREATE TABLE SESSIONE(
 	FOREIGN KEY (Data) REFERENCES DATASVOLGIMENTO(Data)
 ) ENGINE="INNODB";
 
-CREATE TABLE PRESENTAZIONEARTICOLO(
+CREATE TABLE PRESENTAZIONE(
     Codice INT,
     CodiceSessione VARCHAR(10),
     OraInizio DATETIME,
@@ -135,4 +135,93 @@ CREATE TABLE PRESENTAZIONEARTICOLO(
     Tipo VARCHAR(10),
     PRIMARY KEY (Codice),
     FOREIGN KEY (CodiceSessione) REFERENCES SESSIONE(Codice)
-)
+)ENGINE="INNODB";
+
+CREATE TABLE ARTICOLO(
+	CodicePresentazione INT,
+    Titolo VARCHAR(30),
+    NumeroPagine INT,
+    FilePDF BLOB,
+    StatoSvolgimento ENUM ("COPERTO", "NON COPERTO"),
+    UsernamePresenter VARCHAR(30),
+    PRIMARY KEY (CodicePresentazione),
+    FOREIGN KEY(CodicePresentazione) REFERENCES PRESENTAZIONE(Codice)
+)ENGINE="INNODB";
+
+CREATE TABLE TUTORIAL(
+	CodicePresentazione INT,
+	Titolo VARCHAR(30),
+	Abstract VARCHAR(500),
+	PRIMARY KEY (CodicePresentazione),
+	FOREIGN KEY(CodicePresentazione) REFERENCES PRESENTAZIONE(Codice)
+)ENGINE="INNODB";
+
+CREATE TABLE AUTORE(
+	Nome VARCHAR(25),
+	Cognome VARCHAR(25),
+	Articolo INT,
+	PRIMARY KEY(Nome, Cognome, Articolo),
+	FOREIGN KEY(Articolo) REFERENCES ARTICOLO(CodicePresentazione)
+)ENGINE="INNODB";
+
+CREATE TABLE PAROLACHIAVE(
+	Parola VARCHAR(25),
+	Articolo INT,
+	PRIMARY KEY(Parola, Articolo),
+	FOREIGN KEY (Articolo) REFERENCES ARTICOLO(CodicePresentazione)
+)ENGINE="INNODB";
+/*
+voto da uno a 10
+*/
+CREATE TABLE VALUTAZIONE(
+	UsernameAdmin VARCHAR(30),
+	Voto INT,
+	Note VARCHAR(50),
+	CodicePresentazione INT,
+	PRIMARY KEY(UsernameAdmin, CodicePresentazione),
+	FOREIGN KEY(UsernameAdmin) REFERENCES ADMIN(Username),
+	FOREIGN KEY(CodicePresentazione) REFERENCES PRESENTAZIONE(Codice)
+)ENGINE="INNODB";
+
+CREATE TABLE UNIVERSITA(
+	NomeUniversita VARCHAR(15),
+	NomeDipartimento VARCHAR(15),
+    PRIMARY KEY(NomeUniversita)
+)ENGINE="INNODB";
+
+CREATE TABLE RISORSA(
+	UsernameProprietario VARCHAR(30),
+    Link VARCHAR(50),
+    Descrizione VARCHAR(50),
+    CodiceTutorial INT,
+    PRIMARY KEY(UsernameProprietario),
+    FOREIGN KEY(UsernameProprietario) REFERENCES SPEAKER(Username),
+    FOREIGN KEY(CodiceTutorial) REFERENCES TUTORIAL(CodicePresentazione)
+)ENGINE="INNODB";
+
+CREATE TABLE PRESENTAZIONETUTORIAL(
+	UsernameSpeaker VARCHAR(30),
+	CodiceTutorial INT,
+	PRIMARY KEY(UsernameSpeaker),
+	FOREIGN KEY(UsernameSpeaker) REFERENCES SPEAKER(Username),
+	FOREIGN KEY(CodiceTutorial) REFERENCES TUTORIAL(CodicePresentazione) 
+)ENGINE="INNODB";
+
+CREATE TABLE FAVORITE(
+	Username VARCHAR(30),
+	CodicePresentazione INT, 
+	PRIMARY KEY(Username,CodicePresentazione),
+	FOREIGN KEY(Username)REFERENCES UTENTE(Username),
+	FOREIGN KEY(CodicePresentazione)REFERENCES PRESENTAZIONE(Codice)
+)ENGINE="INNODB";
+
+CREATE TABLE MESSAGGIO(
+UsernameMittente VARCHAR(30),
+Testo VARCHAR(200),
+DataInserimento DATE,
+ChatID VARCHAR(10),
+PRIMARY KEY(UsernameMittente,Testo,DataInserimento,ChatID),
+FOREIGN KEY(UsernameMittente) REFERENCES UTENTE(Username),
+FOREIGN KEY(ChatID) REFERENCES SESSIONE(Codice)
+)ENGINE="INNODB";
+ 
