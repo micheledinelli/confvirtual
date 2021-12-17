@@ -170,12 +170,10 @@ CREATE TABLE PAROLACHIAVE(
 	PRIMARY KEY(Parola, Articolo),
 	FOREIGN KEY (Articolo) REFERENCES ARTICOLO(CodicePresentazione)
 )ENGINE="INNODB";
-/*
-voto da uno a 10
-*/
+
 CREATE TABLE VALUTAZIONE(
 	UsernameAdmin VARCHAR(30),
-	Voto INT,
+	Voto INT CHECK(Voto <= 10 AND Voto >= 1),
 	Note VARCHAR(50),
 	CodicePresentazione INT,
 	PRIMARY KEY(UsernameAdmin, CodicePresentazione),
