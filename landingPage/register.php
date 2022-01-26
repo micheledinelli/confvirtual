@@ -7,6 +7,13 @@
     <title>Register</title>
 </head>
 <body>
-    
+    <?php
+
+    $username = $_POST["username"];
+    $password = $_POST["pw"];
+    $name = $_POST["name"];
+    $surname = $_POST["surname"];
+   
+    ?> 
 </body>
 </html>
