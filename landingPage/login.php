@@ -8,9 +8,10 @@
 </head>
 <body>
     <?php
+        
         $username = $_POST["username"];
         $password = $_POST["pw"];
-
+        
         // Connection to db to save data
         try {
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'Pinaccio00!');
