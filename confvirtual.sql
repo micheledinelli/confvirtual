@@ -119,7 +119,7 @@ CREATE TABLE SESSIONE(
     Data DATE, 
     Codice VARCHAR(10),
     Titolo VARCHAR(30),
-    Numero_Presentazioni INT,
+    NumeroPresentazioni INT DEFAULT 0,
     OraInizio DATETIME,
     OraFine DATETIME, 
     Link VARCHAR(50),
@@ -128,7 +128,7 @@ CREATE TABLE SESSIONE(
 ) ENGINE="INNODB";
 
 CREATE TABLE PRESENTAZIONE(
-    Codice INT,
+    Codice INT AUTO_INCREMENT,
     CodiceSessione VARCHAR(10),
     OraInizio DATETIME,
     OraFine DATETIME,
@@ -143,10 +143,12 @@ CREATE TABLE ARTICOLO(
     Titolo VARCHAR(30),
     NumeroPagine INT,
     FilePDF BLOB,
-    StatoSvolgimento ENUM ("COPERTO", "NON COPERTO"),
+    StatoSvolgimento ENUM ("COPERTO", "NON COPERTO") DEFAULT "NON COPERTO",
     UsernamePresenter VARCHAR(30),
     PRIMARY KEY (CodicePresentazione),
-    FOREIGN KEY(CodicePresentazione) REFERENCES PRESENTAZIONE(Codice)
+    FOREIGN KEY(CodicePresentazione) REFERENCES PRESENTAZIONE(Codice),
+    # Vincolo esterno aggiuntivo
+    FOREIGN KEY(UsernamePresenter) REFERENCES PRESENTER(Username)
 )ENGINE="INNODB";
 
 CREATE TABLE TUTORIAL(
@@ -223,4 +225,72 @@ PRIMARY KEY(UsernameMittente,Testo,DataInserimento,ChatID),
 FOREIGN KEY(UsernameMittente) REFERENCES UTENTE(Username),
 FOREIGN KEY(ChatID) REFERENCES SESSIONE(Codice)
 )ENGINE="INNODB";
- 
+
+#################################################
+################################################# 
+################# TRIGGER #######################
+#################################################
+#################################################
+
+/*Utilizzare un	trigger per	 implementare	 l’operazione	 cambio	 di	 stato_svolgimento di	
+una	 presentazione	 di articolo,	 portandolo	 da	 “Non coperto” a “Coperto”  quando si	
+inserisce	un presenter	valido	per	quella	presentazione.*/ 
+
+# TRIGGER AFTER INSERT (AI)
+DELIMITER $
+CREATE TRIGGER PresentazioneCopertaAI
+AFTER INSERT ON ARTICOLO
+FOR EACH ROW BEGIN
+	IF(NEW.UsernamePresenter IN (SELECT Username FROM PRESENTER WHERE NEW.UsernamePresenter = Username)) THEN
+		UPDATE ARTICOLO SET StatoSvolgimento = 'COPERTO' WHERE(CodicePresentazione = 1);    
+	END IF;
+END;
+$ DELIMITER ;
+
+# TO DO : Errori molto strani (Infinite update loop e cose simili)
+# Si vuole aggiornare il campo stato svogimento dopo un eventuale update della
+# tabella Articolo perchè magari si crea l'articolo e si aggiunge un presenter in un secondo momento
+# a tal proposito serve un trigger before/after update on ARTICOLO.
+# Non ho trovato una soluzione per ora perchè ricevo errori strani. 
+# Mic
+# TRIGGER AFTER UPDATE (AU)
+
+
+/*
+Utilizzare un	 trigger per	 implementare	 l’operazione	 di	 aggiornamento	 del	 campo	
+#numero_presentazioni ogni	 qualvolta	 si	 aggiunge	 una	 nuova	 presentazione ad	 una	
+sessione	della	conferenza.
+*/
+# Aggiorna il campo NumeroPresentazioni di SESSIONE ogni volta che una PRESENTAZIONE
+# viene associata a quella determinata SESSIONE.
+DELIMITER $
+CREATE TRIGGER AggiornaNumPresentazioni
+AFTER INSERT ON PRESENTAZIONE
+FOR EACH ROW BEGIN
+	IF(NEW.CodiceSessione IN (SELECT Codice FROM SESSIONE WHERE NEW.CodiceSessione = SESSIONE.Codice)) THEN
+		UPDATE SESSIONE SET NumeroPresentazioni = NumeroPresentazioni + 1 WHERE (SESSIONE.Codice IN (SELECT CodiceSessione FROM PRESENTAZIONE WHERE SESSIONE.Codice = CodiceSessione));
+    END IF;
+END;
+$ DELIMITER ;
+
+/*
+Utilizzare un	 event	per modificare	 il	 campo	 svolgimento di	 una	 conferenza.	 L’evento	
+setta	il	campo	a	“Completata” non	appena	la	data	corrente	eccede	di	un	giorno l’ultima	
+data	di	svolgimento	di una	conferenza.
+*/
+
+#TODO
+CREATE EVENT CompleteOnNextday
+	ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 5 SECOND
+	DO SET @ciao = (SELECT COUNT(*) FROM conferenza);
+
+# test
+INSERT INTO CONFERENZA(Acronimo, AnnoEdizione) VALUES("DB", 2021);
+INSERT INTO DATASVOLGIMENTO(AcronimoConferenza, AnnoEdizione, Data) VALUES("DB",2021, "2021-12-17"); 
+INSERT INTO SESSIONE(Data, Codice, Titolo) VALUES("2021-12-17", "AAA", "Prima");
+INSERT INTO PRESENTAZIONE(CodiceSessione) VALUES("AAA");
+INSERT INTO UTENTE(Username) VALUES ("Paolo");
+INSERT INTO PRESENTER(Username) VALUES ("Paolo");
+INSERT INTO PRESENTAZIONE(CodiceSessione) VALUES("AAA");
+INSERT INTO ARTICOLO(CodicePresentazione, Titolo, NumeroPagine) VALUES(1,"La voglia di volare", 100);
+UPDATE ARTICOLO SET UsernamePresenter = "Paolo" WHERE CodicePresentazione = 1;
