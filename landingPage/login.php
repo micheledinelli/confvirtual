@@ -14,51 +14,37 @@
         
         // Connection to db to save data
         try {
-            $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'Squidy.77');
+            $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'Pinaccio00!');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
-            
-            // Check if the user exists in the DB
-            $query = ("SELECT Username FROM CONFVIRTUAL.UTENTE WHERE Username = :lab1");
-            $res = $pdo -> prepare($query);
-            $res -> bindValue(":lab1", $uname);
-            $res -> execute();
-           
-            while($row = $res -> fetch() ){
-                echo $row["Username"];
-                if($row["Username"] == $uname) {
-                    $checked = true;
-                } 
-            }
-            
-            if( $checked ){
-                // Check if the password is ok for that user
-                $query = ("SELECT Password FROM CONFVIRTUAL.UTENTE WHERE Username = :lab1");
-                $res = $pdo -> prepare($query);
-                $res -> bindValue(":lab1", $uname);
-                $res -> execute();
-                
-                while($row = $res -> fetch() ){
-                    if($row["Password"] == $password) {
-                        $_SESSION['status'] = "Login successfull";
-                        sleep(0.5);
-                        // Redirect
-                        header('Location:index.php');
-                    } else {
-                        echo 'Wrong Password';
-                    }
-                } 
-            } else {
-                echo 'Username does not exists';
-            } 
-            
-
-            $pdo = null;
-        } catch (PDOException $e) {
-            print "Error!: " . $e->getMessage() . "<br/>";
-            // equivalent to exit();
-            die();
         }
+        catch(PDOException $e) {
+            echo("[ERRORE] Query SQL (Insert) non riuscita. Errore primo catch: ".$e->getMessage());
+            exit();
+        }
+
+        try {
+            //check if the username and the password are in the Database
+            $sql='SELECT COUNT(*) AS counter FROM UTENTE  WHERE (Username=:lab1) AND (Password=:lab2)';
+            $res=$pdo->prepare($sql);
+            $res->bindValue(":lab1",$username);
+            $res->bindValue(":lab2",$password);
+            $res->execute();
+
+            $res=$pdo->query($sql);
+          }
+         catch(PDOException $e) {
+           echo("[ERRORE] Query SQL (Insert) non riuscita. Errore secondo catch: ".$e->getMessage());
+           exit();
+         }
+        $row=$res->fetch();
+        if ($row['counter']>0) {
+            echo("<b> Login effettuato con successo, ".$username."</b>"); 
+           } else {
+            echo("<b>Login non autorizzato! </b>");  
+        }
+        
+       
     ?>
 </body>
 </html>
