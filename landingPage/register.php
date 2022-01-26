@@ -8,6 +8,12 @@
 </head>
 <body>
     <?php
+
+    $username = $_POST["username"];
+    $password = $_POST["pw"];
+    $name = $_POST["name"];
+    $surname = $_POST["surname"];
+   
         // Retrieve data from html form
         $username = $_POST["username"];
         $password = $_POST["pw"];
