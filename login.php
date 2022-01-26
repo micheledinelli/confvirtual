@@ -4,22 +4,19 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>login</title>
+    <title>Login</title>
 </head>
 <body>
     <?php
-        // Session has an ID and session variable
-        session_start();
-        
-        $uname = $_POST["uname"];
-        $password = $_POST["psw"];
+        $username = $_POST["username"];
+        $password = $_POST["pw"];
 
         // Connection to db to save data
         try {
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'Squidy.77');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
-
+            
             // Check if the user exists in the DB
             $query = ("SELECT Username FROM CONFVIRTUAL.UTENTE WHERE Username = :lab1");
             $res = $pdo -> prepare($query);
@@ -61,11 +58,6 @@
             // equivalent to exit();
             die();
         }
-        
     ?>
-
-    <br>
-    <a href="signup.html">Sign-Up</a>
-
 </body>
 </html>
