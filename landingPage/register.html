@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
-    <title>Document</title>
+    <title>Register</title>
 </head>
 <body>
 
@@ -23,15 +23,14 @@
         <hr class="my-4">
     </div>
 
-    <form action="" class="container my-5">
-       
-
+    <form action="register.php" method="post" class="container my-5">
+        
         <div class="mb-3 form-group floating">
             <input type="text" class="form-control floating" name="username" required autocomplete="off">
             <label for="username">Username</label>          
         </div>
         <div class="mb-3 form-group floating">
-            <input type="text" class="form-control floating" name="pw" required autocomplete="off">
+            <input type="password" class="form-control floating" name="pw" required autocomplete="off">
             <label for="pw">Password</label> 
         </div>
         <div class="mb-3 form-group floating">
@@ -43,7 +42,7 @@
             <label for="surname">Surname</label> 
         </div>
         <div id="date-picker-example" class="md-form md-outline input-with-post-icon datepicker">
-            <input placeholder="Select date" type="date" id="example" class="form-control">
+            <input placeholder="Select date" type="date" class="form-control" name="date">
         </div>
         <div class="container text-center my-5">
             <button type="submit" class="btn btn-primary">Register</button>
