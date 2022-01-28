@@ -26,19 +26,31 @@
                 </li>
             </ul>
         </div>
-      
-        <ul class="navbar-nav me-5">
-            <div class="dropdown nav-item">
-                <a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-expanded="false">
-                    Get in touch
-                </a>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                    <a class="dropdown-item" href="login.html">Login</a>
-                    <a class="dropdown-item" href="register.html">Register</a>
-                </div>
-            </div>
-        </ul>
         
+        <?php
+            session_start();
+            if (isset($_SESSION['user'])) {
+        ?>
+            
+            <?php print"<h4 class='me-5'>Hello, {$_SESSION['user']}</h4>"?>
+            <a class="btn btn-danger me-5" href="logut.php" role="button" aria-expanded="false">Log-out</a>
+            <?php
+                } else {
+            ?>
+                <ul class="navbar-nav me-5">
+                    <div class="dropdown nav-item">
+                        <a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-expanded="false">
+                            Get in touch
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            <a class="dropdown-item" href="login.html">Login</a>
+                            <a class="dropdown-item" href="register.html">Register</a>
+                        </div>
+                    </div>
+                </ul>
+            <?php
+                }
+            ?>    
     </nav>
 
     <div class="container jumbotron my-5 text-center">

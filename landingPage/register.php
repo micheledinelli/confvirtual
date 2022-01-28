@@ -9,11 +9,9 @@
 <body>
     <?php
 
-    $username = $_POST["username"];
-    $password = $_POST["pw"];
-    $name = $_POST["name"];
-    $surname = $_POST["surname"];
-   
+        // Start or resume the session
+        session_start();
+
         // Retrieve data from html form
         $username = $_POST["username"];
         $password = $_POST["pw"];
@@ -22,7 +20,7 @@
         $date = $_POST["date"];
         
         try {
-            echo $username;
+
             // Connection to db
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'Squidy.77');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -39,8 +37,9 @@
             $res -> bindValue(":lab5", $date);
             $res -> execute();
             echo 'User inserted into table UTENTE';
+            
             // Redirect
-            header('Location:index.html');
+            header('Location:index.php');
             
             $pdo = null;
 
