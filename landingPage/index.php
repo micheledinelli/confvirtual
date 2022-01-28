@@ -32,25 +32,37 @@
             if (isset($_SESSION['user'])) {
         ?>
             
-            <?php print"<h4 class='me-5'>Hello, {$_SESSION['user']}</h4>"?>
-            <a class="btn btn-danger me-5" href="logut.php" role="button" aria-expanded="false">Log-out</a>
-            <?php
-                } else {
-            ?>
-                <ul class="navbar-nav me-5">
-                    <div class="dropdown nav-item">
-                        <a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-expanded="false">
-                            Get in touch
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                            <a class="dropdown-item" href="login.html">Login</a>
-                            <a class="dropdown-item" href="register.html">Register</a>
-                        </div>
+        <?php print"
+                <ul class='navbar-nav me-3'>
+                    <li class='nav-item active'>
+                        <a class='nav-link'>Welcome back, {$_SESSION['user']}</a>
+                    </li>
+                    <li class='nav-item'>
+                        <a class='nav-link'>Role: {$_SESSION['userType']}</a>
+                    </li>
+                </ul>";
+        ?>
+
+        <a class="btn btn-danger me-5" href="logut.php" role="button" aria-expanded="false">Log-out</a>
+            
+        <?php
+            } else {
+        ?>
+            <ul class="navbar-nav me-5">
+                <div class="dropdown nav-item">
+                    <a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-expanded="false">
+                        Get in touch
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <a class="dropdown-item" href="login.html">Login</a>
+                        <a class="dropdown-item" href="register.html">Register</a>
                     </div>
-                </ul>
-            <?php
-                }
-            ?>    
+                </div>
+            </ul>
+        <?php
+            }
+        ?>
+
     </nav>
 
     <div class="container jumbotron my-5 text-center">
@@ -66,40 +78,69 @@
         <hr class="my-4">
         <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
         <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
-    </div><div class="container jumbotron my-5 text-center">
-        <h1 class="display-4">Hello, world!</h1>
-        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-        <hr class="my-4">
-        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
-        <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+    </div>
+    
+    <?php
+        // Start or resume the session
+        session_start();
+
+        $username = $_POST["username"];
+        $password = $_POST["pw"];
+        
+        // Connection to db to save data
+        try {
+            $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='Squidy.77');
+            $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo -> exec('SET NAMES "utf8"');
+            
+            $query1 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.CONFERENZA WHERE Svolgimento = 'COMPLETATA'");
+            $res = $pdo -> prepare($query1);
+            $res -> execute();
+            $row = $res -> fetch();
+            $conf = $row["Counter"];
+
+            $query2 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.CONFERENZA WHERE Svolgimento = 'ATTIVA'");
+            $res = $pdo -> prepare($query2);
+            $res -> execute();
+            $row = $res -> fetch();
+            $confAttive = $row["Counter"];
+
+            $query3 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.UTENTE");
+            $res = $pdo -> prepare($query3);
+            $res -> execute();
+            $row = $res -> fetch();
+            $numUtenti = $row["Counter"];
+
+            /**
+             * TO DO : Classifica per il voto medio
+             */
+
+        } catch( PDOException $e ) {
+            echo("[ERRORE]".$e->getMessage());
+            exit();
+        }
+    ?>
     
     <div class="counter container-xl my-5 bg-light">
         <div class="row">
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
                 <div class="employees">
-                    <p class="counter-count">879</p>
-                    <p class="employee-p">Employee</p>
+                    <p class="counter-count"><?php echo "{$conf}" ?></p>
+                    <p class="employee-p">Conferenze Registrate</p>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
                 <div class="customer">
-                    <p class="counter-count">954</p>
-                    <p class="customer-p">Customer</p>
+                    <p class="counter-count"><?php echo "{$confAttive}" ?></p>
+                    <p class="customer-p">Conferenze Attive</p>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
                 <div class="design">
-                    <p class="counter-count">1050</p>
-                    <p class="design-p">Design</p>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-                <div class="order">
-                    <p class="counter-count">652</p>
-                    <p class="order-p">Orders</p>
+                    <p class="counter-count"><?php echo "{$numUtenti}"?></p>
+                    <p class="design-p">Utenti</p>
                 </div>
             </div>
         </div>
@@ -144,7 +185,7 @@
                     </a>
                 </div>
             </div>
-        </div>  
+        </div> 
         
         <div class=" my-5 footer-copyright text-center py-3">©Sayonara 2022</div>
   

@@ -21,17 +21,18 @@
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
-            $query = ("SELECT COUNT(*) AS Counter 
+            $query = ("SELECT COUNT(*) AS Counter, Tipologia 
                         FROM CONFVIRTUAL.UTENTE 
                         WHERE Username = :lab1 AND Password = :lab2");
 
             $res = $pdo -> prepare($query);
             $res -> bindValue(":lab1", $username);
             $res -> bindValue(":lab2", $password);
-
             $res -> execute();
         
             $row = $res -> fetch();
+            $_SESSION['userType'] = $row["Tipologia"];
+
 
             if($row["Counter"] > 0) {
                 echo "OK";
