@@ -4,7 +4,8 @@ function registerToConference() {
     content.innerHTML = `
     <div class="container text-center">
         <h2>Registrati</h2>
-        <form action="" method="post" class="container my-5">
+        <hr class="my-4">
+        <form action="registerToConference.php" method="post" class="container my-5">
             <div class="mb-3 form-group floating">
                 <input type="text" class="form-control floating" name="username" required autocomplete="off">
                 <label for="username">Username</label>          
@@ -17,8 +18,11 @@ function registerToConference() {
                 <input type="number" class="form-control floating" name="annoEdizione" required autocomplete="off">
                 <label for="annoEdizione">Anno Edizione</label>          
             </div>
-            <hr class="my-4">
         </form>
     </div>
     `;
+}
+
+function visualize() {
+    content.innerHTML = `<p>Hello</p>`
 }
