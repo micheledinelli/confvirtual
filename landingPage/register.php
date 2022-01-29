@@ -37,6 +37,8 @@
             $res -> bindValue(":lab5", $date);
             $res -> execute();
             echo 'User inserted into table UTENTE';
+            $_SESSION['user'] = $username;
+            $_SESSION['userType'] = "BASE";
             
             // Redirect
             header('Location:index.php');
