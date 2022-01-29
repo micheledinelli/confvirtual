@@ -7,7 +7,7 @@ CREATE TABLE CONFERENZA(
 	AnnoEdizione INT,
     Logo BLOB,
     Svolgimento ENUM("ATTIVA","COMPLETATA"),
-    NumeroPresentazion INT,
+    NumeroPresentazioni INT,
     PRIMARY KEY(Acronimo, AnnoEdizione)
 ) ENGINE="INNODB";
 
