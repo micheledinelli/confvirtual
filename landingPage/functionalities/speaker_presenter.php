@@ -5,7 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
-    <link rel="stylesheet" href="/DBProject2021/landingPage/css/form.css">
     <link rel="stylesheet" href="/DBProject2021/landingPage/css/base.css">
     <title>Base</title>
 </head>
@@ -37,7 +36,7 @@
                 
                 <li> <a href="#" onclick="">Modifica CV</a> </li>
             
-                <li> <a href="#" onclick="">Inserisci Foto</a> </li>
+                <li> <a href="#" onclick="insertPhoto()">Inserisci Foto</a> </li>
 
                 <li> <a href="#" onclick="">Modifica Foto</a> </li>
                 
@@ -105,13 +104,28 @@
             content.innerHTML = `
                 <h2>Inserisci il tuo CV</h2>
                 <hr class="my-4">
-                <div class="container">
-                    <div class="file-upload">
-                        <input type="file" />
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z"/>
-                        </svg>
+                <div class="container text-center">
+                    <form action="insertCV.php" method="post">
+                        <input type="file" name="fileCV">
+                        <div class="container text-center my-5">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
                 </div>
+            `;
+        }
+
+        function insertPhoto() {
+            content.innerHTML = `
+                <h2>Inserisci la tua foto</h2>
+                <hr class="my-4">
+                <div class="mb-3">
+                    <form action="insertPhoto.php" method="post">
+                        <input type="file" name="photo">
+                        <div class="container text-center my-5">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
                 </div>
             `;
         }
