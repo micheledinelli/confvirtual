@@ -7,11 +7,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
     <link rel="stylesheet" href="/DBProject2021/landingPage/css/form.css">
     <link rel="stylesheet" href="/DBProject2021/landingPage/css/base.css">
-    <title>Document</title>
+    <title>Base</title>
 </head>
 <body>
 
     <?php
+        session_start();
         // Connection to db
         $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'Squidy.77');
         $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -21,7 +22,7 @@
 
         $res = $pdo -> prepare($query);
         $res -> execute();
-        $conferenze = array();
+        $conferenze = array(); 
 
         while($row = $res -> fetch()) {
             $conferenza = new stdClass();
@@ -34,7 +35,12 @@
     <div class="wrapper">
         <nav id="sidebar" class="vh-100 bg-primary">
             <div class="sidebar-header">
-                <h3><a href="/DBProject2021/landingPage/">Home</a></h3>
+                <a class="btn btn-primary" href="/DBProject2021/landingPage/index.php" role="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M2 13.5V7h1v6.5a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5V7h1v6.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5zm11-11V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/>
+                        <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/>
+                    </svg>
+                </a>
                 <hr>
             </div>
             <ul class="list-unstyled components">
@@ -50,9 +56,47 @@
                 <li> <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Favorites</a>
                     <ul class="collapse list-unstyled" id="pageSubmenu">
                         <li> <a href="#">New favorite</a> </li>
-                        <li> <a href="#">My favorties</a> </li>
+                        <li> <a href="#">My favorites</a> </li>
                     </ul>
                 </li>
+                
+                <li> 
+                    <?php
+                        session_start();
+                        
+                        if (isset($_SESSION['userType']) && $_SESSION['userType'] == "ADMIN") {
+                            print'  
+                                    <a href="/DBProject2021/landingPage/functionalities/admin.php" class="container me-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                                        </svg>
+                                        Admin area
+                                    </a';
+                        
+                        } elseif(isset($_SESSION['userType']) && $_SESSION['userType'] == "PRESENTER") {
+                            print'
+                                    <a href="/DBProject2021/landingPage/functionalities/speaker_presenter.php" class="container me-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                                        </svg>
+                                        Presenter area
+                                    </a';
+                        
+                        } elseif(isset($_SESSION['userType']) && $_SESSION['userType'] == "SPEAKER") {
+                            print'
+                                    <a href="/DBProject2021/landingPage/functionalities/speaker_presenter.php" class="container me-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                                        </svg>
+                                        Speaker area
+                                    </a';
+                        }
+                    ?>
+                </li>
+
             </ul>
             
         </nav>
@@ -62,9 +106,8 @@
                  <button type="button" id="sidebarCollapse" class="btn navbar-toggler-icon"> </button> 
             </nav>
             
-            <?php
+        <?php
             session_start();
-
             if (isset($_SESSION["opSuccesfull"])) {
         ?>
             
@@ -100,6 +143,7 @@
         </div>
     </div>
 
+    <!-- JAVASCRIPT -->
     <script>
         
         const content = document.getElementById("main-content");
