@@ -66,7 +66,7 @@
             
         <?php print'
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Ottimo!</strong> Sei registrato!
+                <strong>Ottimo!</strong> Operazione andata buon fine!
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -78,7 +78,7 @@
     
         <?php
             } elseif(isset($_SESSION["error"])) {
-            unset($_SESSION["error"]);
+                unset($_SESSION["error"]);
         ?>
            <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <strong>Si è verificato un errore!</strong> Riprova controllando che i campi inseriti siano corretti.

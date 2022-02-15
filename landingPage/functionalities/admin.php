@@ -44,6 +44,8 @@
                 <li> <a href="#" onclick="">Associa presenter</a> </li>
 
                 <li> <a href="#" onclick="">Inserisci Sponsor</a> </li>
+                
+                <li> <a href="/DBProject2021/clustering/cluster.php">Viusalizza cluster utenti</a> </li>
                                 
                 <li> <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Valutazioni</a>
                     <ul class="collapse list-unstyled" id="pageSubmenu">
@@ -58,7 +60,6 @@
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                  <button type="button" id="sidebarCollapse" class="btn navbar-toggler-icon"> </button> 
             </nav>
-            
         <?php
             session_start();
             if (isset($_SESSION["opSuccesfull"])) {
