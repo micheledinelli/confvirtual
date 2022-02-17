@@ -34,11 +34,11 @@
                 
                 <li> <a href="#" onclick="insertCV()">Inserisci CV</a></li>
                 
-                <li> <a href="#" onclick="">Modifica CV</a> </li>
+                <li> <a href="#" onclick="moodifyCV()">Modifica CV</a> </li>
             
                 <li> <a href="#" onclick="insertPhoto()">Inserisci Foto</a> </li>
 
-                <li> <a href="#" onclick="">Modifica Foto</a> </li>
+                <li> <a href="#" onclick="modifyPhoto()">Modifica Foto</a> </li>
                 
                 <!-- Funzionalità aggiuntive per gli speaker -->
                 <?php
@@ -98,6 +98,7 @@
         
     <!-- JAVASCRIPT -->
     <script>
+        
         const content = document.getElementById("main-content");
         
         function insertCV() {
@@ -129,6 +130,37 @@
                 </div>
             `;
         }
+
+        function moodifyCV() {
+            content.innerHTML = `
+                <h2>Modifica il tuo CV</h2>
+                <hr class="my-4">
+                <div class="container text-center">
+                    <form action="insertCV.php" method="post">
+                        <input type="file" name="fileCV">
+                        <div class="container text-center my-5">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function modifyPhoto() {
+            content.innerHTML = `
+                <h2>Modfica la tua foto</h2>
+                <hr class="my-4">
+                <div class="mb-3">
+                    <form action="insertPhoto.php" method="post">
+                        <input type="file" name="photo">
+                        <div class="container text-center my-5">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
 
         // switch per il menu
         var radio = 0;
