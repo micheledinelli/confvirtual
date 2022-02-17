@@ -18,6 +18,7 @@
         $name = $_POST["name"];
         $surname = $_POST["surname"];
         $date = $_POST["date"];
+        $birthplace = $_POST["place"];
         
         try {
 
@@ -27,14 +28,16 @@
             $pdo -> exec('SET NAMES "utf8"');
             
             // Check if the username already exists, if not is inserted into UTENTE
-            $query = ('INSERT INTO UTENTE(Username, Password, Nome, Cognome, DataNascita) 
-                VALUES(:lab1, :lab2, :lab3, :lab4, :lab5)');
+            // Eventually possible to use stored procedure defined in the db
+            $query = ('INSERT INTO UTENTE(Username, Password, Nome, Cognome, DataNascita, Luogo) 
+                VALUES(:lab1, :lab2, :lab3, :lab4, :lab5, :lab6)');
             $res = $pdo -> prepare($query);
             $res -> bindValue(":lab1", $username);
             $res -> bindValue(":lab2", $password);
             $res -> bindValue(":lab3", $name);
             $res -> bindValue(":lab4", $surname);
             $res -> bindValue(":lab5", $date);
+            $res -> bindValue(":lab6", $birthplace);
             $res -> execute();
             echo 'User inserted into table UTENTE';
             $_SESSION['user'] = $username;

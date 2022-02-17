@@ -11,14 +11,14 @@
     
     session_start();
 
-    if(isset($_FILES["fileCV"])) {
-        $file = $_FILES["fileCV"];
+    if(isset($_POST["fileCV"])) {
+        $file = $_POST["fileCV"];
     }
 
     try {
 
         // Connection to db
-        $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'Pinaccio00!');
+        $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'Squidy.77');
         $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo -> exec('SET NAMES "utf8"');
         
@@ -36,6 +36,8 @@
         $res -> execute();
 
         $_SESSION["opSuccesfull"] = 0;
+
+        header('Location:base.php');
     
     } catch (PDOException $e) {
         

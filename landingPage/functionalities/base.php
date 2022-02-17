@@ -44,15 +44,11 @@
                 <hr>
             </div>
             <ul class="list-unstyled components">
-                <li> 
-                    <a href="#" onclick="visualize()">Visualizza conferenze</a>
-                </li>
+                <li> <a href="#" onclick="visualizzaConferenze()">Visualizza conferenze</a> </li>
                 <li> <a href="#" onclick="registerToConference()">Registrati ad una conferenza</a> </li>
-            
+                <li> <a href="#" onclick="">Visualizza sessioni</a> </li>
                 <li> <a href="#" onclick="">Inserisci messaggio</a> </li>
-
                 <li> <a href="#" onclick="">Visualizza chat di sessione</a> </li>
-                
                 <li> <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Favorites</a>
                     <ul class="collapse list-unstyled" id="pageSubmenu">
                         <li> <a href="#">New favorite</a> </li>
@@ -152,13 +148,14 @@
         // Array di conferenze preso dalla query in php
         var conferenze = <?php echo json_encode($conferenze); ?>
         
-        function visualize() {
+        function visualizzaConferenze() {
             content.textContent = '';
             const ul = document.createElement("ul");
             var text = `<h2 class="my-4">Lista delle conferenze</h2>`;
             for(let i = 0; i < conferenze.length; i++) {
-                conf = conferenze[i]["acronimo"]
-                text += `<li class="list-group-item"> Acronimo: ${conf} </li> <br>`;
+                acr = conferenze[i]["acronimo"];
+                anno = conferenze[i]["annoEdizione"];
+                text += `<li class="list-group-item"> Acronimo: ${acr} <br> Anno Edizione : ${anno}</li> <br>`;
             }
             
             ul.innerHTML = text;
