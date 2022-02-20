@@ -66,38 +66,30 @@ CREATE TABLE PRESENTER(
     Foto BLOB,
     NomeUniversità VARCHAR(30),
     PRIMARY KEY (Username),
-<<<<<<< HEAD
-    FOREIGN KEY (Username) REFERENCES UTENTE(Username) ON DELETE CASCADES
-=======
     FOREIGN KEY (Username) REFERENCES UTENTE(Username),
     FOREIGN KEY(NomeUniversità) REFERENCES UNIVERSITA(NomeUniversità)
->>>>>>> origin
 ) ENGINE="INNODB";
 
 CREATE TABLE SPEAKER(
     Username VARCHAR(30),
     CurriculumVitae VARCHAR(30),
     Foto BLOB,
-    NomeUniversità VARCHAR(30),
+    NomeUniversità VARCHAR(30), 
     PRIMARY KEY (Username),
-<<<<<<< HEAD
-    FOREIGN KEY (Username) REFERENCES UTENTE(Username) ON DELETE CASCADE 
-=======
     FOREIGN KEY (Username) REFERENCES UTENTE(Username),
 	FOREIGN KEY(NomeUniversità) REFERENCES UNIVERSITA(NomeUniversità)
->>>>>>> origin
 ) ENGINE="INNODB";
 
 CREATE TABLE CREAZIONE(
     UsernameAdmin VARCHAR(30),
-    AcronimoConferenza VARCHAR(10), 
+    AcronimoConferenza VARCHAR(10),
     AnnoEdizione INT,
     PRIMARY KEY (UsernameAdmin, AcronimoConferenza, AnnoEdizione),
     FOREIGN KEY (UsernameAdmin) REFERENCES ADMIN(Username),
     FOREIGN KEY (AcronimoConferenza, AnnoEdizione) REFERENCES CONFERENZA(Acronimo, AnnoEdizione)
 ) ENGINE="INNODB";
 
-CREATE TABLE DATASVOLGIMENTO(
+CREATE TABLE (
     AcronimoConferenza VARCHAR(30),
     AnnoEdizione INT,
     Data DATE,
@@ -116,7 +108,7 @@ CREATE TABLE SESSIONE(
     OraFine DATETIME, 
     Link VARCHAR(50),
     PRIMARY KEY (Codice),
-	FOREIGN KEY (AcronimoConferenza, Anno, Data) REFERENCES DATASVOLGIMENTO(AcronimoConferenza, AnnoEdizione, Data) ON DELETE CASCADE
+	FOREIGN KEY (AcronimoConferenza, Anno, Data) REFERENCES PROGRAMMAGIORNALIERO(AcronimoConferenza, AnnoEdizione, Data) ON DELETE CASCADE
 ) ENGINE="INNODB";
 
 CREATE TABLE PRESENTAZIONE(
@@ -153,9 +145,16 @@ CREATE TABLE P_TUTORIAL(
 CREATE TABLE AUTORE(
 	Nome VARCHAR(25),
 	Cognome VARCHAR(25),
+	PRIMARY KEY(Nome, Cognome)
+)ENGINE="INNODB";
+
+CREATE TABLE SCRITTURA(
+	Nome VARCHAR(25),
+	Cognome VARCHAR(25),
 	CodiceArticolo INT,
 	PRIMARY KEY(Nome, Cognome, CodiceArticolo),
-	FOREIGN KEY(CodiceArticolo) REFERENCES P_ARTICOLO(CodicePresentazione)
+	FOREIGN KEY(CodiceArticolo) REFERENCES P_ARTICOLO(CodicePresentazione),
+	FOREIGN KEY(Nome, Cognome) REFERENCES AUTORE(Nome, Cognome)
 )ENGINE="INNODB";
 
 CREATE TABLE KEYWORD(
@@ -284,7 +283,7 @@ BEGIN
 					LEAVE  loop_label;
 				END  IF;
 					
-				INSERT INTO DATASVOLGIMENTO(AcronimoConferenza, AnnoEdizione, Data) VALUES(AcronimoConferenza, Anno, currentDate);
+				INSERT INTO PROGRAMMAGIORNALIERO(AcronimoConferenza, AnnoEdizione, Data) VALUES(AcronimoConferenza, Anno, currentDate);
 				SET  i = i - 1;
 				SET currentDate = DATE_ADD(currentDate, INTERVAL 1 DAY);
 			
@@ -299,9 +298,9 @@ CREATE PROCEDURE CreaSessione(IN AcronimoConferenza VARCHAR(30), IN Anno INT ,IN
 BEGIN
 	START TRANSACTION;
 		
-        IF(EXISTS(SELECT * FROM DATASVOLGIMENTO AS D WHERE D.AcronimoConferenza = AcronimoConferenza AND D.Data = Data)) THEN
+        IF(EXISTS(SELECT * FROM PROGRAMMAGIORNALIERO AS D WHERE D.AcronimoConferenza = AcronimoConferenza AND D.Data = Data)) THEN
 			SELECT @acronimo:=C.Acronimo, @anno:=C.AnnoEdizione
-			FROM CONFERENZA AS C, DATASVOLGIMENTO AS D
+			FROM CONFERENZA AS C, PROGRAMMAGIORNALIERO AS D
 			WHERE D.AcronimoConferenza = C.Acronimo AND D.AnnoEdizione = C.AnnoEdizione AND C.Acronimo = AcronimoConferenza AND Data = D.Data;
 			INSERT INTO SESSIONE(AcronimoConferenza, Data, Anno, OraInizio, OraFine, Link) VALUES(@acronimo, Data, @anno, OraInizio, OraFine, Link);
         ELSE 
@@ -348,11 +347,12 @@ $ DELIMITER ;
 # inserisce	un presenter	valido	per	quella	presentazione
 DELIMITER $
 CREATE TRIGGER CambiaStatoPresentazione
-AFTER UPDATE ON P_ARTICOLO
+AFTER UPDATE OR INSERT ON P_ARTICOLO 
 FOR EACH ROW 
 BEGIN
-	UPDATE P_ARTICOLO SET StatoSvolgimento = "COPERTO" WHERE NEW.UsernamePresenter = P_ARTICOLO.UsernamePresenter;
-END;
+	UPDATE P_ARTICOLO SET StatoSvolgimento = "COPERTO" WHERE NEW.UsernamePresenter IN(SELECT Username FROM UTENTE AS U WHERE (Nome,Cognome) IN SELECT (Nome, Cognome)
+                                                                                        FROM SCRITTURA WHERE CodiceArticolo IN (SELECT CodiceArticolo FROM P_ARTICOLO)) ;
+END; 
 $ DELIMITER ;
 
 # Utilizzare un	 trigger per	 implementare	 l’operazione	 di	 aggiornamento	 del	 campo	
@@ -367,7 +367,9 @@ BEGIN
 END;
 $ DELIMITER ;
 
-# Un presenter deve essere necessariamente un autore dell'articolo
+
+
+#Un presenter deve essere necessariamente un autore dellarticolo
 DELIMITER $
 CREATE TRIGGER CheckPresenter
 BEFORE INSERT ON P_ARTICOLO
