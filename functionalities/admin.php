@@ -33,7 +33,7 @@
             </div>
             <ul class="list-unstyled components">
                 <li> 
-                    <a href="#" onclick="">Crea Conferenza</a>
+                    <a href="#" onclick="createConference()">Crea Conferenza</a>
                 </li>
                 <li> <a href="#" onclick="">Crea Sessione</a> </li>
             
@@ -67,7 +67,7 @@
             
         <?php print'
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Ottimo!</strong> Sei registrato!
+                <strong>Ottimo!</strong> Operazione andata a buon fine!
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -99,6 +99,34 @@
 
     <!-- JAVASCRIPT -->
     <script>
+
+        const content = document.getElementById("main-content");
+
+        function createConference() {
+            content.innerHTML = `
+            <div class="container-fluid text-center">
+                <h2>Registrati</h2>
+                <hr class="my-4">
+                <form action="createConferenceAdmin.php" method="post" class="container my-5">
+                    <div class="mb-3 form-group floating">
+                        <input type="text" class="form-control floating" name="nomeConferenza" required autocomplete="off">
+                        <label for="nomeConferenza">Nome della Conferenza</label>          
+                    </div>
+                    <div class="mb-3 form-group floating">
+                        <input type="text" class="form-control floating" name="acronimo" required autocomplete="off">
+                        <label for="acronimo">Acronimo della Conferenza</label> 
+                    </div>
+                    <div class="mb-3 form-group floating">
+                        <input type="number" class="form-control floating" name="annoEdizione" required autocomplete="off">
+                        <label for="annoEdizione">Anno Edizione</label>          
+                    </div>
+                    <div class="container text-center my-5">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </div>
+                </form>
+            </div>
+            `;
+        }
         
         // switch per il menu
         var radio = 0;

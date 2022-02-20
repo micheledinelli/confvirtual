@@ -109,7 +109,7 @@
             
         <?php print'
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Ottimo!</strong> Sei registrato!
+                <strong>Ottimo!</strong> Operazione andata a buon fine!
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
