@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
-    <link rel="stylesheet" href="/DBProject2021/landingPage/css/form.css">
-    <link rel="stylesheet" href="/DBProject2021/landingPage/css/base.css">
+    <link rel="stylesheet" href="/DBProject2021/css/form.css">
+    <link rel="stylesheet" href="/DBProject2021/css/base.css">
     <title>Base</title>
 </head>
 <body>
@@ -62,7 +62,7 @@
                         
                         if (isset($_SESSION['userType']) && $_SESSION['userType'] == "ADMIN") {
                             print'  
-                                    <a href="/DBProject2021/landingPage/functionalities/admin.php" class="container me-4">
+                                    <a href="/DBProject2021/functionalities/admin.php" class="container me-4">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
                                             <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
                                             <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
@@ -72,7 +72,7 @@
                         
                         } elseif(isset($_SESSION['userType']) && $_SESSION['userType'] == "PRESENTER") {
                             print'
-                                    <a href="/DBProject2021/landingPage/functionalities/speaker_presenter.php" class="container me-4">
+                                    <a href="/DBProject2021/functionalities/speaker_presenter.php" class="container me-4">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
                                             <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
                                             <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
@@ -82,7 +82,7 @@
                         
                         } elseif(isset($_SESSION['userType']) && $_SESSION['userType'] == "SPEAKER") {
                             print'
-                                    <a href="/DBProject2021/landingPage/functionalities/speaker_presenter.php" class="container me-4">
+                                    <a href="/DBProject2021/functionalities/speaker_presenter.php" class="container me-4">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
                                             <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
                                             <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
