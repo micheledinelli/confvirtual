@@ -211,9 +211,6 @@ CREATE TABLE MESSAGGIO(
 )ENGINE="INNODB";
 
 
-
-
-
 # Stored Procedures
 
 # Iserisce un nuovo utente
@@ -235,7 +232,9 @@ BEGIN
 			INSERT INTO CONFERENZA(Nome, Acronimo, AnnoEdizione, Svolgimento) VALUES(Nome, Acronimo, AnnoEdizione, Svolgimento);
 			INSERT INTO REGISTRAZIONE(Username, AcronimoConferenza, AnnoEdizione) VALUES(UsernameAdmin, Acronimo, AnnoEdizione);
             INSERT INTO CREAZIONE(UsernameAdmin, AcronimoConferenza, AnnoEdizione) VALUES(UsernameAdmin, Acronimo, AnnoEdizione);
-		END IF;
+		ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error';
+        END IF;
     COMMIT WORK;
 END;
 $ DELIMITER ;
@@ -245,11 +244,15 @@ $ DELIMITER ;
 DELIMITER $
 CREATE PROCEDURE AggiungiSponsorizzazione(IN NomeSponsor VARCHAR(30), IN AcronimoConferenza VARCHAR(30), IN Importo DOUBLE, IN Anno INT)
 BEGIN
-	IF(NOT EXISTS(SELECT * FROM SPONSOR AS S WHERE S.Nome = NomeSponsor)) THEN
-		INSERT INTO SPONSOR(Nome, Importo) VALUES(NomeSponsor, Importo);
-		INSERT INTO SPONSORIZZAZIONE(NomeSponsor, AnnoEdizione, AcronimoConferenza) VALUES(NomeSponsor, Anno, AcronimoConferenza);
-	ELSE 
-		INSERT INTO SPONSORIZZAZIONE(NomeSponsor, AnnoEdizione, AcronimoConferenza) VALUES(NomeSponsor, Anno, AcronimoConferenza);
+	IF(EXISTS(SELECT * FROM CONFERENZA AS C WHERE C.AnnoEdizione = Anno AND C.Acronimo = AcronimoConferenza)) THEN
+		IF(NOT EXISTS(SELECT * FROM SPONSOR AS S WHERE S.Nome = NomeSponsor)) THEN
+			INSERT INTO SPONSOR(Nome) VALUES(NomeSponsor);
+			INSERT INTO SPONSORIZZAZIONE(NomeSponsor, AnnoEdizione, AcronimoConferenza, Importo) VALUES(NomeSponsor, Anno, AcronimoConferenza, Importo);
+		ELSE 
+			INSERT INTO SPONSORIZZAZIONE(NomeSponsor, AnnoEdizione, AcronimoConferenza, Importo) VALUES(NomeSponsor, Anno, AcronimoConferenza, Importo);
+		END IF;
+    ELSE 
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error';
     END IF;
 END;
 $ DELIMITER ;
@@ -302,7 +305,7 @@ $ DELIMITER ;
 
 # Inserisce una nuova presentazione
 DELIMITER $
-CREATE PROCEDURE InserisciPresentazione(IN codice INT, IN codiceSessione INT)
+CREATE PROCEDURE InserisciPresentazione(IN codice INT, IN codiceSessione INT, IN OraInizio TIME, IN OraFine TIME)
 BEGIN
 	START TRANSACTION;
 		INSERT INTO PRESENTAZIONE(Codice, CodiceSessione) VALUES(codice, codiceSessione);
@@ -345,6 +348,38 @@ $ DELIMITER ;
 
 ######## TRIGGER #########
 
+# Incrementa il campo totale sponsorizzazioni ogni volta che si aggiunge uno sponsor per una determinata conferenza
+DELIMITER $
+CREATE TRIGGER IncrementaTotSponsorizzazioni
+AFTER INSERT ON SPONSORIZZAZIONE
+FOR EACH ROW
+BEGIN
+	UPDATE CONFERENZA SET totaleSponsorizzazioni = totaleSponsorizzazioni + 1 WHERE CONFERENZA.Acronimo = NEW.AcronimoConferenza;
+END;
+$ DELIMITER ;
+
+# Incrementa il campo numero presentazini ogni volta che si aggiunge una presentazione ad una sessione
+DELIMITER $
+CREATE TRIGGER IncrementaTotPresentazioni
+AFTER INSERT ON PRESENTAZIONE
+FOR EACH ROW
+BEGIN
+	UPDATE SESSIONE SET SESSIONE.NumeroPresentazioni = SESSIONE.NumeroPresentazioni + 1 WHERE SESSIONE.Codice = NEW.CodiceSessione;
+END;
+$ DELIMITER ;
+
+# Controlla che gli orari di inizio e di fine delle presentazioni non eccedano quelli della loro sessione
+DELIMITER $
+CREATE TRIGGER CheckOrariPresentazioni
+BEFORE INSERT ON PRESENTAZIONE
+FOR EACH ROW
+BEGIN
+	IF(NEW.OraInizio < ANY (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione) OR (NEW.OraFine > ANY (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione))) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error';
+    END IF;
+END;
+$ DELIMITER ;
+
 DELIMITER $
 CREATE TRIGGER CambiaStatoPresentazione
 BEFORE INSERT ON P_ARTICOLO
@@ -354,20 +389,6 @@ BEGIN
 		FROM SCRITTURA WHERE CodiceArticolo IN (SELECT CodiceArticolo FROM P_ARTICOLO))) ;
 END; 
 $ DELIMITER ;
-
-# TRIGGER
-# Utilizzare un	trigger per	 implementare	 l’operazione	 cambio	 di	 stato_svolgimento di	
-# una	 presentazione	 di articolo,	 portandolo	 da	 “Non coperto”  a “Coperto” quando si	
-# inserisce	un presenter	valido	per	quella	presentazione
-/*DELIMITER $
-CREATE TRIGGER CambiaStatoPresentazione
-AFTER UPDATE ON P_ARTICOLO
-FOR EACH ROW 
-BEGIN
-	UPDATE P_ARTICOLO SET StatoSvolgimento = "COPERTO" WHERE NEW.UsernamePresenter = P_ARTICOLO.UsernamePresenter;
-END;
-$ DELIMITER ;
-*/
 
 # Un presenter deve essere necessariamente un autore dell'articolo
 DELIMITER $
@@ -382,38 +403,10 @@ BEGIN
 END;
 DELIMITER $ ; 
 
-# Utilizzare un	 trigger per	 implementare	 l’operazione	 di	 aggiornamento	 del	 campo	
-# numero_presentazioni ogni	 qualvolta	 si	 aggiunge	 una	 nuova	 presentazione ad	 una	
-# sessione	della	conferenza
-DELIMITER $
-CREATE TRIGGER AggiungiPresentazione
-AFTER INSERT ON PRESENTAZIONE
-FOR EACH ROW
-BEGIN
-	UPDATE SESSIONE SET SESSIONE.NumeroPresentazioni = SESSIONE.NumeroPresentazioni + 1 WHERE SESSIONE.Codice = NEW.CodiceSessione;
-END;
-$ DELIMITER ;
 
-DELIMITER $
-CREATE TRIGGER CheckOrariPresentazioni
-BEFORE INSERT ON PRESENTAZIONE
-FOR EACH ROW
-BEGIN
-	IF(NEW.OraInizio < ANY (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione) OR (NEW.OraFine > ANY (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione))) THEN
-		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = "DATETIME ERROR";
-    END IF;
-END;
-$ DELIMITER ;
 
-DELIMITER $
-CREATE TRIGGER AggiornaSponsor
-AFTER INSERT ON SPONSORIZZAZIONE
-FOR EACH ROW
-BEGIN
-	UPDATE CONFERENZA SET TotaleSponsorizzazioni = TotaleSponsorizzazioni + 1 WHERE CONFERENZA.Acronimo = NEW.AcronimoConferenza;
-END;
-$ DELIMITER ;
+
+
 
 
 
