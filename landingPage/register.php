@@ -50,6 +50,7 @@
 
         } catch (PDOException $e) {
             print "Error!: " . $e->getMessage() . "<br/>";
+            header('Location:register.html');
             die();
         }
 

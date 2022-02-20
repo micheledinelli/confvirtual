@@ -7,15 +7,14 @@ CREATE TABLE CONFERENZA(
     Acronimo VARCHAR(30),
 	AnnoEdizione INT,
     Logo BLOB,
-    Svolgimento ENUM("ATTIVA","COMPLETATA"),
-    TotaleSponsorizzazioni INT,
+    Svolgimento ENUM("ATTIVA","COMPLETATA") DEFAULT "ATTIVA",
+    TotaleSponsorizzazioni INT DEFAULT 0,
     PRIMARY KEY(Acronimo, AnnoEdizione)
 ) ENGINE="INNODB";
 
 CREATE TABLE SPONSOR(
 	Nome VARCHAR(30),
     Logo BLOB,
-    Importo DOUBLE,
     PRIMARY KEY(Nome)
 ) ENGINE="INNODB";
 
@@ -23,6 +22,7 @@ CREATE TABLE SPONSORIZZAZIONE(
 	AcronimoConferenza VARCHAR(30),
     AnnoEdizione INT,
     NomeSponsor VARCHAR(30),
+    Importo DOUBLE,
     PRIMARY KEY(AcronimoConferenza, AnnoEdizione, NomeSponsor),
     FOREIGN KEY(AcronimoConferenza, AnnoEdizione) REFERENCES CONFERENZA(Acronimo, AnnoEdizione) ON DELETE CASCADE,
     FOREIGN KEY (NomeSponsor) REFERENCES SPONSOR(Nome) ON DELETE CASCADE
@@ -102,10 +102,10 @@ CREATE TABLE SESSIONE(
     Anno INT,
     Data DATE,
     Codice INT AUTO_INCREMENT,
-    Titolo VARCHAR(30),
-    Numero_Presentazioni INT,
-    OraInizio DATETIME,
-    OraFine DATETIME, 
+    Titolo VARCHAR(100),
+    NumeroPresentazioni INT DEFAULT 0,
+    OraInizio TIME,
+    OraFine TIME, 
     Link VARCHAR(50),
     PRIMARY KEY (Codice),
 	FOREIGN KEY (AcronimoConferenza, Anno, Data) REFERENCES PROGRAMMAGIORNALIERO(AcronimoConferenza, AnnoEdizione, Data) ON DELETE CASCADE
@@ -114,8 +114,8 @@ CREATE TABLE SESSIONE(
 CREATE TABLE PRESENTAZIONE(
     Codice INT,
 	CodiceSessione INT,
-    OraInizio DATETIME,
-    OraFine DATETIME,
+    OraInizio TIME,
+    OraFine TIME,
     NumeroSequenza INT,
     Tipologia ENUM("ARTICOLO", "TUTORIAL"),
     PRIMARY KEY (Codice),
@@ -131,7 +131,7 @@ CREATE TABLE P_ARTICOLO(
     UsernamePresenter VARCHAR(30),
     PRIMARY KEY (CodicePresentazione),
     FOREIGN KEY(CodicePresentazione) REFERENCES PRESENTAZIONE(Codice) ON DELETE CASCADE,
-    FOREIGN KEY(UsernamePresenter) REFERENCES PRESENTER(Username)
+    FOREIGN KEY(UsernamePresenter) REFERENCES PRESENTER(Username) ON DELETE CASCADE
 )ENGINE="INNODB";
 
 CREATE TABLE P_TUTORIAL(
@@ -175,12 +175,12 @@ CREATE TABLE VALUTAZIONE(
 )ENGINE="INNODB";
 
 CREATE TABLE RISORSA(
-	UsernameProprietario VARCHAR(30),
+	UsernameSpeaker VARCHAR(30),
     Link VARCHAR(50),
     Descrizione VARCHAR(50),
     CodiceTutorial INT,
-    PRIMARY KEY(UsernameProprietario),
-    FOREIGN KEY(UsernameProprietario) REFERENCES SPEAKER(Username),
+    PRIMARY KEY(UsernameSpeaker),
+    FOREIGN KEY(UsernameSpeaker) REFERENCES SPEAKER(Username),
     FOREIGN KEY(CodiceTutorial) REFERENCES P_TUTORIAL(CodicePresentazione)
 )ENGINE="INNODB";
 
@@ -195,7 +195,7 @@ CREATE TABLE SPEAKER_TUTORIAL(
 CREATE TABLE FAVORITE(
 	Username VARCHAR(30),
 	CodicePresentazione INT, 
-	PRIMARY KEY(Username,CodicePresentazione),
+	PRIMARY KEY(Username, CodicePresentazione),
 	FOREIGN KEY(Username)REFERENCES UTENTE(Username),
 	FOREIGN KEY(CodicePresentazione)REFERENCES PRESENTAZIONE(Codice)
 )ENGINE="INNODB";
@@ -210,9 +210,8 @@ CREATE TABLE MESSAGGIO(
 	FOREIGN KEY(ChatID) REFERENCES SESSIONE(Codice)
 )ENGINE="INNODB";
 
-###########################
-##### STORED PROCEDURES ###
-###########################
+
+# Stored Procedures
 
 # Iserisce un nuovo utente
 DELIMITER $
@@ -220,47 +219,40 @@ CREATE PROCEDURE InserisciUtente(IN Username VARCHAR(30), IN Password VARCHAR(30
 BEGIN
 	START TRANSACTION;
 		INSERT INTO UTENTE(Username, Password, Nome, Cognome, DataNascita, Luogo) VALUES(Username, Password, Nome, Cognome, DataNascita, Luogo);
-		IF(EXISTS(SELECT * FROM UTENTE WHERE UTENTE.Username = Username)) THEN
-			SELECT CONCAT("INSERT SUCCESFULL") AS MESSAGE;
-		ELSE 
-			SELECT CONCAT("A PROBLEM OCCURED") AS MESSAGE;
-		END IF;
-    COMMIT WORK;
-END;
-$ DELIITER ;
-
-# Creazione di una nuova conferenza
-DELIMITER $
-CREATE PROCEDURE CreaConferenza(IN Nome VARCHAR(30), IN Acronimo VARCHAR(30), IN AnnoEdizione INT, IN Svolgimento ENUM("ATTIVA","COMPLETATA")) 
-BEGIN
-	START TRANSACTION;
-		INSERT INTO CONFERENZA(Nome, Acronimo, AnnoEdizione, Svolgimento) VALUES(Nome, Acronimo, AnnoEdizione, Svolgimento);
     COMMIT WORK;
 END;
 $ DELIITER ;
 
 # Creazione di una conferenza da parte di un admin, che viene registrato ad essa automaticamente
 DELIMITER $
-CREATE PROCEDURE CreaConferenzaAdmin(IN Nome VARCHAR(30), IN UsernameAdmin VARCHAR(30), IN Acronimo VARCHAR(30), IN AnnoEdizione INT, IN Svolgimento ENUM("ATTIVA","COMPLETATA")) 
+CREATE PROCEDURE CreaConferenzaAdmin(IN Nome VARCHAR(30), IN UsernameAdmin VARCHAR(30), IN Acronimo VARCHAR(30), IN AnnoEdizione INT) 
 BEGIN
 	START TRANSACTION;
 		IF(EXISTS(SELECT * FROM ADMIN WHERE ADMIN.Username = UsernameAdmin)) THEN
-			INSERT INTO CONFERENZA(Acronimo, AnnoEdizione, Svolgimento) VALUES(Acronimo, AnnoEdizione, Svolgimento);
-			INSERT INTO REGISTRAZIONE(UsernameAdmin, Acronimo, AnnoEdizione) VALUES(Username, Acronimo, Anno);
-		END IF;
+			INSERT INTO CONFERENZA(Nome, Acronimo, AnnoEdizione, Svolgimento) VALUES(Nome, Acronimo, AnnoEdizione, Svolgimento);
+			INSERT INTO REGISTRAZIONE(Username, AcronimoConferenza, AnnoEdizione) VALUES(UsernameAdmin, Acronimo, AnnoEdizione);
+            INSERT INTO CREAZIONE(UsernameAdmin, AcronimoConferenza, AnnoEdizione) VALUES(UsernameAdmin, Acronimo, AnnoEdizione);
+		ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error';
+        END IF;
     COMMIT WORK;
 END;
-$ DELIITER ;
+$ DELIMITER ;
 
-# Aggiunge una nuova sponsorizzazione
+# Aggiunge una nuova sponsorizzazione, se lo sponsor esiste già si inserisce solo 
+# la sponsorizzazione, altrimenti si salva anche il nuovo sponsor
 DELIMITER $
 CREATE PROCEDURE AggiungiSponsorizzazione(IN NomeSponsor VARCHAR(30), IN AcronimoConferenza VARCHAR(30), IN Importo DOUBLE, IN Anno INT)
 BEGIN
-	IF(NOT EXISTS(SELECT * FROM SPONSOR AS S WHERE S.Nome = NomeSponsor)) THEN
-		INSERT INTO SPONSOR(Nome, Importo) VALUES(NomeSponsor, Importo);
-		INSERT INTO SPONSORIZZAZIONE(NomeSponsor, AnnoEdizione, AcronimoConferenza) VALUES(NomeSponsor, Anno, AcronimoConferenza);
-	ELSE 
-		INSERT INTO SPONSORIZZAZIONE(NomeSponsor, AnnoEdizione, AcronimoConferenza) VALUES(NomeSponsor, Anno, AcronimoConferenza);
+	IF(EXISTS(SELECT * FROM CONFERENZA AS C WHERE C.AnnoEdizione = Anno AND C.Acronimo = AcronimoConferenza)) THEN
+		IF(NOT EXISTS(SELECT * FROM SPONSOR AS S WHERE S.Nome = NomeSponsor)) THEN
+			INSERT INTO SPONSOR(Nome) VALUES(NomeSponsor);
+			INSERT INTO SPONSORIZZAZIONE(NomeSponsor, AnnoEdizione, AcronimoConferenza, Importo) VALUES(NomeSponsor, Anno, AcronimoConferenza, Importo);
+		ELSE 
+			INSERT INTO SPONSORIZZAZIONE(NomeSponsor, AnnoEdizione, AcronimoConferenza, Importo) VALUES(NomeSponsor, Anno, AcronimoConferenza, Importo);
+		END IF;
+    ELSE 
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error';
     END IF;
 END;
 $ DELIMITER ;
@@ -293,19 +285,30 @@ BEGIN
 END;
 $ DELIMITER ;
 
+# Crea una sessione per una conferenza, si controlla che la data della sessione sia una data che è 
+# prevista per lo svolgimento della conferenza
 DELIMITER $
-CREATE PROCEDURE CreaSessione(IN AcronimoConferenza VARCHAR(30), IN Anno INT ,IN Data DATE, IN OraInizio DATETIME, IN OraFine DATETIME, IN Link VARCHAR(50))
+CREATE PROCEDURE CreaSessione(IN AcronimoConferenza VARCHAR(30), IN Titolo VARCHAR(30), IN Anno INT ,IN Data DATE, IN OraInizio DATETIME, IN OraFine DATETIME, IN Link VARCHAR(50))
 BEGIN
 	START TRANSACTION;
-		
-        IF(EXISTS(SELECT * FROM PROGRAMMAGIORNALIERO AS D WHERE D.AcronimoConferenza = AcronimoConferenza AND D.Data = Data)) THEN
+        IF(EXISTS(SELECT * FROM DATASVOLGIMENTO AS D WHERE D.AcronimoConferenza = AcronimoConferenza AND D.Data = Data)) THEN
 			SELECT @acronimo:=C.Acronimo, @anno:=C.AnnoEdizione
 			FROM CONFERENZA AS C, PROGRAMMAGIORNALIERO AS D
 			WHERE D.AcronimoConferenza = C.Acronimo AND D.AnnoEdizione = C.AnnoEdizione AND C.Acronimo = AcronimoConferenza AND Data = D.Data;
-			INSERT INTO SESSIONE(AcronimoConferenza, Data, Anno, OraInizio, OraFine, Link) VALUES(@acronimo, Data, @anno, OraInizio, OraFine, Link);
+			INSERT INTO SESSIONE(AcronimoConferenza, Titolo, Data, Anno, OraInizio, OraFine, Link) VALUES(@acronimo, Titolo, Data, @anno, OraInizio, OraFine, Link);
         ELSE 
 			SELECT CONCAT("THE CONFERENCE YOU SELECTED IS NOT SCHEDULED ON THIS DAY") AS MESSAGE;
         END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
+# Inserisce una nuova presentazione
+DELIMITER $
+CREATE PROCEDURE InserisciPresentazione(IN codice INT, IN codiceSessione INT, IN OraInizio TIME, IN OraFine TIME)
+BEGIN
+	START TRANSACTION;
+		INSERT INTO PRESENTAZIONE(Codice, CodiceSessione) VALUES(codice, codiceSessione);
     COMMIT WORK;
 END;
 $ DELIMITER ;
@@ -324,16 +327,20 @@ BEGIN
 END;
 $ DELIMITER ;
 
-# Cambia il ruolo di un Utente esistente
+# Cambia il ruolo di un utente esistente
 DELIMITER $
-CREATE PROCEDURE CambiaRuolo(IN username VARCHAR(30), IN newRole ENUM("BASE","ADMIN","SPEAKER","PRESENTER"))
+CREATE PROCEDURE CambiaRuolo(IN username VARCHAR(30), IN newRole ENUM("ADMIN","SPEAKER","PRESENTER"))
 BEGIN
 	START TRANSACTION;
 		IF(EXISTS(SELECT * FROM UTENTE WHERE UTENTE.Username = username)) THEN
 			UPDATE UTENTE SET UTENTE.Tipologia = newRole WHERE(Utente.Username = username);
-			SELECT CONCAT("OPERATION SUCESSFULL") AS MESSAGE;
-		ELSE 
-			SELECT CONCAT("A PROBLEM OCCURED") AS MESSAGE;
+            IF(newRole = 'ADMIN') THEN
+				INSERT INTO ADMIN(Username) VALUES(username);
+			ELSEIF(newRole = 'PRESENTER') THEN
+				INSERT INTO PRESENTER(Username) VALUES(username);
+			ELSE 
+				INSERT INTO SPEAKER(Username) VALUES(username);
+            END IF;
 		END IF;
     COMMIT WORK;
 END;
@@ -341,38 +348,52 @@ $ DELIMITER ;
 
 ######## TRIGGER #########
 
-# TRIGGER
-# Utilizzare un	trigger per	 implementare	 l’operazione	 cambio	 di	 stato_svolgimento di	
-# una	 presentazione	 di articolo,	 portandolo	 da	 “Non coperto”  a “Coperto” quando si	
-# inserisce	un presenter	valido	per	quella	presentazione
+# Incrementa il campo totale sponsorizzazioni ogni volta che si aggiunge uno sponsor per una determinata conferenza
 DELIMITER $
-CREATE TRIGGER CambiaStatoPresentazione
-AFTER UPDATE OR INSERT ON P_ARTICOLO 
-FOR EACH ROW 
-BEGIN
-	UPDATE P_ARTICOLO SET StatoSvolgimento = "COPERTO" WHERE NEW.UsernamePresenter IN(SELECT Username FROM UTENTE AS U WHERE (Nome,Cognome) IN SELECT (Nome, Cognome)
-                                                                                        FROM SCRITTURA WHERE CodiceArticolo IN (SELECT CodiceArticolo FROM P_ARTICOLO)) ;
-END; 
-$ DELIMITER ;
-
-# Utilizzare un	 trigger per	 implementare	 l’operazione	 di	 aggiornamento	 del	 campo	
-# numero_presentazioni ogni	 qualvolta	 si	 aggiunge	 una	 nuova	 presentazione ad	 una	
-# sessione	della	conferenza
-DELIMITER $
-CREATE TRIGGER AggiungiPresentazione
-AFTER INSERT ON PRESENTAZIONE
+CREATE TRIGGER IncrementaTotSponsorizzazioni
+AFTER INSERT ON SPONSORIZZAZIONE
 FOR EACH ROW
 BEGIN
-	UPDATE SESSIONE SET SESSIONE.NumeroPresentazione = SESSIONE.NumeroPresentazione + 1 WHERE SESSIONE.Codice = NEW.CodiceSessione;
+	UPDATE CONFERENZA SET totaleSponsorizzazioni = totaleSponsorizzazioni + 1 WHERE CONFERENZA.Acronimo = NEW.AcronimoConferenza;
 END;
 $ DELIMITER ;
 
+# Incrementa il campo numero presentazini ogni volta che si aggiunge una presentazione ad una sessione
+DELIMITER $
+CREATE TRIGGER IncrementaTotPresentazioni
+AFTER INSERT ON PRESENTAZIONE
+FOR EACH ROW
+BEGIN
+	UPDATE SESSIONE SET SESSIONE.NumeroPresentazioni = SESSIONE.NumeroPresentazioni + 1 WHERE SESSIONE.Codice = NEW.CodiceSessione;
+END;
+$ DELIMITER ;
 
+# Controlla che gli orari di inizio e di fine delle presentazioni non eccedano quelli della loro sessione
+DELIMITER $
+CREATE TRIGGER CheckOrariPresentazioni
+BEFORE INSERT ON PRESENTAZIONE
+FOR EACH ROW
+BEGIN
+	IF(NEW.OraInizio < ANY (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione) OR (NEW.OraFine > ANY (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione))) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error';
+    END IF;
+END;
+$ DELIMITER ;
 
-#Un presenter deve essere necessariamente un autore dellarticolo
+DELIMITER $
+CREATE TRIGGER CambiaStatoPresentazione
+BEFORE INSERT ON P_ARTICOLO
+FOR EACH ROW 
+BEGIN
+	UPDATE P_ARTICOLO SET StatoSvolgimento = "COPERTO" WHERE NEW.UsernamePresenter IN (SELECT Username FROM UTENTE WHERE (Nome,Cognome) IN (SELECT (Nome, Cognome)
+		FROM SCRITTURA WHERE CodiceArticolo IN (SELECT CodiceArticolo FROM P_ARTICOLO))) ;
+END; 
+$ DELIMITER ;
+
+# Un presenter deve essere necessariamente un autore dell'articolo
 DELIMITER $
 CREATE TRIGGER CheckPresenter
-BEFORE INSERT ON P_ARTICOLO
+BEFORE INSERT OR UPDATE ON P_ARTICOLO
 FOR EACH ROW
 BEGIN
 	IF( NOT EXISTS(SELECT * FROM AUTORE AS A WHERE A.Nome IN (SELECT U.Nome FROM UTENTE AS U WHERE U.Username = NEW.UsernamePresenter))) THEN
@@ -382,26 +403,10 @@ BEGIN
 END;
 DELIMITER $ ; 
 
-DELIMITER $
-CREATE TRIGGER CheckOrariPresentazioni
-BEFORE INSERT ON PRESENTAZIONE
-FOR EACH ROW
-BEGIN
-	IF(NEW.OraInizio < ANY (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione) OR (NEW.OraFine > ANY (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione))) THEN
-		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = "DATETIME ERROR";
-    END IF;
-END;
-$ DELIMITER ;
 
-DELIMITER $
-CREATE TRIGGER AggiornaSponsor
-AFTER INSERT ON SPONSORIZZAZIONE
-FOR EACH ROW
-BEGIN
-	UPDATE CONFERENZA SET TotaleSponsorizzazioni = TotaleSponsorizzazioni + 1 WHERE CONFERENZA.Acronimo = NEW.AcronimoConferenza;
-END;
-$ DELIMITER ;
+
+
+
 
 
 
