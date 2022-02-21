@@ -127,7 +127,7 @@ CREATE TABLE P_ARTICOLO(
     Titolo VARCHAR(30),
     NumeroPagine INT,
     FilePDF BLOB,
-    StatoSvolgimento ENUM ("COPERTO", "NON COPERTO"),
+    StatoSvolgimento ENUM ("COPERTO", "NON COPERTO") DEFAULT "NON COPERTO",
     UsernamePresenter VARCHAR(30),
     PRIMARY KEY (CodicePresentazione),
     FOREIGN KEY(CodicePresentazione) REFERENCES PRESENTAZIONE(Codice) ON DELETE CASCADE,
@@ -149,12 +149,12 @@ CREATE TABLE AUTORE(
 )ENGINE="INNODB";
 
 CREATE TABLE SCRITTURA(
-	Nome VARCHAR(25),
-	Cognome VARCHAR(25),
+	NomeAutore VARCHAR(25),
+	CognomeAutore VARCHAR(25),
 	CodiceArticolo INT,
-	PRIMARY KEY(Nome, Cognome, CodiceArticolo),
+	PRIMARY KEY(NomeAutore, CognomeAutore, CodiceArticolo),
 	FOREIGN KEY(CodiceArticolo) REFERENCES P_ARTICOLO(CodicePresentazione),
-	FOREIGN KEY(Nome, Cognome) REFERENCES AUTORE(Nome, Cognome)
+	FOREIGN KEY(NomeAutore, CognomeAutore) REFERENCES AUTORE(Nome, Cognome)
 )ENGINE="INNODB";
 
 CREATE TABLE KEYWORD(
@@ -203,9 +203,9 @@ CREATE TABLE FAVORITE(
 CREATE TABLE MESSAGGIO(
 	UsernameMittente VARCHAR(30),
 	Testo VARCHAR(200),
-	DataInserimento DATE,
+	Ts TIME,
 	ChatID INT,
-	PRIMARY KEY(UsernameMittente,Testo,DataInserimento,ChatID),
+	PRIMARY KEY(UsernameMittente, Testo, Ts, ChatID),
 	FOREIGN KEY(UsernameMittente) REFERENCES UTENTE(Username),
 	FOREIGN KEY(ChatID) REFERENCES SESSIONE(Codice)
 )ENGINE="INNODB";
@@ -304,11 +304,17 @@ END;
 $ DELIMITER ;
 
 # Inserisce una nuova presentazione
+# TO DO : FINIRE
 DELIMITER $
-CREATE PROCEDURE InserisciPresentazione(IN codice INT, IN codiceSessione INT, IN OraInizio TIME, IN OraFine TIME)
+CREATE PROCEDURE InserisciArticolo(IN Codice INT, IN CodiceSessione INT, IN OraInizio TIME, IN OraFine TIME, IN Titolo VARCHAR(30), IN NumeroPagine INT, IN UsernamePresenter VARCHAR(30))
 BEGIN
 	START TRANSACTION;
-		INSERT INTO PRESENTAZIONE(Codice, CodiceSessione) VALUES(codice, codiceSessione);
+		INSERT INTO PRESENTAZIONE(Codice, CodiceSessione, OraInizio, OraFine, Tipologia) VALUES(Codice, CodiceSessione, OraInizio, OraFine, Tipologia);
+		IF(UsernamePresenter IS NOT NULL AND UsernamePresenter <> '') THEN
+			INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine, UsernamePresenter) VALUES(Codice, Titolo, NumeroPagine, UsernamePresenter);
+		ELSE 
+			INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine) VALUES(Codice, Titolo, NumeroPagine);
+		END IF;
     COMMIT WORK;
 END;
 $ DELIMITER ;
@@ -374,39 +380,48 @@ CREATE TRIGGER CheckOrariPresentazioni
 BEFORE INSERT ON PRESENTAZIONE
 FOR EACH ROW
 BEGIN
-	IF(NEW.OraInizio < ANY (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione) OR (NEW.OraFine > ANY (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione))) THEN
-		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error';
+	
+    IF(NOT EXISTS (SELECT * FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione)) THEN 
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error CodiceSessione Errato';
+    END IF;
+
+	IF(NEW.OraInizio < ALL (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione) OR (NEW.OraFine > ALL (SELECT S.OraFine FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione))) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error CheckOrariPresentazioni';
     END IF;
 END;
 $ DELIMITER ;
 
 DELIMITER $
-CREATE TRIGGER CambiaStatoPresentazione
+CREATE TRIGGER CheckAutoreArticolo
 BEFORE INSERT ON P_ARTICOLO
 FOR EACH ROW 
 BEGIN
-	UPDATE P_ARTICOLO SET StatoSvolgimento = "COPERTO" WHERE NEW.UsernamePresenter IN (SELECT Username FROM UTENTE WHERE (Nome,Cognome) IN (SELECT (Nome, Cognome)
-		FROM SCRITTURA WHERE CodiceArticolo IN (SELECT CodiceArticolo FROM P_ARTICOLO))) ;
-END; 
-$ DELIMITER ;
-
-# Un presenter deve essere necessariamente un autore dell'articolo
-DELIMITER $
-CREATE TRIGGER CheckPresenter
-BEFORE INSERT OR UPDATE ON P_ARTICOLO
-FOR EACH ROW
-BEGIN
-	IF( NOT EXISTS(SELECT * FROM AUTORE AS A WHERE A.Nome IN (SELECT U.Nome FROM UTENTE AS U WHERE U.Username = NEW.UsernamePresenter))) THEN
-		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = "PRESENTER IS NOT THE AUTHOR";
+	IF(NEW.UsernamePresenter IS NOT NULL AND NEW.UsernamePresenter <> '') THEN
+        IF(NOT EXISTS( SELECT * FROM P_ARTICOLO AS P WHERE P.CodicePresentazione = ANY(SELECT CodiceArticolo FROM SCRITTURA AS S WHERE NEW.CodicePresentazione = S.CodiceArticolo AND
+		S.NomeAutore IN (SELECT Nome FROM UTENTE AS U WHERE U.Username = NEW.UsernamePresenter)))) THEN
+		
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NON AUTORE';
+		
+        END IF;
     END IF;
 END;
-DELIMITER $ ; 
+$ DELIMITER ;
 
-
-
-
-
+DELIMITER $
+CREATE TRIGGER CheckOrariMessaggi
+BEFORE INSERT ON MESSAGGIO
+FOR EACH ROW
+BEGIN	
+	
+    IF(NOT EXISTS (SELECT * FROM SESSIONE AS S WHERE S.Codice = NEW.ChatId)) THEN 
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error ChatId Errato';
+    END IF;
+	
+	IF(NEW.Ts < ALL (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.ChatId) OR (NEW.Ts > ALL (SELECT S.OraFine FROM SESSIONE AS S WHERE S.Codice = NEW.ChatId))) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error CheckOrariPresentazioni';
+    END IF;
+END;
+$ DELIMITER ;
 
 
 

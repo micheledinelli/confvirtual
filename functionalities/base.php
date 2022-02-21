@@ -44,9 +44,9 @@
                 <hr>
             </div>
             <ul class="list-unstyled components">
-                <li> <a href="#" onclick="visualizzaConferenze()">Visualizza conferenze</a> </li>
+                <li> <a href="#" onclick="visualizeConferences()">Visualizza conferenze</a> </li>
                 <li> <a href="#" onclick="registerToConference()">Registrati ad una conferenza</a> </li>
-                <li> <a href="#" onclick="">Visualizza sessioni</a> </li>
+                <li> <a href="#" onclick="visualizeSessions()">Visualizza sessioni</a> </li>
                 <li> <a href="#" onclick="">Inserisci messaggio</a> </li>
                 <li> <a href="#" onclick="">Visualizza chat di sessione</a> </li>
                 <li> <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Favorites</a>
@@ -92,9 +92,7 @@
                         }
                     ?>
                 </li>
-
             </ul>
-            
         </nav>
 
         <div class="content container-fluid">
@@ -116,7 +114,6 @@
               </div>
             ';
             unset($_SESSION["opSuccesfull"]);
-
         ?>
     
         <?php
@@ -148,7 +145,7 @@
         // Array di conferenze preso dalla query in php
         var conferenze = <?php echo json_encode($conferenze); ?>
         
-        function visualizzaConferenze() {
+        function visualizeConferences() {
             content.textContent = '';
             const ul = document.createElement("ul");
             var text = `<h2 class="my-4">Lista delle conferenze</h2>`;
@@ -185,6 +182,33 @@
                         <button type="submit" class="btn btn-primary">Register</button>
                     </div>
                 </form>
+            </div>
+            `;
+        }
+
+        function visualizeSessions() {
+            content.textContent = '';
+            var text = "";
+            var dynamicContent = "";
+            for(let i = 0; i < conferenze.length; i++) {
+                acr = conferenze[i]["acronimo"];
+                anno = conferenze[i]["annoEdizione"];
+                text += `<a class="list-group-item list-group-item-action" id="list-home-list" data-toggle="list" href="#${acr}" role="tab">Acronimo: ${acr} <br> Anno Edizione : ${anno}</a>`;
+                dynamicContent += `<div class="tab-pane fade show" id=${acr} role="tabpanel" aria-labelledby="list-home-list"> ${acr} </div>`;
+            }
+            
+            content.innerHTML = `
+            <div class="row">
+                <div class="col-4">
+                    <div class="list-group" id="list-tab" role="tablist">
+                        ${text}
+                    </div>
+                </div>
+                    <div class="col-8">
+                        <div class="tab-content" id="nav-tabContent">
+                            ${dynamicContent}
+                        </div>
+                </div>
             </div>
             `;
         }
