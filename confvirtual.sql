@@ -57,7 +57,7 @@ CREATE TABLE UNIVERSITA(
 CREATE TABLE ADMIN(
     Username VARCHAR(30),
     PRIMARY KEY (Username),
-    FOREIGN KEY (Username) REFERENCES UTENTE(Username) ON DELETE CASCADE 
+    FOREIGN KEY (Username) REFERENCES UTENTE(Username)
 ) ENGINE="INNODB";
 
 CREATE TABLE PRESENTER(
@@ -74,7 +74,7 @@ CREATE TABLE SPEAKER(
     Username VARCHAR(30),
     CurriculumVitae VARCHAR(30),
     Foto BLOB,
-    NomeUniversità VARCHAR(30), 
+    NomeUniversità VARCHAR(30),
     PRIMARY KEY (Username),
     FOREIGN KEY (Username) REFERENCES UTENTE(Username),
 	FOREIGN KEY(NomeUniversità) REFERENCES UNIVERSITA(NomeUniversità)
@@ -82,7 +82,7 @@ CREATE TABLE SPEAKER(
 
 CREATE TABLE CREAZIONE(
     UsernameAdmin VARCHAR(30),
-    AcronimoConferenza VARCHAR(10),
+    AcronimoConferenza VARCHAR(10), 
     AnnoEdizione INT,
     PRIMARY KEY (UsernameAdmin, AcronimoConferenza, AnnoEdizione),
     FOREIGN KEY (UsernameAdmin) REFERENCES ADMIN(Username),
@@ -108,7 +108,7 @@ CREATE TABLE SESSIONE(
     OraFine TIME, 
     Link VARCHAR(50),
     PRIMARY KEY (Codice),
-	FOREIGN KEY (AcronimoConferenza, Anno, Data) REFERENCES PROGRAMMAGIORNALIERO(AcronimoConferenza, AnnoEdizione, Data) ON DELETE CASCADE
+	FOREIGN KEY (AcronimoConferenza, Anno, Data) REFERENCES DATASVOLGIMENTO(AcronimoConferenza, AnnoEdizione, Data) ON DELETE CASCADE
 ) ENGINE="INNODB";
 
 CREATE TABLE PRESENTAZIONE(
@@ -288,7 +288,7 @@ BEGIN
 	START TRANSACTION;
         IF(EXISTS(SELECT * FROM DATASVOLGIMENTO AS D WHERE D.AcronimoConferenza = AcronimoConferenza AND D.Data = Data)) THEN
 			SELECT @acronimo:=C.Acronimo, @anno:=C.AnnoEdizione
-			FROM CONFERENZA AS C, PROGRAMMAGIORNALIERO AS D
+			FROM CONFERENZA AS C, DATASVOLGIMENTO AS D
 			WHERE D.AcronimoConferenza = C.Acronimo AND D.AnnoEdizione = C.AnnoEdizione AND C.Acronimo = AcronimoConferenza AND Data = D.Data;
 			INSERT INTO SESSIONE(AcronimoConferenza, Titolo, Data, Anno, OraInizio, OraFine, Link) VALUES(@acronimo, Titolo, Data, @anno, OraInizio, OraFine, Link);
         ELSE 
@@ -452,3 +452,7 @@ $ DELIMITER ;
 
 
 
+
+
+
+ 
