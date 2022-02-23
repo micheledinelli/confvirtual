@@ -89,7 +89,7 @@ CREATE TABLE CREAZIONE(
     FOREIGN KEY (AcronimoConferenza, AnnoEdizione) REFERENCES CONFERENZA(Acronimo, AnnoEdizione)
 ) ENGINE="INNODB";
 
-CREATE TABLE (
+CREATE TABLE DATASVOLGIMENTO(
     AcronimoConferenza VARCHAR(30),
     AnnoEdizione INT,
     Data DATE,
@@ -451,24 +451,4 @@ $ DELIMITER ;
 # VIEW
 
 
-
-
-
-
- 
-
-
-DELIMITER |
-
-CREATE TRIGGER after_tipologia_update
-AFTER UPDATE
-ON UTENTE FOR EACH ROW
-BEGIN
-    IF NEW.Tipologia = "ADMIN" THEN
-        INSERT INTO ADMIN(UsernameAdmin)
-        VALUES(SELECT Username FROM UTENTE WHERE Username NOT IN (SELECT UsernameAdmin FROM ADMIN));
-    END IF;
-END
-
-| DELIMITER ;
 
