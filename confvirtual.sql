@@ -233,7 +233,7 @@ BEGIN
 			INSERT INTO REGISTRAZIONE(Username, AcronimoConferenza, AnnoEdizione) VALUES(UsernameAdmin, Acronimo, AnnoEdizione);
             INSERT INTO CREAZIONE(UsernameAdmin, AcronimoConferenza, AnnoEdizione) VALUES(UsernameAdmin, Acronimo, AnnoEdizione);
 		ELSE 
-			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error';
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on creaConferenzaAdmin: no admin found';
         END IF;
     COMMIT WORK;
 END;
@@ -252,7 +252,7 @@ BEGIN
 			INSERT INTO SPONSORIZZAZIONE(NomeSponsor, AnnoEdizione, AcronimoConferenza, Importo) VALUES(NomeSponsor, Anno, AcronimoConferenza, Importo);
 		END IF;
     ELSE 
-		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error';
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AggiungiSponsorizzazione: no conference with that acronimo found';
     END IF;
 END;
 $ DELIMITER ;
@@ -263,22 +263,17 @@ CREATE PROCEDURE InserisciDateSvoglimento(IN AcronimoConferenza VARCHAR(30), IN 
 BEGIN
 	START TRANSACTION;
 		BEGIN
-			
             DECLARE i INT;
             DECLARE currentDate DATE;
-            
             SET i = DataFine - DataInizio;
             SET currentDate = DataInizio;
-           
 			loop_label:  LOOP
 				IF  i < 0 THEN 
 					LEAVE  loop_label;
 				END  IF;
-					
 				INSERT INTO DATASVOLGIMENTO(AcronimoConferenza, AnnoEdizione, Data) VALUES(AcronimoConferenza, Anno, currentDate);
 				SET  i = i - 1;
 				SET currentDate = DATE_ADD(currentDate, INTERVAL 1 DAY);
-			
             END LOOP;
 		END;
     COMMIT WORK;
@@ -288,7 +283,7 @@ $ DELIMITER ;
 # Crea una sessione per una conferenza, si controlla che la data della sessione sia una data che è 
 # prevista per lo svolgimento della conferenza
 DELIMITER $
-CREATE PROCEDURE CreaSessione(IN AcronimoConferenza VARCHAR(30), IN Titolo VARCHAR(30), IN Anno INT ,IN Data DATE, IN OraInizio DATETIME, IN OraFine DATETIME, IN Link VARCHAR(50))
+CREATE PROCEDURE CreaSessione(IN AcronimoConferenza VARCHAR(30), IN Titolo VARCHAR(30), IN Anno INT ,IN Data DATE, IN OraInizio TIME, IN OraFine TIME, IN Link VARCHAR(50))
 BEGIN
 	START TRANSACTION;
         IF(EXISTS(SELECT * FROM DATASVOLGIMENTO AS D WHERE D.AcronimoConferenza = AcronimoConferenza AND D.Data = Data)) THEN
@@ -297,23 +292,41 @@ BEGIN
 			WHERE D.AcronimoConferenza = C.Acronimo AND D.AnnoEdizione = C.AnnoEdizione AND C.Acronimo = AcronimoConferenza AND Data = D.Data;
 			INSERT INTO SESSIONE(AcronimoConferenza, Titolo, Data, Anno, OraInizio, OraFine, Link) VALUES(@acronimo, Titolo, Data, @anno, OraInizio, OraFine, Link);
         ELSE 
-			SELECT CONCAT("THE CONFERENCE YOU SELECTED IS NOT SCHEDULED ON THIS DAY") AS MESSAGE;
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on CreaSessione: the conference selected is not scheduled on this day';
         END IF;
     COMMIT WORK;
 END;
 $ DELIMITER ;
 
 # Inserisce una nuova presentazione
-# TO DO : FINIRE
 DELIMITER $
 CREATE PROCEDURE InserisciArticolo(IN Codice INT, IN CodiceSessione INT, IN OraInizio TIME, IN OraFine TIME, IN Titolo VARCHAR(30), IN NumeroPagine INT, IN UsernamePresenter VARCHAR(30))
 BEGIN
 	START TRANSACTION;
-		INSERT INTO PRESENTAZIONE(Codice, CodiceSessione, OraInizio, OraFine, Tipologia) VALUES(Codice, CodiceSessione, OraInizio, OraFine, Tipologia);
-		IF(UsernamePresenter IS NOT NULL AND UsernamePresenter <> '') THEN
-			INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine, UsernamePresenter) VALUES(Codice, Titolo, NumeroPagine, UsernamePresenter);
+		IF(EXISTS(SELECT * FROM SESSIONE AS S WHERE S.Codice = CodiceSessione)) THEN
+			INSERT INTO PRESENTAZIONE(Codice, CodiceSessione, OraInizio, OraFine, Tipologia) VALUES(Codice, CodiceSessione, OraInizio, OraFine, "ARTICOLO");
+			IF(UsernamePresenter IS NOT NULL AND UsernamePresenter <> '') THEN
+				INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine, UsernamePresenter) VALUES(Codice, Titolo, NumeroPagine, UsernamePresenter);
+			ELSE 
+				INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine) VALUES(Codice, Titolo, NumeroPagine);
+			END IF;
 		ELSE 
-			INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine) VALUES(Codice, Titolo, NumeroPagine);
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on InserisciArticolo: the specified session has not been found ';
+        END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
+# Inserisce una nuova presentazione
+DELIMITER $
+CREATE PROCEDURE InserisciTutorial(IN Codice INT, IN CodiceSessione INT, IN OraInizio TIME, IN OraFine TIME, IN Titolo VARCHAR(30), IN Abstract VARCHAR(500))
+BEGIN
+	START TRANSACTION;
+		IF(EXISTS(SELECT * FROM SESSIONE AS S WHERE S.Codice = CodiceSessione)) THEN
+			INSERT INTO PRESENTAZIONE(Codice, CodiceSessione, OraInizio, OraFine, Tipologia) VALUES(Codice, CodiceSessione, OraInizio, OraFine, "TUTORIAL");
+			INSERT INTO P_TUTORIAL(CodicePresentazione, Titolo, Abstract) VALUES(Codice, Titolo, Abstract);
+		ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on InseriTutorial the specified session has not been found ';
 		END IF;
     COMMIT WORK;
 END;
@@ -380,7 +393,6 @@ CREATE TRIGGER CheckOrariPresentazioni
 BEFORE INSERT ON PRESENTAZIONE
 FOR EACH ROW
 BEGIN
-	
     IF(NOT EXISTS (SELECT * FROM SESSIONE AS S WHERE S.Codice = NEW.CodiceSessione)) THEN 
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error CodiceSessione Errato';
     END IF;
@@ -412,7 +424,6 @@ CREATE TRIGGER CheckOrariMessaggi
 BEFORE INSERT ON MESSAGGIO
 FOR EACH ROW
 BEGIN	
-	
     IF(NOT EXISTS (SELECT * FROM SESSIONE AS S WHERE S.Codice = NEW.ChatId)) THEN 
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error ChatId Errato';
     END IF;
@@ -424,8 +435,20 @@ END;
 $ DELIMITER ;
 
 
+# Si vuole fare in modo che il numero di sequenza di ogni presentazione dipenda dalla 
+# data e dall'ora della sessione in cui è programmata, perciò ogni numero di sequenza
+# associato ad una presentazione farà fede alla sequenza propria della sua sessione
+$ DELIMITER 
+CREATE TRIGGER NumeriSequenza
+BEFORE INSERT ON PRESENTAZIONE
+FOR EACH ROW
+BEGIN
+	
+END;
+$ DELIMITER ;
 
 
+# VIEW
 
 
 
