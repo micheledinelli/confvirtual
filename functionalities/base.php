@@ -27,11 +27,27 @@
         while($row = $res -> fetch()) {
             $conferenza = new stdClass();
             $conferenza -> acronimo = $row["Acronimo"];
+            $conferenza -> nome = $row["Nome"];
             $conferenza -> annoEdizione = $row["AnnoEdizione"];
             array_push($conferenze, $conferenza);
-        }    
-    ?>
+        }
+        
+        $querySessions = ('SELECT * FROM SESSIONE');
+        
+        $res = $pdo -> prepare($querySessions);
+        $res -> execute();
+        $sessioni = array();
 
+        while($row = $res -> fetch()) {
+            $sessione = new stdClass();
+            $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
+            $sessione -> titoloSessione = $row["Titolo"];
+            $sessione -> numPresentazioni = $row["NumeroPresentazioni"];
+            array_push($sessioni, $sessione);
+        }
+
+    ?>
+    
     <div class="wrapper">
         <nav id="sidebar" class="vh-100 bg-primary">
             <div class="sidebar-header">
@@ -44,9 +60,9 @@
                 <hr>
             </div>
             <ul class="list-unstyled components">
-                <li> <a href="#" onclick="visualizzaConferenze()">Visualizza conferenze</a> </li>
+                <li> <a href="#" onclick="visualizeConferences()">Visualizza conferenze</a> </li>
                 <li> <a href="#" onclick="registerToConference()">Registrati ad una conferenza</a> </li>
-                <li> <a href="#" onclick="">Visualizza sessioni</a> </li>
+                <li> <a href="#" onclick="visualizeSessions()">Visualizza sessioni</a> </li>
                 <li> <a href="#" onclick="">Inserisci messaggio</a> </li>
                 <li> <a href="#" onclick="">Visualizza chat di sessione</a> </li>
                 <li> <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Favorites</a>
@@ -92,9 +108,7 @@
                         }
                     ?>
                 </li>
-
             </ul>
-            
         </nav>
 
         <div class="content container-fluid">
@@ -116,7 +130,6 @@
               </div>
             ';
             unset($_SESSION["opSuccesfull"]);
-
         ?>
     
         <?php
@@ -135,35 +148,81 @@
 
             <div id="main-content" class="content-wrapper text-center">
                 
-            </div>
+            </div>            
+            
         </div>
     </div>
 
     <!-- JAVASCRIPT -->
     <script>
-        
         const content = document.getElementById("main-content");
         const userName = <?php echo json_encode($_SESSION["user"]); ?>
         
         // Array di conferenze preso dalla query in php
-        var conferenze = <?php echo json_encode($conferenze); ?>
-        
-        function visualizzaConferenze() {
+        var conferenze = <?php echo json_encode($conferenze); ?>;
+        var sessioni = <?php echo json_encode($sessioni); ?>;
+
+        function visualizeConferences() {
             content.textContent = '';
-            const ul = document.createElement("ul");
-            var text = `<h2 class="my-4">Lista delle conferenze</h2>`;
+            let div = document.createElement('div');
+            div.classList.add('row');
+            var cardContent = "";
+
             for(let i = 0; i < conferenze.length; i++) {
                 acr = conferenze[i]["acronimo"];
                 anno = conferenze[i]["annoEdizione"];
-                text += `<li class="list-group-item"> Acronimo: ${acr} <br> Anno Edizione : ${anno}</li> <br>`;
+                title = conferenze[i]["nome"];
+                cardContent += ` 
+                    <div class="card" style="width: 18rem; margin: 5px 5px">
+                        <div class="card-body">
+                            <h5 class="card-title">${title}</h5>
+                            <p class="card-text">Acronimo: ${acr} <br> Anno edizione: ${anno}</p>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#${acr}">Register</button>
+                        </div>
+                    </div>
+
+                    <div id="${acr}" class="modal fade">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Attenzione</h5>
+                                    <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Sei sicuro di volerti registrare a ${title}? 
+                                </div>
+                                <div class="modal-footer">
+                                    <form action="registerToConference.php" method="post" class="container">
+                                        <div class="mb-3 form-group floating">
+                                            <input type="hidden" class="form-control floating" name="username" value=${userName} readonly>
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="hidden" class="form-control floating" name="acronimo" value=${acr} autocomplete="off">
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="hidden" class="form-control floating" name="annoEdizione" value=${anno} autocomplete="off">
+                                        </div>
+                                        <div class="container text-center">
+                                            <button type="submit" class="btn btn-primary">Register</button>
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </form>                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
             }
             
-            ul.innerHTML = text;
-            ul.classList.add("list-group-flush");
-            content.append(ul);
+            div.innerHTML = cardContent;
+            content.append(div);
         }
 
         function registerToConference() {
+            content.textContent = '';
             content.innerHTML = `
             <div class="container-fluid text-center">
                 <h2>Registrati</h2>
@@ -178,8 +237,8 @@
                         <label for="acronimo">Acronimo Conferenza</label> 
                     </div>
                     <div class="mb-3 form-group floating">
-                        <input type="number" class="form-control floating" name="annoEdizione" required autocomplete="off">
-                        <label for="annoEdizione">Anno Edizione</label>          
+                        <input type="number" min="1900" max="2099" class="form-control floating" name="annoEdizione" required autocomplete="off">
+                        <label for="annoEdizione">Anno</label>          
                     </div>
                     <div class="container text-center my-5">
                         <button type="submit" class="btn btn-primary">Register</button>
@@ -187,6 +246,59 @@
                 </form>
             </div>
             `;
+        }
+
+        function visualizeSessions() {
+            content.textContent = '';
+            var dynamicContent = "";
+            for(let i = 0; i < sessioni.length; i++) {
+                acr = sessioni[i]["acronimoConferenza"];
+                titleSession = sessioni[i]["titoloSessione"];
+                dynamicContent += `
+                <li class="list-group-item my-1" id="${acr}">
+                    <button type="button" class="btn" data-toggle="modal" data-target="#${acr}${i}">${acr}</button>
+                </li>
+                <div id="${acr}${i}" class="modal fade">
+                    <div class="modal-dialog modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Sessioni e presentazioni di: ${acr}</h5>
+                                <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                ${titleSession}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            
+            content.innerHTML = `
+            <div class="container">
+                <input class="form-control" id="myInput" type="text" placeholder="Search" autocomplete="off">
+                <br>
+                <ul class="list-group" id="myList">
+                    ${dynamicContent}
+                </ul>  
+            </div>
+            `;
+            
+            // Filtro per le conferenze
+            $(document).ready(function(){
+                $("#myInput").on("keyup", function() {
+                    var value = $(this).val().toLowerCase();
+                    $("#myList li").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                    });
+                });
+            });
         }
 
         // switch per il menu
