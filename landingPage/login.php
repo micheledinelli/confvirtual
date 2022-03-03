@@ -40,7 +40,7 @@
             if($row["Counter"] > 0) {
                 echo "OK";
                 $_SESSION['user'] = $username;
-                header('Location:/DBProject2021/landingPage/index.php');
+                header('location.index.php');
             } else {
                 echo "ERROR";
             }
