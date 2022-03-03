@@ -298,7 +298,7 @@ BEGIN
 END;
 $ DELIMITER ;
 
-# Inserisce una nuova presentazione
+# Inserisce una nuovo articolo
 DELIMITER $
 CREATE PROCEDURE InserisciArticolo(IN Codice INT, IN CodiceSessione INT, IN OraInizio TIME, IN OraFine TIME, IN Titolo VARCHAR(30), IN NumeroPagine INT, IN UsernamePresenter VARCHAR(30))
 BEGIN
@@ -317,7 +317,7 @@ BEGIN
 END;
 $ DELIMITER ;
 
-# Inserisce una nuova presentazione
+# Inserisce una nuovo tutorial
 DELIMITER $
 CREATE PROCEDURE InserisciTutorial(IN Codice INT, IN CodiceSessione INT, IN OraInizio TIME, IN OraFine TIME, IN Titolo VARCHAR(30), IN Abstract VARCHAR(500))
 BEGIN
@@ -341,6 +341,20 @@ BEGIN
 			INSERT INTO REGISTRAZIONE(Username, AcronimoConferenza, AnnoEdizione) VALUES(Username, Acronimo, Anno);
 		ELSE 
 			SELECT CONCAT("INPUT DATA INCORRECT") AS MESSAGE;
+        END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
+# Inserisce un messaggio
+DELIMITER $ 
+CREATE PROCEDURE InserisiciMessaggio(IN UsernameMittente VARCHAR(30), IN Testo VARCHAR(200), IN ChatId INT, IN Ts TIME)
+BEGIN
+	START TRANSACTION;
+		IF(EXISTS(SELECT * FROM SESSIONE AS S WHERE S.Codice = ChatId) AND EXISTS(SELECT * FROM UTENTE WHERE Username = UsernameMittente)) THEN
+			INSERT INTO MESSAGGIO(UsernameMittente, Testo, Ts, ChatId) VALUES(UsernameMittente, Testo, Ts, ChatId);
+        ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on InserisiciMessaggio the specified session or user have not been found';
         END IF;
     COMMIT WORK;
 END;
@@ -424,10 +438,6 @@ CREATE TRIGGER CheckOrariMessaggi
 BEFORE INSERT ON MESSAGGIO
 FOR EACH ROW
 BEGIN	
-    IF(NOT EXISTS (SELECT * FROM SESSIONE AS S WHERE S.Codice = NEW.ChatId)) THEN 
-		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error ChatId Errato';
-    END IF;
-	
 	IF(NEW.Ts < ALL (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.ChatId) OR (NEW.Ts > ALL (SELECT S.OraFine FROM SESSIONE AS S WHERE S.Codice = NEW.ChatId))) THEN
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error CheckOrariPresentazioni';
     END IF;
