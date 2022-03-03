@@ -40,12 +40,13 @@
             if($row["Counter"] > 0) {
                 echo "OK";
                 $_SESSION['user'] = $username;
-                header('location.index.php');
+                header('Location:index.php');
             } else {
                 echo "ERROR";
             }
 
         } catch( PDOException $e ) {
+            header('Location:index.php');
             echo("[ERRORE]".$e->getMessage());
             exit();
         }
