@@ -13,6 +13,12 @@
 
     <?php
         session_start();
+        if(time() > $_SESSION['expire']) {
+            session_unset();
+            session_destroy();
+            header('Location:/DBProject2021/landingPage/index.php');
+        } 
+
         // Connection to db
         $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
         $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -45,7 +51,6 @@
             $sessione -> numPresentazioni = $row["NumeroPresentazioni"];
             array_push($sessioni, $sessione);
         }
-
 
         $queryMessages = ('SELECT *
                             FROM REGISTRAZIONE AS R, SESSIONE AS S

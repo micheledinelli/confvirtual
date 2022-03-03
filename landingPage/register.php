@@ -12,6 +12,10 @@
         // Start or resume the session
         session_start();
 
+        $_SESSION['start'] = time(); 
+        $inactive = 10;
+        $_SESSION['expire'] = time() + $inactive;
+
         // Retrieve data from html form
         $username = $_POST["username"];
         $password = $_POST["pw"];
@@ -21,7 +25,7 @@
         $birthplace = $_POST["place"];
         
         try {
-
+            
             // Connection to db
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

@@ -11,6 +11,10 @@
         
         // Start or resume the session
         session_start();
+        
+        $_SESSION['start'] = time(); 
+        $inactive = 600; //10 minutes in seconds
+        $_SESSION['expire'] = time() + $inactive;
 
         $username = $_POST["username"];
         $password = $_POST["pw"];
@@ -33,11 +37,10 @@
             $row = $res -> fetch();
             $_SESSION['userType'] = $row["Tipologia"];
 
-
             if($row["Counter"] > 0) {
                 echo "OK";
                 $_SESSION['user'] = $username;
-                header('Location:index.php');
+                header('Location:/DBProject2021/landingPage/index.php');
             } else {
                 echo "ERROR";
             }
