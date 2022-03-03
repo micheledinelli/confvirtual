@@ -86,12 +86,17 @@
     </div>
     
     <?php
+        
         // Start or resume the session
         session_start();
-
-        $username = $_POST["username"];
-        $password = $_POST["pw"];
-        
+        if(isset($_SESSION['expire'])) {
+            if(time() > $_SESSION['expire']) {
+                session_unset();
+                session_destroy();
+                header('Location:/DBProject2021/landingPage/index.php');
+            } 
+        }
+         
         try {
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
