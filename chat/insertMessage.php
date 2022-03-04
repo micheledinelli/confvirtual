@@ -15,6 +15,7 @@
         
         $username = $_SESSION["user"]; 
         $text = $_POST["msg"];
+        $chatId = $_POST["chatId"];
 
         date_default_timezone_set('Europe/Rome');
         $date = new DateTime();
@@ -31,7 +32,7 @@
             $res -> bindValue(":lab1", $username);
             $res -> bindValue(":lab2", $text);
             //:lab3 chat Id TO DO
-            $res -> bindValue(":lab3", 1);
+            $res -> bindValue(":lab3", $chatId);
             $res -> bindValue(":lab4", $currentDate);
             
             $res -> execute();

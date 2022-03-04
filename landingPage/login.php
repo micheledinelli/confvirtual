@@ -13,7 +13,7 @@
         session_start();
         
         $_SESSION['start'] = time(); 
-        $inactive = 600; //10 minutes in seconds
+        $inactive = 1200; //20 minutes in seconds
         $_SESSION['expire'] = time() + $inactive;
 
         $username = $_POST["username"];

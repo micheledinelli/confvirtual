@@ -37,13 +37,33 @@
             while($row = $res -> fetch()) {
                 $sessione = new stdClass();
                 $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
+                $sessione -> codiceSessione = $row["Codice"];
                 $sessione -> titoloSessione = $row["Titolo"];
                 $sessione -> data = $row["Data"];
                 $sessione -> oraInizio = $row["OraInizio"];
                 $sessione -> oraFine = $row["OraFine"];
                 array_push($sessionsPermitted, $sessione);
             }
-            
+
+            $messaggiSessioniPermesse = array();
+            foreach($sessionsPermitted as $i => $i_value) {
+                $messaggi = array();
+                $curCodice =  $i_value -> codiceSessione;
+                $query = 'SELECT * FROM MESSAGGIO WHERE ChatID = :lab1 ORDER BY Ts';
+                $res = $pdo -> prepare($query);
+                $res -> bindValue(":lab1", $curCodice);
+                $res -> execute();
+                
+                while($row = $res -> fetch()) {
+                    $messaggio = new stdClass();
+                    $messaggio -> testo = $row["Testo"];
+                    $messaggio -> ts = $row["Ts"];
+                    $messaggio -> mittente = $row["UsernameMittente"];
+                    array_push($messaggi, $messaggio);
+                }
+                $messaggiSessioniPermesse[$curCodice] = $messaggi;            
+            }
+
         } catch( PDOException $e ) {
             echo("[ERRORE]".$e->getMessage());
             exit();
@@ -61,21 +81,13 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>';
-            } else {
-                print '
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Ottimo!</strong> messaggio inviato
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>';
-            }
+            } 
         }
         unset($_SESSION["chatError"]);
     ?>
 
     <div class="container">
-        <a class="btn btn-primary my-3" href="/DBProject2021/landingPage/index.php" role="button">
+        <a class="btn btn-primary my-3" href="../functionalities/base.php" role="button">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M2 13.5V7h1v6.5a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5V7h1v6.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5zm11-11V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/>
                 <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/>
@@ -95,7 +107,8 @@
                     <div class="messages-box">
                         <?php
                             foreach($sessionsPermitted as $i => $i_value) {
-                                $currentConference = $i_value->acronimoConferenza;
+                                $currentConference = $i_value -> acronimoConferenza;
+                                $codiceSessione = $i_value -> codiceSessione;
                                 $titoloSessione = $i_value -> titoloSessione;
                                 $data = $i_value -> data;
                                 $oraInizio = $i_value -> oraInizio;
@@ -106,7 +119,7 @@
 
                                 echo"
                                 <div class='list-group rounded-0'>
-                                    <a id='{$titoloSessione}' class='list-group-item list-group-item-action rounded-0' onclick='changeChat(this.id)'>
+                                    <a id='{$codiceSessione}' class='list-group-item list-group-item-action rounded-0' onclick='changeChat(this.id)'>
                                         <div class='media'><img src='https://bootstrapious.com/i/snippets/sn-chat/avatar.svg' alt='user' width='50' class='rounded-circle'>
                                             <div class='media-body ml-4'>
                                                 <div class='d-flex align-items-center justify-content-between mb-1'>
@@ -128,30 +141,14 @@
             <!-- Chat Box-->
             <div class="col-7 px-0">
                 <div class="px-4 py-5 chat-box bg-white" id="chat-box">
-                    <!-- White Message (left) -->
-                    <div class="media w-50 mb-3"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
-                        <div class="media-body ml-3">
-                            <div class="bg-light rounded py-2 px-3 mb-2">
-                                <p class="text-small mb-0 text-muted">ciao</p>
-                            </div>
-                            <p class="small text-muted">12:00 PM | Aug 13</p>
-                        </div>
-                    </div>
-                    <!-- Blue Message (right) -->
-                    <div class="media w-50 ml-auto mb-3">
-                        <div class="media-body">
-                            <div class="bg-primary rounded py-2 px-3 mb-2">
-                                <p class="text-small mb-0 text-white">come va</p>
-                            </div>
-                            <p class="small text-muted">12:00 PM | Aug 13</p>
-                        </div>
-                    </div>
+                    
                 </div>
 
                 <!-- Typing area -->
                 <form action="insertMessage.php" method="post" class="bg-light">
                     <div class="input-group">
                         <input id="send-input" name="msg" type="text" placeholder="Type a message" aria-describedby="send-btn" autocomplete="off" class="form-control rounded-0 border-0 py-4 bg-light" >
+                        <input id="chat-id-input" name="chatId" type="hidden" aria-describedby="send-btn" autocomplete="off" class="form-control rounded-0 border-0 py-4 bg-light" >
                         <div class="input-group-append">
                             <button id="send-btn" type="submit" class="btn btn-link">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send" viewBox="0 0 16 16">
@@ -217,43 +214,64 @@
     
     const sendBtn = document.getElementById("send-btn");
     const sendInput = document.getElementById("send-input");
+    const chatIdInput = document.getElementById("chat-id-input");
     const chatBox = document.getElementById("chat-box");
     const messagesBox = document.getElementById("messages-box");
 
     var sessioniPermesse = <?php echo json_encode($sessionsPermitted); ?>;
+    var messaggiSessioniPermesse = <?php echo json_encode($messaggiSessioniPermesse); ?>;
+    var usernameAttuale = <?php echo json_encode($_SESSION['user']); ?>;
+
+    var currentChatId;
+
+    function getCurrentChatId() {
+        return currentChatId;
+    }
     
     function changeChat(clickedId) {
-        var contenuto1 = "ciao ciao";
-        var contentuto2 = "sono il 2";
-        for(let i = 0; i < sessioniPermesse.length; i++) {
-            if(sessioniPermesse[i]["titoloSessione"] == clickedId) {
-                chatBox.innerHTML = `
-                <div class="media w-50 mb-3"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
-                        <div class="media-body ml-3">
-                            <div class="bg-light rounded py-2 px-3 mb-2">
-                                <p class="text-small mb-0 text-muted">ciao</p>
-                            </div>
-                            <p class="small text-muted">12:00 PM | Aug 13</p>
-                        </div>
-                    </div>
-                    <!-- Blue Message (right) -->
+        currentChatId = clickedId;
+
+        var dynamicContent = '';
+        for(let i = 0; i < messaggiSessioniPermesse[clickedId].length; i++) {
+            if(messaggiSessioniPermesse[clickedId] !== undefined) {
+                var messaggio = messaggiSessioniPermesse[clickedId][i]["testo"];
+                var timeStamp = messaggiSessioniPermesse[clickedId][i]["ts"];
+                var mittente = messaggiSessioniPermesse[clickedId][i]["mittente"];
+                
+                if(mittente === usernameAttuale) {
+                    // Blue right
+                    dynamicContent += `
                     <div class="media w-50 ml-auto mb-3">
                         <div class="media-body">
                             <div class="bg-primary rounded py-2 px-3 mb-2">
-                                <p class="text-small mb-0 text-white">Contenuto 1</p>
+                                <p class="text-small mb-0 text-white">${messaggio}</p>
                             </div>
-                            <p class="small text-muted">12:00 PM | Aug 13</p>
+                            <p class="small text-muted">${timeStamp}</p>
                         </div>
-                    </div>
-                `;
-            } else {
-                chatBox.innerHTML = '<p>ciao</p>'
+                    </div>`;
+                } else {
+                    // White left
+                    dynamicContent += `
+                    <span style="border-radius:50%;"class="text-small bg-light">${mittente}</span>
+                    <div class="media w-50 mb-3">
+                        <div class="media-body ml-3">
+                            <div class="bg-light rounded py-2 px-3 mb-2">
+                                <p class="text-small mb-0 text-muted">${messaggio}</p>
+                            </div>
+                            <p class="small text-muted">${timeStamp}</p>
+                        </div>
+                    </div>`;
+                }
             }
         }
+
+        chatBox.innerHTML = dynamicContent;
     }
-    
 
     sendBtn.addEventListener("click", function(){
+        //event.preventDefault();
+        let date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
         if(sendInput.value !== '') {
             const newMessage = `
             <div class="media w-50 ml-auto mb-3">
@@ -261,12 +279,12 @@
                     <div class="bg-primary rounded py-2 px-3 mb-2">
                         <p class="text-small mb-0 text-white">${sendInput.value}</p>
                     </div>
-                    <p class="small text-muted">12:00 PM | Aug 13</p>
+                    <p class="small text-muted">${date}</p>
                 </div>
             </div>`;
             
             chatBox.insertAdjacentHTML('beforeend', newMessage);
-            //sendInput.value = '';
+            chatIdInput.value = getCurrentChatId();
         }  
     });
 </script>
