@@ -113,9 +113,13 @@
                                 $data = $i_value -> data;
                                 $oraInizio = $i_value -> oraInizio;
                                 $oraFine = $i_value -> oraFine;
-                                if(time() > $oraFine) {
+
+                                $currentDate = date("Y-m-d");
+                                if(time() > strtotime($oraFine) || $currentDate != $data) {
                                     $stato = "Chiusa";
-                                } else { $stato = "Aperta"; }
+                                } else { 
+                                    $stato = "Aperta";
+                                }
 
                                 echo"
                                 <div class='list-group rounded-0'>
@@ -145,7 +149,9 @@
                 </div>
 
                 <!-- Typing area -->
-                <form action="insertMessage.php" method="post" class="bg-light">
+                <!-- TO DO : Prevent refresh -->
+                <iframe name="votar" style="display:none;"></iframe>
+                <form id="send-form" action="insertMessage.php" method="post" class="bg-light" target="votar">
                     <div class="input-group">
                         <input id="send-input" name="msg" type="text" placeholder="Type a message" aria-describedby="send-btn" autocomplete="off" class="form-control rounded-0 border-0 py-4 bg-light" >
                         <input id="chat-id-input" name="chatId" type="hidden" aria-describedby="send-btn" autocomplete="off" class="form-control rounded-0 border-0 py-4 bg-light" >
@@ -211,6 +217,10 @@
 </body>
 
 <script>
+
+</script>
+
+<script>
     
     const sendBtn = document.getElementById("send-btn");
     const sendInput = document.getElementById("send-input");
@@ -260,16 +270,16 @@
                             </div>
                             <p class="small text-muted">${timeStamp}</p>
                         </div>
-                    </div>`;
+                        </div>`;
+                    }
                 }
             }
+            
+            chatBox.innerHTML = dynamicContent;
         }
-
-        chatBox.innerHTML = dynamicContent;
-    }
-
+            
     sendBtn.addEventListener("click", function(){
-        //event.preventDefault();
+
         let date = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
         if(sendInput.value !== '') {
@@ -285,6 +295,7 @@
             
             chatBox.insertAdjacentHTML('beforeend', newMessage);
             chatIdInput.value = getCurrentChatId();
+        
         }  
     });
 </script>
