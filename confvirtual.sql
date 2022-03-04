@@ -112,7 +112,7 @@ CREATE TABLE SESSIONE(
 ) ENGINE="INNODB";
 
 CREATE TABLE PRESENTAZIONE(
-    Codice INT,
+    Codice INT AUTO_INCREMENT,
 	CodiceSessione INT,
     OraInizio TIME,
     OraFine TIME,
@@ -203,7 +203,7 @@ CREATE TABLE FAVORITE(
 CREATE TABLE MESSAGGIO(
 	UsernameMittente VARCHAR(30),
 	Testo VARCHAR(200),
-	Ts TIME,
+	Ts DATETIME,
 	ChatID INT,
 	PRIMARY KEY(UsernameMittente, Testo, Ts, ChatID),
 	FOREIGN KEY(UsernameMittente) REFERENCES UTENTE(Username),
@@ -298,36 +298,46 @@ BEGIN
 END;
 $ DELIMITER ;
 
-# Inserisce una nuovo articolo
+# Inserisce un nuovo articolo
 DELIMITER $
-CREATE PROCEDURE InserisciArticolo(IN Codice INT, IN CodiceSessione INT, IN OraInizio TIME, IN OraFine TIME, IN Titolo VARCHAR(30), IN NumeroPagine INT, IN UsernamePresenter VARCHAR(30))
+CREATE PROCEDURE InserisciArticolo(IN CodiceSessione INT, IN OraInizio TIME, IN OraFine TIME, IN Titolo VARCHAR(30), IN NumeroPagine INT, IN UsernamePresenter VARCHAR(30))
 BEGIN
 	START TRANSACTION;
-		IF(EXISTS(SELECT * FROM SESSIONE AS S WHERE S.Codice = CodiceSessione)) THEN
-			INSERT INTO PRESENTAZIONE(Codice, CodiceSessione, OraInizio, OraFine, Tipologia) VALUES(Codice, CodiceSessione, OraInizio, OraFine, "ARTICOLO");
-			IF(UsernamePresenter IS NOT NULL AND UsernamePresenter <> '') THEN
-				INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine, UsernamePresenter) VALUES(Codice, Titolo, NumeroPagine, UsernamePresenter);
+		BEGIN
+			DECLARE lastInserted INT;
+			IF(EXISTS(SELECT * FROM SESSIONE AS S WHERE S.Codice = CodiceSessione)) THEN
+				INSERT INTO PRESENTAZIONE(CodiceSessione, OraInizio, OraFine, Tipologia) VALUES(CodiceSessione, OraInizio, OraFine, "ARTICOLO");
+                
+                SET lastInserted = (SELECT Codice FROM PRESENTAZIONE WHERE Codice = (SELECT MAX(Codice) FROM PRESENTAZIONE));
+                
+				IF(UsernamePresenter IS NOT NULL AND UsernamePresenter <> '') THEN
+					INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine, UsernamePresenter) VALUES(lastInserted, Titolo, NumeroPagine, UsernamePresenter);
+				ELSE 
+					INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine) VALUES(lastInserted, Titolo, NumeroPagine);
+				END IF;
 			ELSE 
-				INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine) VALUES(Codice, Titolo, NumeroPagine);
+				SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on InserisciArticolo: the specified session has not been found ';
 			END IF;
-		ELSE 
-			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on InserisciArticolo: the specified session has not been found ';
-        END IF;
+		END;
     COMMIT WORK;
 END;
 $ DELIMITER ;
 
 # Inserisce una nuovo tutorial
 DELIMITER $
-CREATE PROCEDURE InserisciTutorial(IN Codice INT, IN CodiceSessione INT, IN OraInizio TIME, IN OraFine TIME, IN Titolo VARCHAR(30), IN Abstract VARCHAR(500))
+CREATE PROCEDURE InserisciTutorial(IN CodiceSessione INT, IN OraInizio TIME, IN OraFine TIME, IN Titolo VARCHAR(30), IN Abstract VARCHAR(500))
 BEGIN
 	START TRANSACTION;
-		IF(EXISTS(SELECT * FROM SESSIONE AS S WHERE S.Codice = CodiceSessione)) THEN
-			INSERT INTO PRESENTAZIONE(Codice, CodiceSessione, OraInizio, OraFine, Tipologia) VALUES(Codice, CodiceSessione, OraInizio, OraFine, "TUTORIAL");
-			INSERT INTO P_TUTORIAL(CodicePresentazione, Titolo, Abstract) VALUES(Codice, Titolo, Abstract);
-		ELSE 
-			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on InseriTutorial the specified session has not been found ';
-		END IF;
+		BEGIN
+			DECLARE lastInserted INT;
+			IF(EXISTS(SELECT * FROM SESSIONE AS S WHERE S.Codice = CodiceSessione)) THEN
+				INSERT INTO PRESENTAZIONE(CodiceSessione, OraInizio, OraFine, Tipologia) VALUES(CodiceSessione, OraInizio, OraFine, "TUTORIAL");
+				SET lastInserted = (SELECT Codice FROM PRESENTAZIONE WHERE Codice = (SELECT MAX(Codice) FROM PRESENTAZIONE));
+				INSERT INTO P_TUTORIAL(CodicePresentazione, Titolo, Abstract) VALUES(lastInserted, Titolo, Abstract);
+			ELSE 
+				SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on InseriTutorial the specified session has not been found ';
+			END IF;
+		END;
     COMMIT WORK;
 END;
 $ DELIMITER ;
@@ -348,7 +358,7 @@ $ DELIMITER ;
 
 # Inserisce un messaggio
 DELIMITER $ 
-CREATE PROCEDURE InserisiciMessaggio(IN UsernameMittente VARCHAR(30), IN Testo VARCHAR(200), IN ChatId INT, IN Ts TIME)
+CREATE PROCEDURE InserisiciMessaggio(IN UsernameMittente VARCHAR(30), IN Testo VARCHAR(200), IN ChatId INT, IN Ts DATETIME)
 BEGIN
 	START TRANSACTION;
 		IF(EXISTS(SELECT * FROM SESSIONE AS S WHERE S.Codice = ChatId) AND EXISTS(SELECT * FROM UTENTE WHERE Username = UsernameMittente)) THEN
@@ -433,18 +443,19 @@ BEGIN
 END;
 $ DELIMITER ;
 
-DELIMITER $
+/*DELIMITER $
 CREATE TRIGGER CheckOrariMessaggi
 BEFORE INSERT ON MESSAGGIO
 FOR EACH ROW
-BEGIN	
-	IF(NEW.Ts < ALL (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.ChatId) OR (NEW.Ts > ALL (SELECT S.OraFine FROM SESSIONE AS S WHERE S.Codice = NEW.ChatId))) THEN
-		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error CheckOrariPresentazioni';
+BEGIN
+	DECLARE messageTime TIME;
+    SET messageTime =  DATE_FORMAT(NEW.Ts,'%H:%i:%s');
+	IF(messageTime < ALL (SELECT S.OraInizio FROM SESSIONE AS S WHERE S.Codice = NEW.ChatId) OR (messageTime > ALL (SELECT S.OraFine FROM SESSIONE AS S WHERE S.Codice = NEW.ChatId))) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error CheckOrariMessaggi';
     END IF;
 END;
 $ DELIMITER ;
-
-
+*/
 # Si vuole fare in modo che il numero di sequenza di ogni presentazione dipenda dalla 
 # data e dall'ora della sessione in cui è programmata, perciò ogni numero di sequenza
 # associato ad una presentazione farà fede alla sequenza propria della sua sessione
@@ -457,12 +468,4 @@ BEGIN
 END;
 $ DELIMITER ;
 
-
 # VIEW
-
-
-
-
-
-
- 
