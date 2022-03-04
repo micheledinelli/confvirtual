@@ -1,13 +1,14 @@
 .counter
 {
     text-align: center;
+    margin: 70px 70px;
 }
-.employees,.customer,.design,.order
+
+.counters
 {
     margin-top: 70px;
     margin-bottom: 70px;
 }
-
 .counter-count
 {
     font-size: 18px;
@@ -25,9 +26,3 @@
     display: inline-block;
 }
 
-.employee-p,.customer-p,.order-p,.design-p
-{
-    font-size: 24px;
-    color: #000000;
-    line-height: 34px;
-}
