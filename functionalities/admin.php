@@ -388,18 +388,86 @@
             content.innerHTML = dynamicContent;
 
         }
+
+        function addSponsor() {
+            content.innerHTML = `
+            <div class="container-fluid text-center w-50">
+                <h2>Inserisci uno sponsor</h2>
+                <hr class="my-4">
+                <form id="sponsor-form" action="insertSponsor.php" method="post" class="container my-3">
+                    
+                    <!-- Form content -->
+                    <div class="container" id="form-content">
+                        <div class="mb-3 form-group floating">
+                            <input type="text" class="form-control floating" name="nomeSponsor" required autocomplete="off">
+                            <label for="nomeSponsor">Nome dello sponsor</label>          
+                        </div>
+                    </div>
+                    <div class="mb-3 form-group floating">
+                        <input type="button" class="btn btn-primary" id="logo-input" value="carica il logo" onclick="document.getElementById('hidden-logo-input').click();" />
+                        <input type="file" style="display:none;" id="hidden-logo-input" name="logo"/>                    
+                    </div>
+                    
+                    <!-- Submit -->
+                    <div class="container text-center my-5">
+                        <div class="row">
+                            <div class="col">
+                                <a id="expand-btn" role="btn" class="btn btn-primary" data-toggle="tooltip" data-placement="bottom" title="Espandi per aggiungere anche la sponsorizzazione">espandi</a>
+                            </div>
+                            <div class="col">
+                                <button type="submit" id="my-btn" class="btn btn-primary">Inserisci</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            `;
+
+            const formContent = document.getElementById("form-content");
+            const expandBtn =  document.getElementById("expand-btn");
+            const hiddenInput = document.getElementById('hidden-logo-input');
+
+            var tooltip = new bootstrap.Tooltip(expandBtn);
             
-            // switch per il menu
-            var radio = 0;
-            document.getElementById("sidebarCollapse").addEventListener("click", () => {
-                if(radio === 0) {
-                    document.getElementById("sidebar").classList.add("active");
-                    radio = 1;
-                } else {
-                    document.getElementById("sidebar").classList.remove("active");
-                    radio = 0;
-                }
+            hiddenInput.addEventListener("change", function() {
+                alert("Logo aggiunto con successo");
             });
+
+            var radio = 1;
+            expandBtn.addEventListener("click", function() {
+                
+                if(radio === 1) {
+                    formContent.innerHTML += `
+                        <div class="mb-3 form-group floating">
+                            <input type="text" class="form-control floating" name="acronimoConferenza" autocomplete="off">
+                            <label for="acronimoConferenza">Acronimo della conferenza</label>          
+                        </div>
+                        <div class="mb-3 form-group floating">
+                            <input type="number" min="1990" class="form-control floating" name="annoEdizione" autocomplete="off">
+                            <label for="annoEdizione">Anno Edizione</label>          
+                        </div>
+                        <div class="mb-3 form-group floating">
+                            <input type="number" min="0" max="99999999" class="form-control floating" name="importo" autocomplete="off">
+                            <label for="importo">Importo</label>          
+                        </div>`;
+                        expandBtn.textContent = "riduci";
+                        expandBtn.setAttribute("data-original-title", "Riduci");
+                        
+                } else {
+                    formContent.innerHTML = `
+                    <div class="mb-3 form-group floating">
+                        <input type="text" class="form-control floating" name="nomeSponsor" autocomplete="off">
+                        <label for="nomeSponsor">Nome dello sponsor</label>          
+                    </div>`;
+                    expandBtn.textContent = "espandi";
+                    expandBtn.setAttribute("data-original-title", "Espandi per aggiungere anche la sponsorizzazione");
+                } 
+
+                radio = -radio;
+
+            })
+        }
+                
         // switch per il menu
         var radio = 0;
         document.getElementById("sidebarCollapse").addEventListener("click", () => {

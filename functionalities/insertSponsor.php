@@ -49,6 +49,7 @@
                 $res -> bindValue(":lab4", $annoEdizione);
 
                 $res -> execute();
+                $_SESSION["opSuccesfull"] = 0;
 
                 header('Location: admin.php');
 
@@ -60,6 +61,7 @@
                 $res -> bindValue(":lab2", $logo, PDO::PARAM_LOB);
 
                 $res -> execute();
+                $_SESSION["opSuccesfull"] = 0;
 
                 header('Location: admin.php');
 
@@ -69,6 +71,7 @@
                 $res -> bindValue(":lab1", $nomeSponsor);
 
                 $res -> execute();
+                $_SESSION["opSuccesfull"] = 0;
 
                 header('Location: admin.php');
             }
