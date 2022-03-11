@@ -22,7 +22,7 @@
                     <a class="nav-link" href="#">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#sme">Some cool effects</a>
+                    <a class="nav-link" href="#ourSponsors">I nostri sponsor</a>
                 </li>
             </ul>
         </div>
@@ -69,21 +69,6 @@
         ?>
 
     </nav>
-
-    <div class="container jumbotron my-5 text-center">
-        <h1 class="display-4">Hello, world!</h1>
-        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-        <hr class="my-4">
-        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
-        <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
-    </div>
-    <div class="container jumbotron my-5 text-center">
-        <h1 class="display-4">Hello, world!</h1>
-        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-        <hr class="my-4">
-        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
-        <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
-    </div>
     
     <?php
         
@@ -138,7 +123,7 @@
                     <p class="p-counter">Conferenze Registrate</p>
                 </div>
             </div>
-
+            
             <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
                 <div class="counter">
                     <p class="counter-count bg-primary"><?php echo "{$confAttive}" ?></p>
@@ -155,6 +140,43 @@
         </div>
     </div>
     
+    <div class="container sponsors text-center" id="ourSponsors">
+        <div class="container jumbotron my-5 text-center">
+            <h1 class="display-4">Alcuni dei nostri sponsor</h1>
+            <p class="lead my-3">Gli sponsor di confvirtual permettono che il nostro servizio sia il migliore possibile</p>
+            <p class="lead text-small">Diventa anche tu un nostro partner!</p>
+        </div>
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/dinelli-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/brajucha-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/pinazza-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/leob-logo.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/bepo-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/friuj-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/sayonara-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/maich-logo.png">
+                </div>
+            </div>
+        </div>
+    </div>
     <!--
     <div class="container text-center">
         <img id="sme" height="200px" src="https://zindex99.com/front/assets/img/effetti-speciali.gif" alt="ciao">
@@ -174,12 +196,12 @@
                         </div>
                         <div class="col-md-2">
                             <h6 class="text-uppercase font-weight-bold">
-                            <a href="#!" class="text-white">Other Projects</a>
+                                <a href="#!" class="text-white">Other projects</a>
                             </h6>
                         </div>
                         <div class="col-md-2">
                             <h6 class="text-uppercase font-weight-bold">
-                            <a href="#!" class="text-white">Products</a>
+                                <a href="sideParts/mail.php" class="text-white" id="contact-us">Contact us</a>
                             </h6>
                         </div>
                     </div>

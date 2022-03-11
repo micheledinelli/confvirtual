@@ -45,6 +45,7 @@ a:focus {
 #sidebar {
     min-width: 250px;
     max-width: 250px;
+    position: relative;
     color: #fff;
     transition: all 0.3s;
 }
@@ -101,20 +102,11 @@ ul ul a {
     padding-left: 30px !important;
 }
 
-a.download,
-a.download:hover {
-    color: #fff
-}
 
-#content {
+#main-content {
     width: 100%;
     padding: 20px;
-    min-height: 100vh;
-    transition: all 0.3s
-}
-
-.content-wrapper {
-    padding: 15px
+    transition: all 0.3s;
 }
 
 @media(maz-width:768px) {

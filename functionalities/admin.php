@@ -48,7 +48,7 @@
                 
                 <li> <a href="#" onclick="">Associa presenter</a> </li>
 
-                <li> <a href="#" onclick="">Inserisci Sponsor</a> </li>
+                <li> <a href="#" onclick="addSponsor()">Inserisci Sponsor</a> </li>
                 
                 <li> <a href="/DBProject2021/clustering/cluster.php">Viusalizza cluster utenti</a> </li>
                                 
@@ -102,53 +102,132 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT -->
-    <script>
-
-        const content = document.getElementById("main-content");
-
-        function createConference() {
-            content.innerHTML = `
-            <div class="container-fluid text-center">
-                <h2>Registrati</h2>
-                <hr class="my-4">
-                <form action="createConferenceAdmin.php" method="post" class="container my-5">
-                    <div class="mb-3 form-group floating">
-                        <input type="text" class="form-control floating" name="nomeConferenza" required autocomplete="off">
-                        <label for="nomeConferenza">Nome della Conferenza</label>          
-                    </div>
-                    <div class="mb-3 form-group floating">
-                        <input type="text" class="form-control floating" name="acronimo" required autocomplete="off">
-                        <label for="acronimo">Acronimo della Conferenza</label> 
-                    </div>
-                    <div class="mb-3 form-group floating">
-                        <input type="number" class="form-control floating" name="annoEdizione" required autocomplete="off">
-                        <label for="annoEdizione">Anno Edizione</label>          
-                    </div>
-                    <div class="container text-center my-5">
-                        <button type="submit" class="btn btn-primary">Register</button>
-                    </div>
-                </form>
-            </div>
-            `;
-        }
-        
-        // switch per il menu
-        var radio = 0;
-        document.getElementById("sidebarCollapse").addEventListener("click", () => {
-            if(radio === 0) {
-                document.getElementById("sidebar").classList.add("active");
-                radio = 1;
-            } else {
-                document.getElementById("sidebar").classList.remove("active");
-                radio = 0;
-            }
-        });
-    </script>
-
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js" integrity="sha384-VHvPCCyXqtD5DqJeNxl2dtTyhF78xXNXdkwX1CZeRusQfRKp+tA7hAShOK/B/fQ2" crossorigin="anonymous"></script>
+    
+     <!-- JAVASCRIPT -->
+     <script>
+
+    const content = document.getElementById("main-content");
+
+    function createConference() {
+        content.innerHTML = `
+        <div class="container-fluid text-center w-50">
+            <h2>Registrati</h2>
+            <hr class="my-4">
+            <form action="createConferenceAdmin.php" method="post" class="container my-5">
+                <div class="mb-3 form-group floating">
+                    <input type="text" class="form-control floating" name="nomeConferenza" required autocomplete="off">
+                    <label for="nomeConferenza">Nome della Conferenza</label>          
+                </div>
+                <div class="mb-3 form-group floating">
+                    <input type="text" class="form-control floating" name="acronimo" required autocomplete="off">
+                    <label for="acronimo">Acronimo della Conferenza</label> 
+                </div>
+                <div class="mb-3 form-group floating">
+                    <input type="number" class="form-control floating" name="annoEdizione" required autocomplete="off">
+                    <label for="annoEdizione">Anno Edizione</label>          
+                </div>
+                <div class="container text-center my-5">
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </div>
+            </form>
+        </div>
+        `;
+    }
+
+    function addSponsor() {
+        content.innerHTML = `
+        <div class="container-fluid text-center w-50">
+            <h2>Inserisci uno sponsor</h2>
+            <hr class="my-4">
+            <form id="sponsor-form" action="insertSponsor.php" method="post" class="container my-3">
+                
+                <!-- Form content -->
+                <div class="container" id="form-content">
+                    <div class="mb-3 form-group floating">
+                        <input type="text" class="form-control floating" name="nomeSponsor" required autocomplete="off">
+                        <label for="nomeSponsor">Nome dello sponsor</label>          
+                    </div>
+                </div>
+                <div class="mb-3 form-group floating">
+                    <input type="button" class="btn btn-primary" id="logo-input" value="carica il logo" onclick="document.getElementById('hidden-logo-input').click();" />
+                    <input type="file" style="display:none;" id="hidden-logo-input" name="logo"/>                    
+                </div>
+                
+                <!-- Submit -->
+                <div class="container text-center my-5">
+                    <div class="row">
+                        <div class="col">
+                            <a id="expand-btn" role="btn" class="btn btn-primary" data-toggle="tooltip" data-placement="bottom" title="Espandi per aggiungere anche la sponsorizzazione">espandi</a>
+                        </div>
+                        <div class="col">
+                            <button type="submit" id="my-btn" class="btn btn-primary">Inserisci</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        `;
+
+        const formContent = document.getElementById("form-content");
+        const expandBtn =  document.getElementById("expand-btn");
+        const hiddenInput = document.getElementById('hidden-logo-input');
+
+        var tooltip = new bootstrap.Tooltip(expandBtn);
+        
+        hiddenInput.addEventListener("change", function() {
+            alert("Logo aggiunto con successo");
+        });
+
+        var radio = 1;
+        expandBtn.addEventListener("click", function() {
+            
+            if(radio === 1) {
+                formContent.innerHTML += `
+                    <div class="mb-3 form-group floating">
+                        <input type="text" class="form-control floating" name="acronimoConferenza" autocomplete="off">
+                        <label for="acronimoConferenza">Acronimo della conferenza</label>          
+                    </div>
+                    <div class="mb-3 form-group floating">
+                        <input type="number" min="1990" class="form-control floating" name="annoEdizione" autocomplete="off">
+                        <label for="annoEdizione">Anno Edizione</label>          
+                    </div>
+                    <div class="mb-3 form-group floating">
+                        <input type="number" min="0" max="99999999" class="form-control floating" name="importo" autocomplete="off">
+                        <label for="importo">Importo</label>          
+                    </div>`;
+                    expandBtn.textContent = "riduci";
+                    expandBtn.setAttribute("data-original-title", "Riduci");
+                    
+            } else {
+                formContent.innerHTML = `
+                <div class="mb-3 form-group floating">
+                    <input type="text" class="form-control floating" name="nomeSponsor" autocomplete="off">
+                    <label for="nomeSponsor">Nome dello sponsor</label>          
+                </div>`;
+                expandBtn.textContent = "espandi";
+                expandBtn.setAttribute("data-original-title", "Espandi per aggiungere anche la sponsorizzazione");
+            } 
+
+            radio = -radio;
+
+        })
+    }
+
+    // switch per il menu
+    var radio = 0;
+    document.getElementById("sidebarCollapse").addEventListener("click", () => {
+        if(radio === 0) {
+            document.getElementById("sidebar").classList.add("active");
+            radio = 1;
+        } else {
+            document.getElementById("sidebar").classList.remove("active");
+            radio = 0;
+        }
+    });
+    </script>
 
 </body>
 </html>
