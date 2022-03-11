@@ -13,7 +13,7 @@
         session_start();
 
         $_SESSION['start'] = time(); 
-        $inactive = 10;
+        $inactive = 2400;
         $_SESSION['expire'] = time() + $inactive;
 
         // Retrieve data from html form

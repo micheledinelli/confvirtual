@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
     <link rel="stylesheet" href="/DBProject2021/css/form.css">
-    <link rel="stylesheet" href="/DBProject2021/css/base.css">
+    <link rel="stylesheet" href="../css/base.css">
     <title>Base</title>
 </head>
 <body>
@@ -71,12 +71,46 @@
             array_push($sessionsPermitted, $sessione);
         }
 
+        // Presentazioni a cui si ha accesso
+        $query = ('SELECT * FROM REGISTRAZIONE AS R, SESSIONE AS S, PRESENTAZIONE AS P
+                WHERE R.AcronimoConferenza = S.AcronimoConferenza AND Username = "mic" AND P.CodiceSessione = S.Codice');
+        
+        $res = $pdo -> prepare($query);
+        $res -> bindValue(":lab1", $_SESSION['user']);
+        $res -> execute();
+        $presentationsPermitted = array();
+        while($row = $res -> fetch()) {
+            $presentation = new stdClass();
+            $presentation -> codicePresentazione = $row["Codice"];
+            $favorite -> oraInizio = $row["OraInizio"];
+            $favorite -> oraFine = $row["OraFine"];
+            $favorite -> tipologia = $row["Tipologia"];
+            $favorite -> titolo = $row["Titolo"];
+            array_push($presentationsPermitted, $presentation);
+        }
+
+        $query = ('SELECT * FROM FAVORITE AS F WHERE Username = :lab1');
+        $res = $pdo -> prepare($query);
+        $res -> bindValue(":lab1", $_SESSION['user']);
+        $res -> execute();
+        
+        $favorites = array();
+        while($row = $res -> fetch()) {
+            $favorite = new stdClass();
+            $favorite -> codicePresentazione = $row["Codice"];
+            $favorite -> oraInizio = $row["OraInizio"];
+            $favorite -> oraFine = $row["OraFine"];
+            $favorite -> tipologia = $row["Tipologia"];
+            $favorite -> titolo = $row["Titolo"];
+            array_push($favorites, $favorite);
+        }
+
     ?>
     
     <div class="wrapper">
         <nav id="sidebar" class="vh-100 bg-primary">
             <div class="sidebar-header">
-                <a class="btn btn-primary" href="/DBProject2021/landingPage/index.php" role="button">
+                <a class="btn btn-primary" href="../landingPage/index.php" role="button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M2 13.5V7h1v6.5a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5V7h1v6.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5zm11-11V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/>
                         <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/>
@@ -170,11 +204,9 @@
         <?php
             }
         ?>
-
-            <div id="main-content" class="content-wrapper text-center">
-
-            </div>            
-            
+                <div id="main-content" class="content-wrapper text-center">
+                    
+                </div>            
         </div>
     </div>
 
@@ -190,7 +222,9 @@
         var conferenze = <?php echo json_encode($conferenze); ?>;
         var sessioni = <?php echo json_encode($sessioni); ?>;
         var sessioniPermesse = <?php echo json_encode($sessionsPermitted); ?>;
-
+        var favorites = <?php echo json_encode($favorites); ?>;
+        
+        console.log(favorites);
         function visualizeConferences() {
             content.textContent = '';
             let div = document.createElement('div');
@@ -253,7 +287,7 @@
         function registerToConference() {
             content.textContent = '';
             content.innerHTML = `
-            <div class="container-fluid text-center">
+            <div class="container-fluid text-center w-50">
                 <h2>Registrati</h2>
                 <hr class="my-4">
                 <form action="registerToConference.php" method="post" class="container my-5">
@@ -273,9 +307,7 @@
                         <button type="submit" class="btn btn-primary">Register</button>
                     </div>
                 </form>
-            </div>
-            `;
-            
+            </div>`;   
         }
 
         function visualizeSessions() {
@@ -308,8 +340,6 @@
                 dynPres += `</tbody></table>`;
                 dynamicPresentations[i] = dynPres; 
             }
-            console.log(dynamicPresentations);
-
             
             for(let i = 0; i < sessioni.length; i++) {
                 acr = sessioni[i]["acronimoConferenza"];
@@ -344,8 +374,6 @@
                         </div>
                     </div>
                 </tr>`;
-
-                
             }
             
             dynamicContent += `</tbody></table>`;

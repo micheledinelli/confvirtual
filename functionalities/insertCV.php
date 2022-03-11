@@ -11,8 +11,8 @@
     
     session_start();
 
-    if(isset($_POST["fileCV"])) {
-        $file = $_POST["fileCV"];
+    if(!empty($_POST["cv"])) {
+        $cv = $_POST["cv"];
     }
 
     try {
@@ -23,27 +23,26 @@
         $pdo -> exec('SET NAMES "utf8"');
         
         if($_SESSION["userType"] == "SPEAKER") {
-            $query = 'UPDATE CONFVIRTUAL.SPEAKER SET  CurriculumVitae = :lab1  WHERE Username = :lab2';
+            $query = 'UPDATE CONFVIRTUAL.SPEAKER SET CurriculumVitae = :lab1  WHERE Username = :lab2';
         
         } elseif($_SESSION["userType"] == "PRESENTER") {
             $query = 'UPDATE CONFVIRTUAL.PRESENTER SET CurriculumVitae = :lab1  WHERE Username = :lab2';
         } 
 
         $res = $pdo -> prepare($query);
-        $res -> bindValue(":lab1", $file, PDO::PARAM_LOB);
+        $res -> bindValue(":lab1", $cv);
         $res -> bindValue(":lab2", $_SESSION["user"]);
         
         $res -> execute();
 
         $_SESSION["opSuccesfull"] = 0;
-
-        header('Location:base.php');
+        
+        header('Location: speaker_presenter.php');
     
     } catch (PDOException $e) {
-        
         // Errore
         $_SESSION["error"] = 1;
-
+        header('Location:speaker_presenter.php');
         print "Error!: " . $e->getMessage() . "<br/>";
         die();
     }

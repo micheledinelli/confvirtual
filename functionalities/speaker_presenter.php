@@ -17,10 +17,47 @@
             session_destroy();
             header('Location:/DBProject2021/landingPage/index.php');
         } 
-        // Connection to db
-        $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
-        $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $pdo -> exec('SET NAMES "utf8"');
+        
+        try{
+            // Connection to db
+            $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
+            $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo -> exec('SET NAMES "utf8"');
+
+            if($_SESSION["userType"] == "SPEAKER") {
+                $query = 'SELECT CurriculumVitae FROM SPEAKER WHERE Username = :lab1';
+            
+            } elseif($_SESSION["userType"] == "PRESENTER") {
+                $query = 'SELECT CurriculumVitae FROM PRESENTER WHERE Username = :lab1';
+            }
+            
+            $res = $pdo -> prepare($query);
+            $res -> bindValue(":lab1", $_SESSION["user"]);
+            $res -> execute();
+
+            while($row = $res -> fetch()) {
+                $userCurriculum = $row["CurriculumVitae"];
+            }
+
+            $query = 'SELECT * FROM UNIVERSITA';
+            $res = $pdo -> prepare($query);            
+            $res -> execute();
+
+            $università = array(); 
+            while($row = $res -> fetch()) {
+               $uni = new StdClass();
+               $uni -> nome = $row["NomeUniversità"];
+               $uni -> dipartimento = $row["NomeDipartimento"];
+               array_push($università, $uni);
+            }
+
+        }catch(PDOException $e) {
+            // Errore
+            $_SESSION["error"] = 1;
+
+            print "Error!: " . $e->getMessage() . "<br/>";
+            die();
+        }
 
     ?>
 
@@ -41,9 +78,9 @@
                 
                 <li> <a href="#" onclick="moodifyCV()">Modifica CV</a> </li>
             
-                <li> <a href="#" onclick="insertPhoto()">Inserisci Foto</a> </li>
+                <li> <a href="#" onclick="insertPhoto()">Inserisci/Modifica Foto</a> </li>
 
-                <li> <a href="#" onclick="modifyPhoto()">Modifica Foto</a> </li>
+                <li> <a href="#" onclick="manageUni()">Affilizazione universitaria</a> </li>
                 
                 <!-- Funzionalità aggiuntive per gli speaker -->
                 <?php
@@ -105,14 +142,18 @@
     <script>
         
         const content = document.getElementById("main-content");
-        
+        const userCurriculum = <?php echo json_encode($userCurriculum); ?>;
+        const università = <?php echo json_encode($università); ?>
+
         function insertCV() {
             content.innerHTML = `
-                <h2>Inserisci il tuo CV</h2>
-                <hr class="my-4">
-                <div class="container text-center">
+                <div class="container text-center w-50">
+                    <h2>Inserisci il tuo CV</h2>
+                    <hr class="my-4">
                     <form action="insertCV.php" method="post">
-                        <input type="file" name="fileCV">
+                        <div class="form-floating">
+                            <textarea name="cv" class="form-control" placeholder="Scrivi il tuo cv" style="height: 100px"></textarea>
+                        </div>
                         <div class="container text-center my-5">
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
@@ -123,50 +164,98 @@
 
         function insertPhoto() {
             content.innerHTML = `
-                <h2>Inserisci la tua foto</h2>
-                <hr class="my-4">
-                <div class="mb-3">
-                    <form action="insertPhoto.php" method="post">
-                        <input type="file" name="photo">
-                        <div class="container text-center my-5">
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                        </div>
-                    </form>
+                <div class="container w-50">
+                    <h2>Inserisci la tua foto</h2>
+                    <hr class="my-4">
+                    <div class="mb-3">
+                        <form action="insertPhoto.php" method="post">
+
+                            <div class="mb-3 form-group floating">
+                                <input type="button" class="btn btn-primary" id="photo" value="carica la tua foto" onclick="document.getElementById('hidden-photo-input').click();" />
+                                <input type="file" style="display:none;" id="hidden-photo-input" name="photo"/>                    
+                            </div>
+
+                            <div class="container text-center my-5">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             `;
+
+            const hiddenInput = document.getElementById('hidden-photo-input');
+            hiddenInput.addEventListener("change", function() {
+                alert("Foto aggiunta con successo");
+             });
         }
 
-        function moodifyCV() {
-            content.innerHTML = `
-                <h2>Modifica il tuo CV</h2>
-                <hr class="my-4">
-                <div class="container text-center">
+        function moodifyCV() { 
+            if(userCurriculum) {
+                content.innerHTML = `
+                <div class="container text-center w-50">
+                    <h2>Modifica il tuo CV</h2>
+                    <p>Abbiamo caricato il tuo cv dall'ultimo edit</p>
+                    <hr class="my-4">
                     <form action="insertCV.php" method="post">
-                        <input type="file" name="fileCV">
+                        <div class="form-floating">
+                            <textarea name="cv" class="form-control" placeholder="Scrivi il tuo cv" style="height: 100px">${userCurriculum}</textarea>
+                        </div>
+                        <div class="container text-center my-5">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>`;
+            } else {
+                content.innerHTML = `
+                <div class="container text-center w-50">
+                    <h2>Modifica il tuo CV</h2>
+                    <hr class="my-4">
+                    <form action="insertCV.php" method="post">
+                        <div class="form-floating">
+                            <textarea name="cv" class="form-control" placeholder="Scrivi il tuo cv" style="height: 100px"></textarea>
+                        </div>
                         <div class="container text-center my-5">
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
                     </form>
                 </div>
             `;
+            }
         }
 
-        function modifyPhoto() {
+        function manageUni() {
             content.innerHTML = `
-                <h2>Modfica la tua foto</h2>
-                <hr class="my-4">
-                <div class="mb-3">
-                    <form action="insertPhoto.php" method="post">
-                        <input type="file" name="photo">
-                        <div class="container text-center my-5">
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                        </div>
-                    </form>
-                </div>
-            `;
+            <div class = "container w-50">
+                <h2>Università</h2>
+                <p>Abbiamo caricato le università ed i relativi dipartimenti nel nostro database,
+                se non appartieni ad una di queste <a class="link-primary" href="../landingPage/index.php#contact-us">informaci</a>!</p>
+                <input class="form-control" id="demo" type="text" placeholder="Search here...">
+                <br>
+                <ul class="list-group" id="uniList">
+                    
+                </ul>
+            </div>`;
+            var list = '';
+            var ul = document.getElementById("uniList");
+
+            for(let i = 0; i < università.length; i++) {
+                nomeUni = università[i]["nome"];
+                dipartimento = università[i]["dipartimento"];
+                list += `<li id="${nomeUni} | ${dipartimento}" class="list-group-item" onclick=this.classList.contains("active") ? this.classList.add("active") : this.classList.add("active");><a href="#">${nomeUni} | ${dipartimento}</a></li>`;
+            }
+
+            ul.innerHTML = list;
+
+                $(document).ready(function(){
+                    $("#demo").on("keyup", function() {
+                        var value = $(this).val().toLowerCase();
+                        $("#uniList li").filter(function() {
+                            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                    });
+                });
+            });
         }
-
-
+        
         // switch per il menu
         var radio = 0;
         document.getElementById("sidebarCollapse").addEventListener("click", () => {

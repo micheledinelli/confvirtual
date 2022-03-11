@@ -10,7 +10,7 @@
     <?php
         session_start();
 
-        if(isset($_POST["photo"])) {
+        if(!empty($_POST["photo"])) {
             $file = $_POST["photo"];
         }
 
@@ -35,6 +35,8 @@
             $res -> execute();
 
             $_SESSION["opSuccesfull"] = 0;
+
+            header('Location: speaker_presenter.php');
         
         } catch (PDOException $e) {
             
