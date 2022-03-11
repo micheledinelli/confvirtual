@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <title>CONFVIRTUAL</title>
 </head>
 <body>
     
-    <nav class="navbar py-3 navbar-expand-lg navbar-light bg-light sticky-top">
+    <nav class="navbar py-4 navbar-expand-lg navbar-light bg-light sticky-top">
         <a class="navbar-brand ms-5" href="#">CONFVIRTUAL</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -21,7 +22,7 @@
                     <a class="nav-link" href="#">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#sme">Some cool effects</a>
+                    <a class="nav-link" href="#ourSponsors">I nostri sponsor</a>
                 </li>
             </ul>
         </div>
@@ -68,21 +69,6 @@
         ?>
 
     </nav>
-
-    <div class="container jumbotron my-5 text-center">
-        <h1 class="display-4">Hello, world!</h1>
-        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-        <hr class="my-4">
-        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
-        <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
-    </div>
-    <div class="container jumbotron my-5 text-center">
-        <h1 class="display-4">Hello, world!</h1>
-        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-        <hr class="my-4">
-        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
-        <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
-    </div>
     
     <?php
         
@@ -132,28 +118,65 @@
     <div class="counter container-fluid my-5">
         <div class="row">
             <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
-                <div class="employees">
-                    <p class="counter-count bg-light"><?php echo "{$conf}" ?></p>
-                    <p class="employee-p">Conferenze Registrate</p>
+                <div class="counter">
+                    <p class="counter-count bg-primary"><?php echo "{$conf}" ?></p>
+                    <p class="p-counter">Conferenze Registrate</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
+                <div class="counter">
+                    <p class="counter-count bg-primary"><?php echo "{$confAttive}" ?></p>
+                    <p class="p-counter">Conferenze Attive</p>
                 </div>
             </div>
 
             <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
-                <div class="customer">
-                    <p class="counter-count bg-light"><?php echo "{$confAttive}" ?></p>
-                    <p class="customer-p">Conferenze Attive</p>
-                </div>
-            </div>
-
-            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
-                <div class="design">
-                    <p class="counter-count bg-light"><?php echo "{$numUtenti}"?></p>
-                    <p class="design-p">Utenti</p>
+                <div class="counter">
+                    <p class="counter-count bg-primary"><?php echo "{$numUtenti}"?></p>
+                    <p class="p-counter">Utenti</p>
                 </div>
             </div>
         </div>
     </div>
     
+    <div class="container sponsors text-center" id="ourSponsors">
+        <div class="container jumbotron my-5 text-center">
+            <h1 class="display-4">Alcuni dei nostri sponsor</h1>
+            <p class="lead my-3">Gli sponsor di confvirtual permettono che il nostro servizio sia il migliore possibile</p>
+            <p class="lead text-small">Diventa anche tu un nostro partner!</p>
+        </div>
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/dinelli-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/brajucha-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/pinazza-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/leob-logo.png">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/bepo-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/friuj-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/sayonara-logo.png">
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="../logos/maich-logo.png">
+                </div>
+            </div>
+        </div>
+    </div>
     <!--
     <div class="container text-center">
         <img id="sme" height="200px" src="https://zindex99.com/front/assets/img/effetti-speciali.gif" alt="ciao">
@@ -162,7 +185,7 @@
 
     <div class="relative-bottom">
         <!-- style="background-color: #3f51b5" cool color to eventually use... -->
-        <footer class="text-center text-white" style="background-color: #3f51b5">
+        <footer class="text-center bg-primary text-white">
             <div class="container">
                 <section class="mt-5">
                     <div class="row text-center d-flex justify-content-center pt-5">
@@ -173,12 +196,12 @@
                         </div>
                         <div class="col-md-2">
                             <h6 class="text-uppercase font-weight-bold">
-                            <a href="#!" class="text-white">Other Projects</a>
+                                <a href="#!" class="text-white">Other projects</a>
                             </h6>
                         </div>
                         <div class="col-md-2">
                             <h6 class="text-uppercase font-weight-bold">
-                            <a href="#!" class="text-white">Products</a>
+                                <a href="sideParts/mail.php" class="text-white" id="contact-us">Contact us</a>
                             </h6>
                         </div>
                     </div>
@@ -189,7 +212,9 @@
                     <div class="row d-flex justify-content-center">
                         <div class="col-lg-8">
                             <p>
-                                Questo progetto
+                                Questo progetto è stato svolto da Brajucha Filippo, Youssef Hanna e Michele Dinelli.
+                                Riguarda l'esame di Basi di Dati del nostro corso di laurea ed è stato molto divertente.
+                                Ah giusto per la normativa vi informiamo che abbiamo un DataBase con tutti i vostri dati e password... 
                             </p>
                         </div>
                     </div>
