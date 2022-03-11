@@ -10,9 +10,15 @@
     <?php
         session_start();
         $usernameAdmin = $_SESSION['user'];
-        $nomeConferenza = $_POST['nomeConferenza'];
         $annoEdizione = $_POST['annoEdizione'];
         $acronimo = $_POST['acronimo'];
+        $titoloSessione = $_POST['titoloSessione'];
+        $dataSessione = $_POST['dataSessione'];
+        $oraInizio = $_POST['oraInizio'];
+        $oraFine = $_POST['oraFine'];
+        $linkSessione = $_POST['linkSessione'];
+        
+        
 
         echo $usernameAdmin . " "  . $annoEdizione .  " " . $nomeConferenza . " " . $acronimo;
 
@@ -23,14 +29,17 @@
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
-            $sql = 'call creaConferenzaAdmin(:lab1, :lab2, :lab3, :lab4, :lab4)';
+            $sql = 'call creaSessione(:lab1, :lab2, :lab3, :lab4, :lab5, :lab6, :lab7)';
 
             $stmt = $pdo->prepare($sql);
 
-            $stmt->bindValue(':lab1', $nomeConferenza);
-            $stmt->bindValue(':lab2', $usernameAdmin);
-            $stmt->bindValue(':lab3', $acronimo);
-            $stmt->bindValue(':lab4', $annoEdizione);
+            $stmt->bindValue(':lab1', $acronimo);
+            $stmt->bindValue(':lab2', $titoloSessione);
+            $stmt->bindValue(':lab3', $annoEdizione);
+            $stmt->bindValue(':lab4', $dataSessione);
+            $stmt->bindValue(':lab5', $oraInizio);
+            $stmt->bindValue(':lab6', $oraFine);
+            $stmt->bindValue(':lab7', $linkSessione);
 
             $stmt->execute();
 

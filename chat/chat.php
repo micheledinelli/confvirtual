@@ -36,6 +36,7 @@
             $sessionsPermitted = array();
             while($row = $res -> fetch()) {
                 $sessione = new stdClass();
+                $sessione -> codiceSessione = $row["Codice"];
                 $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
                 $sessione -> titoloSessione = $row["Titolo"];
                 $sessione -> data = $row["Data"];
@@ -95,6 +96,7 @@
                     <div class="messages-box">
                         <?php
                             foreach($sessionsPermitted as $i => $i_value) {
+                                $codiceSessione = $i_value->codiceSessione;
                                 $currentConference = $i_value->acronimoConferenza;
                                 $titoloSessione = $i_value -> titoloSessione;
                                 $data = $i_value -> data;
@@ -106,7 +108,7 @@
 
                                 echo"
                                 <div class='list-group rounded-0'>
-                                    <a id='{$titoloSessione}' class='list-group-item list-group-item-action rounded-0' onclick='changeChat(this.id)'>
+                                    <a id='{$codiceSessione}' class='list-group-item list-group-item-action rounded-0' onclick='changeChat(this.id)'>
                                         <div class='media'><img src='https://bootstrapious.com/i/snippets/sn-chat/avatar.svg' alt='user' width='50' class='rounded-circle'>
                                             <div class='media-body ml-4'>
                                                 <div class='d-flex align-items-center justify-content-between mb-1'>
@@ -125,6 +127,8 @@
                 </div>
             </div>
               
+            
+
             <!-- Chat Box-->
             <div class="col-7 px-0">
                 <div class="px-4 py-5 chat-box bg-white" id="chat-box">
@@ -166,6 +170,33 @@
 
         </div>
     </div>
+
+
+    <?php
+        function getMessages($codiceSessione){
+            try {
+                $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='root');
+                $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $pdo -> exec('SET NAMES "utf8"');
+                
+                $queryMessagesSessions = ('SELECT *
+                                FROM MESSAGGIO AS M
+                                WHERE M.ChatID = :lab1');
+
+                $res = $pdo -> prepare($queryMessagesSessions);
+                $res -> bindValue(":lab1", $codiceSessione);
+                $res -> execute();
+                while($row = $res -> fetch()){
+                    echo $row["Testo"];
+                }
+
+        }catch( PDOException $e ) {
+            echo("[ERRORE]".$e->getMessage());
+            exit();
+        }
+    }
+    ?>
+
 
     <style>
        
@@ -223,10 +254,11 @@
     var sessioniPermesse = <?php echo json_encode($sessionsPermitted); ?>;
     
     function changeChat(clickedId) {
+        /*
         var contenuto1 = "ciao ciao";
         var contentuto2 = "sono il 2";
         for(let i = 0; i < sessioniPermesse.length; i++) {
-            if(sessioniPermesse[i]["titoloSessione"] == clickedId) {
+            if(sessioniPermesse[i]["codiceSessione"] == clickedId) {
                 chatBox.innerHTML = `
                 <div class="media w-50 mb-3"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
                         <div class="media-body ml-3">
@@ -249,7 +281,10 @@
             } else {
                 chatBox.innerHTML = '<p>ciao</p>'
             }
-        }
+        }*/
+        var res = "clickedId";
+        var result ="<?php getMessages("res"); ?>";
+        document.write(result);
     }
     
 
