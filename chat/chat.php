@@ -36,6 +36,7 @@
             $sessionsPermitted = array();
             while($row = $res -> fetch()) {
                 $sessione = new stdClass();
+                $sessione -> codiceSessione = $row["Codice"];
                 $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
                 $sessione -> codiceSessione = $row["Codice"];
                 $sessione -> titoloSessione = $row["Titolo"];
@@ -107,8 +108,9 @@
                     <div class="messages-box">
                         <?php
                             foreach($sessionsPermitted as $i => $i_value) {
-                                $currentConference = $i_value -> acronimoConferenza;
-                                $codiceSessione = $i_value -> codiceSessione;
+
+                                $codiceSessione = $i_value->codiceSessione;
+                                $currentConference = $i_value->acronimoConferenza;
                                 $titoloSessione = $i_value -> titoloSessione;
                                 $data = $i_value -> data;
                                 $oraInizio = $i_value -> oraInizio;
@@ -142,6 +144,8 @@
                 </div>
             </div>
               
+            
+
             <!-- Chat Box-->
             <div class="col-7 px-0">
                 <div class="px-4 py-5 chat-box bg-white" id="chat-box">
@@ -169,6 +173,33 @@
 
         </div>
     </div>
+
+
+    <?php
+        function getMessages($codiceSessione){
+            try {
+                $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='root');
+                $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $pdo -> exec('SET NAMES "utf8"');
+                
+                $queryMessagesSessions = ('SELECT *
+                                FROM MESSAGGIO AS M
+                                WHERE M.ChatID = :lab1');
+
+                $res = $pdo -> prepare($queryMessagesSessions);
+                $res -> bindValue(":lab1", $codiceSessione);
+                $res -> execute();
+                while($row = $res -> fetch()){
+                    echo $row["Testo"];
+                }
+
+        }catch( PDOException $e ) {
+            echo("[ERRORE]".$e->getMessage());
+            exit();
+        }
+    }
+    ?>
+
 
     <style>
        
@@ -239,7 +270,7 @@
     }
     
     function changeChat(clickedId) {
-        
+      
         // Check to disable input if the session is closed
         currentChatId = clickedId;
         let currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -262,6 +293,7 @@
                 if(mittente === usernameAttuale) {
                     // Blue right
                     dynamicContent += `
+
                     <div class="media w-50 ml-auto mb-3">
                         <div class="media-body">
                             <div class="bg-primary rounded py-2 px-3 mb-2">
@@ -285,7 +317,8 @@
                     }
                 }
             }
-            
+        }
+    }        
             chatBox.innerHTML = dynamicContent;
         }
             
