@@ -51,7 +51,12 @@
                array_push($università, $uni);
             }
 
-            $queryUniAttuale = 'SELECT * FROM PRESENTER AS P WHERE P.Username = :lab1';
+            if($_SESSION['userType'] == "SPEAKER") {
+                $queryUniAttuale = 'SELECT * FROM SPEAKER AS S WHERE S.Username = :lab1';
+            } else {
+                $queryUniAttuale = 'SELECT * FROM  PRESENTER AS P WHERE P.Username = :lab1';
+            }
+            
             $res = $pdo -> prepare($queryUniAttuale);
             $res -> bindValue(":lab1", $_SESSION["user"]);
             $res -> execute();
@@ -155,7 +160,7 @@
         const università = <?php echo json_encode($università); ?>;
         const uniAttuale = <?php echo json_encode($uniAttuale); ?>;
         const dipAttuale = <?php echo json_encode($dipAttuale); ?>;
-
+        
         function insertCV() {
             content.innerHTML = `
                 <div class="container text-center w-50">

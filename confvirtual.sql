@@ -76,9 +76,10 @@ CREATE TABLE SPEAKER(
     CurriculumVitae VARCHAR(300),
     Foto BLOB,
     NomeUniversità VARCHAR(30),
+    NomeDipartimento VARCHAR(30),
     PRIMARY KEY (Username),
     FOREIGN KEY (Username) REFERENCES UTENTE(Username),
-	FOREIGN KEY(NomeUniversità) REFERENCES UNIVERSITA(NomeUniversità)
+	FOREIGN KEY(NomeUniversità,NomeDipartimento) REFERENCES UNIVERSITA(NomeUniversità, NomeDipartimento)
 ) ENGINE="INNODB";
 
 CREATE TABLE CREAZIONE(
@@ -373,12 +374,17 @@ $ DELIMITER ;
 
 # Aggiunge o modifica un'affiliazione universitaria
 DELIMITER $
-CREATE PROCEDURE AffiliazioneUni(IN NomeUni VARCHAR(30), IN NomeDip VARCHAR(30), IN UsernamePresenter VARCHAR(30))
+CREATE PROCEDURE AffiliazioneUni(IN NomeUni VARCHAR(30), IN NomeDip VARCHAR(30), IN UsernameIN VARCHAR(30))
 BEGIN
 	START TRANSACTION;
 		IF(EXISTS (SELECT * FROM UNIVERSITA AS U WHERE NomeUni = U.NomeUniversità)) THEN
-			UPDATE PRESENTER SET NomeUniversità = NomeUni WHERE Username = UsernamePresenter; 
-			UPDATE PRESENTER SET NomeDipartimento = NomeDip WHERE Username = UsernamePresenter; 
+			IF(EXISTS(SELECT * FROM PRESENTER P WHERE P.Username = UsernameIN)) THEN
+				UPDATE PRESENTER SET NomeUniversità = NomeUni WHERE UsernameIN = Username; 
+				UPDATE PRESENTER SET NomeDipartimento = NomeDip WHERE Username = UsernameIN; 
+			ELSE 
+				UPDATE SPEAKER SET NomeUniversità = NomeUni WHERE UsernameIN = Username; 
+				UPDATE SPEAKER SET NomeDipartimento = NomeDip WHERE Username = UsernameIN; 
+			END IF;
         ELSE 
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AffiliazioneUni the specified uni has not been found';
         END IF;

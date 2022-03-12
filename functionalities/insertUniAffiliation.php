@@ -29,7 +29,7 @@
         }catch(PDOException $e) {
             // Errore
             $_SESSION["error"] = 1;
-            header('Location: speaker_presenter.php');
+            //header('Location: speaker_presenter.php');
 
             print "Error!: " . $e->getMessage() . "<br/>";
             die();
