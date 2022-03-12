@@ -51,7 +51,7 @@ CREATE TABLE REGISTRAZIONE(
 CREATE TABLE UNIVERSITA(
 	NomeUniversità VARCHAR(30),
 	NomeDipartimento VARCHAR(30),
-    PRIMARY KEY(NomeUniversità)
+    PRIMARY KEY(NomeUniversità, NomeDipartimento)
 )ENGINE="INNODB";
 
 CREATE TABLE ADMIN(
@@ -62,17 +62,18 @@ CREATE TABLE ADMIN(
 
 CREATE TABLE PRESENTER(
     Username VARCHAR(30),
-    CurriculumVitae VARCHAR(30),
+    CurriculumVitae VARCHAR(300),
     Foto BLOB,
     NomeUniversità VARCHAR(30),
+    NomeDipartimento VARCHAR(30),
     PRIMARY KEY (Username),
     FOREIGN KEY (Username) REFERENCES UTENTE(Username),
-    FOREIGN KEY(NomeUniversità) REFERENCES UNIVERSITA(NomeUniversità)
+    FOREIGN KEY(NomeUniversità, NomeDipartimento) REFERENCES UNIVERSITA(NomeUniversità, NomeDipartimento)
 ) ENGINE="INNODB";
 
 CREATE TABLE SPEAKER(
     Username VARCHAR(30),
-    CurriculumVitae VARCHAR(30),
+    CurriculumVitae VARCHAR(300),
     Foto BLOB,
     NomeUniversità VARCHAR(30),
     PRIMARY KEY (Username),
@@ -365,6 +366,21 @@ BEGIN
 			INSERT INTO MESSAGGIO(UsernameMittente, Testo, Ts, ChatId) VALUES(UsernameMittente, Testo, Ts, ChatId);
         ELSE 
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on InserisiciMessaggio the specified session or user have not been found';
+        END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
+# Aggiunge o modifica un'affiliazione universitaria
+DELIMITER $
+CREATE PROCEDURE AffiliazioneUni(IN NomeUni VARCHAR(30), IN NomeDip VARCHAR(30), IN UsernamePresenter VARCHAR(30))
+BEGIN
+	START TRANSACTION;
+		IF(EXISTS (SELECT * FROM UNIVERSITA AS U WHERE NomeUni = U.NomeUniversità)) THEN
+			UPDATE PRESENTER SET NomeUniversità = NomeUni WHERE Username = UsernamePresenter; 
+			UPDATE PRESENTER SET NomeDipartimento = NomeDip WHERE Username = UsernamePresenter; 
+        ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AffiliazioneUni the specified uni has not been found';
         END IF;
     COMMIT WORK;
 END;
