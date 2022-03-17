@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
-    <link rel="stylesheet" href="/DBProject2021/css/base.css">
+    <link rel="stylesheet" href="../css/base.css">
     <title>S-P</title>
 </head>
 <body>
@@ -15,7 +15,7 @@
         if(time() > $_SESSION['expire']) {
             session_unset();
             session_destroy();
-            header('Location:/DBProject2021/landingPage/index.php');
+            header('Location:../landingPage/index.php');
         } 
         
         try{
@@ -50,6 +50,20 @@
                $uni -> dipartimento = $row["NomeDipartimento"];
                array_push($università, $uni);
             }
+
+            if($_SESSION['userType'] == "SPEAKER") {
+                $queryUniAttuale = 'SELECT * FROM SPEAKER AS S WHERE S.Username = :lab1';
+            } else {
+                $queryUniAttuale = 'SELECT * FROM  PRESENTER AS P WHERE P.Username = :lab1';
+            }
+            
+            $res = $pdo -> prepare($queryUniAttuale);
+            $res -> bindValue(":lab1", $_SESSION["user"]);
+            $res -> execute();
+            while($row = $res -> fetch()) {
+                $uniAttuale = $row["NomeUniversità"];
+                $dipAttuale = $row["NomeDipartimento"];
+             }
 
         }catch(PDOException $e) {
             // Errore
@@ -143,16 +157,19 @@
         
         const content = document.getElementById("main-content");
         const userCurriculum = <?php echo json_encode($userCurriculum); ?>;
-        const università = <?php echo json_encode($università); ?>
-
+        const università = <?php echo json_encode($università); ?>;
+        const uniAttuale = <?php echo json_encode($uniAttuale); ?>;
+        const dipAttuale = <?php echo json_encode($dipAttuale); ?>;
+        
         function insertCV() {
             content.innerHTML = `
                 <div class="container text-center w-50">
                     <h2>Inserisci il tuo CV</h2>
                     <hr class="my-4">
+                    <p id="charNum">0</p>
                     <form action="insertCV.php" method="post">
                         <div class="form-floating">
-                            <textarea name="cv" class="form-control" placeholder="Scrivi il tuo cv" style="height: 100px"></textarea>
+                            <textarea name="cv" class="form-control" placeholder="Scrivi il tuo cv" style="height: 300px;" onkeyup="countChars(this);"></textarea>
                         </div>
                         <div class="container text-center my-5">
                             <button type="submit" class="btn btn-primary">Submit</button>
@@ -196,9 +213,10 @@
                     <h2>Modifica il tuo CV</h2>
                     <p>Abbiamo caricato il tuo cv dall'ultimo edit</p>
                     <hr class="my-4">
+                    <p id="charNum"></p>
                     <form action="insertCV.php" method="post">
                         <div class="form-floating">
-                            <textarea name="cv" class="form-control" placeholder="Scrivi il tuo cv" style="height: 100px">${userCurriculum}</textarea>
+                        <textarea name="cv" class="form-control" placeholder="Scrivi il tuo cv" style="height: 300px;" onkeyup="countChars(this);">${userCurriculum}</textarea>
                         </div>
                         <div class="container text-center my-5">
                             <button type="submit" class="btn btn-primary">Submit</button>
@@ -210,9 +228,10 @@
                 <div class="container text-center w-50">
                     <h2>Modifica il tuo CV</h2>
                     <hr class="my-4">
+                    <p id="charNum">0</p>
                     <form action="insertCV.php" method="post">
                         <div class="form-floating">
-                            <textarea name="cv" class="form-control" placeholder="Scrivi il tuo cv" style="height: 100px"></textarea>
+                            <textarea name="cv" class="form-control" placeholder="Scrivi il tuo cv" style="height: 100px" onkeyup="countChars(this);"></textarea>
                         </div>
                         <div class="container text-center my-5">
                             <button type="submit" class="btn btn-primary">Submit</button>
@@ -241,7 +260,40 @@
             for(let i = 0; i < università.length; i++) {
                 nomeUni = università[i]["nome"];
                 dipartimento = università[i]["dipartimento"];
-                list += `<li id="${nomeUni} | ${dipartimento}" class="list-group-item" onclick=this.classList.contains("active") ? this.classList.add("active") : this.classList.add("active");><a href="#">${nomeUni} | ${dipartimento}</a></li>`;
+                if((uniAttuale && nomeUni === uniAttuale) && (dipAttuale && dipAttuale == dipartimento)) {
+                    attuale = ` 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-check-lg" viewBox="0 0 16 16">
+                        <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                    </svg>`
+                } else {
+                    attuale = '';
+                }
+                list += `<li id="${nomeUni} | ${dipartimento}" class="list-group-item"><a href="#" data-toggle="modal" data-target="#${nomeUni}${dipartimento}">${nomeUni} | ${dipartimento} ${attuale}</a></li>
+                    <div id="${nomeUni}${dipartimento}" class="modal fade">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Attenzione</h5>
+                                    <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Stai dichiarando di essere un membro di ${nomeUni}.<p>
+                                    <p>Puoi modificare la tua affiliazione in qualsiasi momento</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <form method="post" action="insertUniAffiliation.php">
+                                        <input type="hidden" class="form-control floating" name="uni" value=${nomeUni} autocomplete="off">
+                                        <input type="hidden" class="form-control floating" name="dip" value=${dipartimento} autocomplete="off">
+                                        <button class="btn btn-primary" type="submit">Procedi</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
             }
 
             ul.innerHTML = list;
@@ -256,6 +308,10 @@
             });
         }
         
+        function countChars(obj){
+            document.getElementById("charNum").innerHTML = obj.value.length + ' / 300';
+        }
+
         // switch per il menu
         var radio = 0;
         document.getElementById("sidebarCollapse").addEventListener("click", () => {
