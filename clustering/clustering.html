@@ -13,10 +13,10 @@
 <body>
 
     
-    <div class="container p-3 w-50">
+    <div class="container p-3">
         
         <div class="container my-2">
-            <a class="btn btn-primary" href="../admin.php" role="button">
+            <a class="btn btn-primary" href="../functionalities/admin.php" role="button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M2 13.5V7h1v6.5a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5V7h1v6.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5zm11-11V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"/>
                     <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"/>
@@ -46,12 +46,17 @@
         </div>
     </div>
 
-    <div class="container text-center my-5 w-50" id="root";>
-        
-    </div>
+    <div class="container">
+        <div class="row justify-content-around">
+            <div class="col-2">
+               <div id="stats">
 
-    <div class="container w-50" id="stats">
-        
+               </div>
+            </div>
+            <div class="col-8" id="root";>
+            
+            </div>
+        </div>
     </div>
 
     <script src="kmeans.js"></script>
@@ -60,8 +65,9 @@
 
         const statsDiv = document.getElementById("stats");
         const clusters = document.getElementById("select-clusters");
+        const rootContent = document.getElementById("root");
 
-        var stats= '';
+        var stats = '';
         var numberOfClusters = 2; // deafault
         
         document.addEventListener("change", () => {
@@ -82,20 +88,23 @@
             
             var dynamicContent = `
                 <h3>Stats</h3>
-                <hr>
-                <p class="text-left">Coordinate dei centroidi:</p>`;
+                <hr>`;
+            
+            /*dynamicContent += `<p class="text-left">Coordinate dei centroidi:</p>`;
 
-            for(let i = 0; i < stats.centroids.length; i++) {
-                centroid = stats.centroids[i];
-                centroid = centroid.map(function(each_element){
-                    return Number(each_element.toFixed(2));
+            for(let i = 0; i < stats.clusters.length; i++) {
+                centroid = stats.clusters[i].
+                centroid = centroid.map(function(elem){
+                    return Number(elem).toFixed(2);
                 });
 
                 dynamicContent += `<p class="text-left">[${centroid}]</p>`;
-            }
+            }*/
 
+            dynamicContent += `<p class="text-left text-muted">k: ${stats.k}</p>`;
             dynamicContent += `<p class="text-left text-muted">Convergenza: ${stats.converged}</p>`;
             dynamicContent += `<p class="text-left text-muted">Iterazioni: ${stats.iterations}</p>`;
+            dynamicContent += `<p class="text-left text-muted">Errore Soglia: ${stats.threshold}</p>`;
             dynamicContent += `<p class="text-left text-muted">MSE: ${stats.mse}</p>`; 
 
             statsDiv.innerHTML = dynamicContent;
