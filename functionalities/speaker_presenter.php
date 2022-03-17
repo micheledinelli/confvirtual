@@ -63,7 +63,7 @@
             while($row = $res -> fetch()) {
                 $uniAttuale = $row["NomeUniversità"];
                 $dipAttuale = $row["NomeDipartimento"];
-             }
+            }
 
         }catch(PDOException $e) {
             // Errore
