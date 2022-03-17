@@ -1,15 +1,86 @@
 const MAX_ITERATIONS = 50;
-const dataset = [[21,0,33],
-                [22,1,34],
-                [0,0,0],
-                [3,1,1],
-                [0,1,2]];
+const dataset = [
+    [21,0,33],
+    [27,1,33],
+    [22,1,34],
+    [1,1,1],
+    [3,1,1],
+    [27,1,13],
+    [31,1,18],
+    [25,0,7],
+    [8,1,2],
+    [9,0,15],
+    [0,0,12],
+    [15,1,8],
+    [1,0,22],
+    [11,1,11],
+    [1,0,31],
+];
+const K = 5;
+const THRESHOLD = 1500;
+
+/**
+ * 
+ * @param {*} visualizer 2 o 3(2D o 3D)
+ * @param K numero di cluster
+*/
+function start(visualizer, K) {
+    results = kMeansAlgorithm(dataset, K, MAX_ITERATIONS, THRESHOLD);
+    if( visualizer === 2 ) {
+        draw2d(dataset, results.centroids);
+    } else {
+        draw3d(dataset)
+    }
+
+    return results;
+}
+
+/**
+ * 
+ * @param {*} dataset 
+ * @param {*} k 
+ * @param {*} maxIterations 
+ * @param {*} threshold 
+ */
+ function kMeansAlgorithm(dataset, k, maxIterations, threshold) {
+
+    // Si inizializzano i centroidi
+    let centroids = getRandomCentroids(dataset, k);
+    let tags = assign(dataset, centroids);
+
+    let iterations = 0;
+    while(iterations < maxIterations && mse(tags) > threshold) {
+        
+        prevMse = mse(tags)
+        tags = assign(dataset, centroids);
+        centroids = relocateCentroids(dataset, tags, k);
+
+        if(mse(tags) > prevMse) { break; }
+        iterations++;
+    }
+
+    const clusters = [];
+    for (let i = 0; i < k; i++) {
+      clusters.push(tags[i].observations);
+    }
+
+    const results = {
+      clusters: clusters,
+      centroids: centroids,
+      iterations: iterations,
+      converged: iterations <= MAX_ITERATIONS,
+      mse : mse(tags)
+    };
+    
+    console.log(results);
+    return results;
+}
 
 /**
  * Genera un valore random tra min e max
  * @param {*} min 
  * @param {*} max 
- * @returns 
+ * @returns min <= rand < max
  */
 function randomBetween(min, max) {
     return Math.floor(
@@ -124,7 +195,7 @@ function clusterMean(dataset) {
             sum += dataset[j][i];
         }
 
-        means.push(sum/dataset.length);
+        means.push(Math.round(sum/dataset.length));
     }
 
     return means;
@@ -183,56 +254,142 @@ function domainTranslation(users) {
  */
  function mse(tags) {
     
-    for(let i = 0; i < tags.length; i++) {
+    // Number of object inside tags
+    var count = 0;
+
+    for(var prop in tags) {
+        if(tags.hasOwnProperty(prop))
+            ++count;
+    }
+
+    for(let i = 0; i < count; i++) {
         let sum = 0;
         let curCluster = tags[i];
+        let curCentroid = tags[i].centroid;
         
         if(curCluster.observations.length > 0) {
             for(let j = 0; j < curCluster.observations.length; j++) {
-                sum += getDistance(tags.centroid, curCluster.observations[j]);
+                sum += getDistance(curCentroid, curCluster.observations[j]);
             }
         }
     }
 
-    return Math.round(Math.pow(sum, 2));
+    console.log(Math.pow(sum, 2))
+    return Math.pow(sum, 2)
 }
 
-/**
- * 
- * @param {*} dataset 
- * @param {*} k 
- * @param {*} maxIterations 
- * @param {*} threshold 
- */
-function kMeansAlgorithm(dataset, k, maxIterations, threshold) {
+function draw3d(dataset) {
 
-    debugger;
-    // Si inizializzano i centroidi
-    let centroids = getRandomCentroids(dataset, k);
-    let tags = assign(dataset, centroids);
+    var x = [];
+    var y = [];
+    var z = [];
 
-    let iterations = 0;
-    while(iterations < maxIterations && mse(tags) > threshold) {
-        
-        tags = assign(dataset, centroids);
-        centroids = relocateCentroids(dataset, tags, k);
-
-        iterations++;
+    for(let i = 0; i < dataset.length; i++) {
+        x[i] = dataset[i][0];
+        y[i] = dataset[i][1];
+        z[i] = dataset[i][2];
     }
 
-    const clusters = [];
-    for (let i = 0; i < k; i++) {
-      clusters.push(tags[i].observations);
-    }
+    var data = [{
+        x: x,
+        y: y,
+        z: z,
+        mode: 'markers',
+        type: 'scatter3d',
+        marker: {
+          color: 'red',
+          size: 3
+        }
+    },{
+        alphahull: 7,
+        opacity: 0.1,
+        type: 'mesh3d',
+        x: x,
+        y: y,
+        z: z
+    }];
 
-    const results = {
-      clusters: clusters,
-      centroids: centroids,
-      iterations: iterations,
-      converged: iterations <= MAX_ITERATIONS,
-      mse : mse(tags)
+    var layout = {
+        autosize: true,
+        height: 300,
+        scene: {
+            aspectratio: {
+                x: 5,
+                y: 5,
+                z: 5
+            },
+            camera: {
+                center: {
+                    x: 0,
+                    y: 0,
+                    z: 0
+                },
+                eye: {
+                    x: 5.25,
+                    y: 2.25,
+                    z: 2.25
+                },
+                up: {
+                    x: 0,
+                    y: 0,
+                    z: 1
+                }
+            },
+            xaxis: {
+                type: 'linear',
+                zeroline: true
+            },
+            yaxis: {
+                type: 'linear',
+                zeroline: true
+            },
+            zaxis: {
+                type: 'linear',
+                zeroline: true
+            }
+        },
+        title: '3d point clustering',
+        width: 477
     };
-    console.log(results);
+
+    Plotly.newPlot('root', data, layout);
 }
 
-kMeansAlgorithm(dataset, 4, 50, 1500);
+function draw2d(dataset, centroids) {
+
+    var x = [];
+    var z = [];
+
+    for(let i = 0; i < dataset.length; i++) {
+        x[i] = dataset[i][0];
+        z[i] = dataset[i][2];
+    }
+
+    var xCentroids = [];
+    var yCentroids = [];
+
+    for(let i = 0; i < centroids.length; i++) {
+        xCentroids[i] = centroids[i][0];
+        yCentroids[i] = centroids[i][2];
+    }
+    
+    var trace1 = {
+        x: x,
+        y: z,
+        mode: 'markers',
+        type: 'scatter',
+        name: 'obs'
+      };
+      
+      var trace2 = {
+        x: xCentroids,
+        y: yCentroids,
+        mode: 'markers',
+        type: 'scatter',
+        name: 'centroidi'
+      };
+      
+      var data = [trace1, trace2];
+      
+      Plotly.newPlot('root', data);
+}
