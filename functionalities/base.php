@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
     <link rel="stylesheet" href="/DBProject2021/css/form.css">
     <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <title>Base</title>
 </head>
 <body>
@@ -89,20 +90,42 @@
             array_push($presentationsPermitted, $presentation);
         }
 
-        $query = ('SELECT * FROM FAVORITE AS F WHERE Username = :lab1');
+        $query = ('SELECT * 
+                FROM FAVORITE AS F, P_ARTICOLO AS PA, PRESENTAZIONE AS P 
+                WHERE Username = :lab1 AND F.CodicePresentazione = PA.CodicePresentazione AND PA.CodicePresentazione = P.Codice');
+        
         $res = $pdo -> prepare($query);
         $res -> bindValue(":lab1", $_SESSION['user']);
         $res -> execute();
         
-        $favorites = array();
+        $favoritesArticoli = array();
         while($row = $res -> fetch()) {
-            $favorite = new stdClass();
-            $favorite -> codicePresentazione = $row["Codice"];
-            $favorite -> oraInizio = $row["OraInizio"];
-            $favorite -> oraFine = $row["OraFine"];
-            $favorite -> tipologia = $row["Tipologia"];
-            $favorite -> titolo = $row["Titolo"];
-            array_push($favorites, $favorite);
+            $favoriteArticolo = new stdClass();
+            $favoriteArticolo -> codicePresentazione = $row["CodicePresentazione"];
+            $favoriteArticolo -> oraInizio = $row["OraInizio"];
+            $favoriteArticolo -> oraFine = $row["OraFine"];
+            $favoriteArticolo -> tipologia = $row["Tipologia"];
+            $favoriteArticolo -> titolo = $row["Titolo"];
+            array_push($favoritesArticoli, $favoriteArticolo);
+        }
+
+        $query = ('SELECT * 
+                FROM FAVORITE AS F, P_TUTORIAL AS PT, PRESENTAZIONE AS P 
+                WHERE Username = :lab1 AND F.CodicePresentazione = PT.CodicePresentazione AND PT.CodicePresentazione = P.Codice');
+        
+        $res = $pdo -> prepare($query);
+        $res -> bindValue(":lab1", $_SESSION['user']);
+        $res -> execute();
+
+        $favoritesTutorial = array();
+        while($row = $res -> fetch()) {
+            $favoriteTutorial = new stdClass();
+            $favoriteTutorial -> codicePresentazione = $row["CodicePresentazione"];
+            $favoriteTutorial -> oraInizio = $row["OraInizio"];
+            $favoriteTutorial -> oraFine = $row["OraFine"];
+            $favoriteTutorial -> tipologia = $row["Tipologia"];
+            $favoriteTutorial -> titolo = $row["Titolo"];
+            array_push($favoritesTutorial, $favoriteTutorial);
         }
 
     ?>
@@ -127,7 +150,7 @@
                 <li> <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Favorites</a>
                     <ul class="collapse list-unstyled" id="pageSubmenu">
                         <li> <a href="#">New favorite</a> </li>
-                        <li> <a href="#">My favorites</a> </li>
+                        <li> <a href="#" onclick="showFavorites()">My favorites</a> </li>
                     </ul>
                 </li>
                 
@@ -222,9 +245,10 @@
         var conferenze = <?php echo json_encode($conferenze); ?>;
         var sessioni = <?php echo json_encode($sessioni); ?>;
         var sessioniPermesse = <?php echo json_encode($sessionsPermitted); ?>;
-        var favorites = <?php echo json_encode($favorites); ?>;
-        
-        console.log(favorites);
+        var favoritesArticoli = <?php echo json_encode($favoritesArticoli); ?>;
+        var favoritesArticoli = <?php echo json_encode($favoritesArticoli); ?>;
+        var favoritesTutorial = <?php echo json_encode($favoritesTutorial); ?>;
+
         function visualizeConferences() {
             content.textContent = '';
             let div = document.createElement('div');
@@ -433,6 +457,126 @@
             <p>I messaggi possono essere inseriti solo nell'orario indicato</p>`;
 
             content.innerHTML = dynamicContent;
+        }
+
+        function showFavorites() {
+            content.innerHTML = '';
+            var dynamicContent = `<p class="lead">Le tue presentazioni preferite</p><hr>
+                                    <div class="container w-50">`;
+            const ol = document.createElement("ol");
+            ol.classList.add("list-group");
+            ol.classList.add("list-group-numbered");
+
+            if(favoritesArticoli.length === 0 && favoritesTutorial.length === 0) {
+                dynamicContent += `<p>Lista vuota</p></div>`;
+            }
+
+            for(let i = 0; i < favoritesArticoli.length; i++) {
+                var title = favoritesArticoli[i]["titolo"];
+                var oraInizio = favoritesArticoli[i]["oraInizio"];
+                var oraFine = favoritesArticoli[i]["oraFine"];
+                var tipologia = favoritesArticoli[i]["tipologia"];
+                var codice =  favoritesArticoli[i]["codicePresentazione"];
+
+                // Si eliminano gli spazi per problemi se assegnato come id di un elemento
+                var titleCompact = title.split(' ').join('');
+
+                dynamicContent += ` 
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <span><b>${title}</b></span>
+                        <p class="small">${tipologia}</p>
+                    </div>  
+                    <span><button class="btn btn-primary" data-toggle="modal" data-target="#${titleCompact}"><i class="bi bi-star-fill"></i></button></span>
+                </li>
+                <div id="${titleCompact}" class="modal fade">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Attenzione</h5>
+                                <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Sei sicuro di voler rimuovere <b>${title}</b> dai tuoi preferiti? 
+                            </div>
+                            <div class="modal-footer">
+                                <form action="removeFavorite.php" method="post" class="container">
+                                    <div class="mb-3 form-group floating">
+                                        <input type="hidden" class="form-control floating" name="username" value=${userName} readonly>
+                                    </div>
+                                    <div class="mb-3 form-group floating">
+                                        <input type="hidden" class="form-control floating" name="codice" value=${codice} autocomplete="off">
+                                    </div>
+                                    <div class="container text-center">
+                                        <button type="submit" class="btn btn-danger">Rimuovi</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </form>                                    
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            for(let i = 0; i < favoritesTutorial.length; i++) {
+                var title = favoritesTutorial[i]["titolo"];
+                var oraInizio = favoritesTutorial[i]["oraInizio"];
+                var oraFine = favoritesTutorial[i]["oraFine"];
+                var tipologia = favoritesTutorial[i]["tipologia"];
+                var codice =  favoritesTutorial[i]["codicePresentazione"];
+
+                // Si eliminano gli spazi per problemi se assegnato come id di un elemento
+                var titleCompact = title.split(' ').join('');
+
+                dynamicContent += ` 
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <span><b>${title}</b></span>
+                        <p class="small">${tipologia}</p>
+                    </div>  
+                    <span><button class="btn btn-primary" data-toggle="modal" data-target="#${titleCompact}"><i class="bi bi-star-fill"></i></button></span>
+                </li>
+                <div id="${titleCompact}" class="modal fade">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Attenzione</h5>
+                                <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Sei sicuro di voler rimuovere <b>${title}</b> dai tuoi preferiti? 
+                            </div>
+                            <div class="modal-footer">
+                                <form action="removeFavorite.php" method="post" class="container">
+                                    <div class="mb-3 form-group floating">
+                                        <input type="hidden" class="form-control floating" name="username" value=${userName} readonly>
+                                    </div>
+                                    <div class="mb-3 form-group floating">
+                                        <input type="hidden" class="form-control floating" name="codice" value=${codice} autocomplete="off">
+                                    </div>    
+                                    <div class="container text-center">
+                                        <button type="submit" class="btn btn-danger">Remove</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </form>                                    
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            
+            dynamicContent += `</div>`;
+            ol.innerHTML = dynamicContent;
+            content.append(ol);
+            
         }
 
         // switch per il menu

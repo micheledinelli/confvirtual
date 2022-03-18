@@ -24,6 +24,7 @@
             $res -> bindValue(":lab3", $_SESSION["user"]);
             $res -> execute();
            
+            $_SESSION['opSuccesfull'] = 1;
             header('Location: speaker_presenter.php');
 
         }catch(PDOException $e) {
