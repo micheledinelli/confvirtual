@@ -25,6 +25,7 @@
         $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo -> exec('SET NAMES "utf8"');
 
+        // SESSIONS
         $query = ('SELECT * FROM CONFERENZA WHERE Svolgimento = "ATTIVA"');
 
         $res = $pdo -> prepare($query);
@@ -47,17 +48,21 @@
 
         while($row = $res -> fetch()) {
             $sessione = new stdClass();
+            $sessione -> codice = $row["Codice"];
             $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
             $sessione -> titoloSessione = $row["Titolo"];
             $sessione -> numPresentazioni = $row["NumeroPresentazioni"];
+            $sessione -> oraInizio = $row["OraInizio"];
+            $sessione -> oraFine = $row["OraFine"];
+            $sessione -> data = $row["Data"];
             array_push($sessioni, $sessione);
         }
 
-        $queryMessages = ('SELECT *
+        $querySessionsPermitted = ('SELECT *
                             FROM REGISTRAZIONE AS R, SESSIONE AS S
                             WHERE R.AcronimoConferenza = S.AcronimoConferenza AND Username = :lab1');
         
-        $res = $pdo -> prepare($queryMessages);
+        $res = $pdo -> prepare($querySessionsPermitted);
         $res -> bindValue(":lab1", $_SESSION['user']);
         $res -> execute();
 
@@ -72,24 +77,49 @@
             array_push($sessionsPermitted, $sessione);
         }
 
-        // Presentazioni a cui si ha accesso
-        $query = ('SELECT * FROM REGISTRAZIONE AS R, SESSIONE AS S, PRESENTAZIONE AS P
-                WHERE R.AcronimoConferenza = S.AcronimoConferenza AND Username = "mic" AND P.CodiceSessione = S.Codice');
-        
-        $res = $pdo -> prepare($query);
-        $res -> bindValue(":lab1", $_SESSION['user']);
+        // PRESENTATIONS
+
+        // Considerare l'operazione UNION ma si perderebbe specificità
+        // alcuni campi non sono comuni nei tutorial e negli articoli
+        // e.g abstract...
+        $queryPresArticoli = 'SELECT * 
+                            FROM PRESENTAZIONE AS P, P_ARTICOLO AS PA
+                            WHERE P.Codice = PA.CodicePresentazione;';
+        $res = $pdo -> prepare($queryPresArticoli);
         $res -> execute();
-        $presentationsPermitted = array();
+
+        $articles = array();
         while($row = $res -> fetch()) {
-            $presentation = new stdClass();
-            $presentation -> codicePresentazione = $row["Codice"];
-            $favorite -> oraInizio = $row["OraInizio"];
-            $favorite -> oraFine = $row["OraFine"];
-            $favorite -> tipologia = $row["Tipologia"];
-            $favorite -> titolo = $row["Titolo"];
-            array_push($presentationsPermitted, $presentation);
+            $article = new stdClass();
+            $article -> codicePresentazione = $row["CodicePresentazione"];
+            $article -> oraInizio = $row["OraInizio"];
+            $article -> oraFine = $row["OraFine"];
+            $article -> tipologia = $row["Tipologia"];
+            $article -> titolo = $row["Titolo"];
+            $article -> presenter = $row["UsernamePresenter"];
+            $article -> stato = $row["StatoSvolgimento"];
+            array_push($articles, $article);
         }
 
+        $queryPresTutorial = 'SELECT * 
+                            FROM PRESENTAZIONE AS P, P_TUTORIAL AS PT
+                            WHERE P.Codice = PT.CodicePresentazione;
+                            ';
+        $res = $pdo -> prepare($queryPresTutorial);
+        $res -> execute();
+
+        $tutorials = array();
+        while($row = $res -> fetch()) {
+            $tutorial = new stdClass();
+            $tutorial -> codicePresentazione = $row["CodicePresentazione"];
+            $tutorial -> oraInizio = $row["OraInizio"];
+            $tutorial -> oraFine = $row["OraFine"];
+            $tutorial -> tipologia = $row["Tipologia"];
+            $tutorial -> titolo = $row["Titolo"];
+            array_push($tutorials, $tutorial);
+        }
+
+        // FAVORITES
         $query = ('SELECT * 
                 FROM FAVORITE AS F, P_ARTICOLO AS PA, PRESENTAZIONE AS P 
                 WHERE Username = :lab1 AND F.CodicePresentazione = PA.CodicePresentazione AND PA.CodicePresentazione = P.Codice');
@@ -149,7 +179,7 @@
                 <li> <a href="/DBProject2021/chat/chat.php" onclick="">Visualizza chat di sessione</a> </li>
                 <li> <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Favorites</a>
                     <ul class="collapse list-unstyled" id="pageSubmenu">
-                        <li> <a href="#">New favorite</a> </li>
+                        <li> <a href="#" onclick="showPresentations()">Add favorite</a> </li>
                         <li> <a href="#" onclick="showFavorites()">My favorites</a> </li>
                     </ul>
                 </li>
@@ -241,11 +271,14 @@
         const content = document.getElementById("main-content");
         const userName = <?php echo json_encode($_SESSION["user"]); ?>
         
-        // Array di conferenze e sessioni presi tradotti da php
         var conferenze = <?php echo json_encode($conferenze); ?>;
+
         var sessioni = <?php echo json_encode($sessioni); ?>;
         var sessioniPermesse = <?php echo json_encode($sessionsPermitted); ?>;
-        var favoritesArticoli = <?php echo json_encode($favoritesArticoli); ?>;
+
+        var articles = <?php echo json_encode($articles); ?>;
+        var tutorials = <?php echo json_encode($tutorials); ?>;
+
         var favoritesArticoli = <?php echo json_encode($favoritesArticoli); ?>;
         var favoritesTutorial = <?php echo json_encode($favoritesTutorial); ?>;
 
@@ -335,74 +368,252 @@
         }
 
         function visualizeSessions() {
-            
             content.textContent = '';
-            var dynamicContent = `                
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Conferenza</th>
-                        <th scope="col">Titolo Sessione</th>
-                        <th scope="col">Numero di Presentazioni</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-            
-            dynamicPresentations = [];
-            for(let i = 0; i < sessioni.length; i++) {
-                dynPres = `<table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th scope="col">Conferenza</th>
-                        <th scope="col">Titolo Sessione</th>
-                        <th scope="col">Numero di Presentazioni</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-                dynPres += `<tr><td>sie he</td><td>ciao</td><td>ciao</td></tr>`
-                dynPres += `</tbody></table>`;
-                dynamicPresentations[i] = dynPres; 
-            }
+            var dynamicContent = '';
+            dynamicContent = `
+            <div class="container text-center">
+            <p>Sessioni della conferenza<p> 
+            <p class="small">Clicca sul titolo per visualizzare le presentazioni di una sessione</p>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Acronimo conferenza</th>
+                            <th scope="col">Titolo sessione</th>
+                            <th scope="col">Data</th>
+                            <th scope="col">Ora inizio</th>
+                            <th scope="col">Ora Fine</th>
+                            <th scope="col">Numero presentazioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>` ;
             
             for(let i = 0; i < sessioni.length; i++) {
+                codice = sessioni[i]["codice"];
                 acr = sessioni[i]["acronimoConferenza"];
                 titleSession = sessioni[i]["titoloSessione"];
                 numPresentazioni = sessioni[i]["numPresentazioni"];
+                oraFine = sessioni[i]["oraFine"];
+                oraInizio = sessioni[i]["oraInizio"];
+                data = sessioni[i]["data"];
+
                 dynamicContent += `
                 <tr>
-                    <th scope="row">${i+1}</th>                    
                     <td>${acr}</td>
-                    <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#${acr}${titleSession}">${titleSession}</button></td> 
-                    </td>
+                    <td><button type="button" id="${codice}" class="btn btn-primary" onclick="showPresentations(this.id)">${titleSession}</button></td> 
+                    <td>${data}</td>
+                    <td>${oraInizio}</td>
+                    <td>${oraFine}</td>
                     <td>${numPresentazioni}</td>
-                    
-                    <div id="${acr}${titleSession}" class="modal fade">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Attenzione</h5>
-                                    <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                ${acr}${titleSession}
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </tr>`;
             }
             
             dynamicContent += `</tbody></table>`;
             content.innerHTML = dynamicContent;
  
+        }
+
+        function showPresentations(id) {
+
+            content.textContent = '';
+            var dynamicContent = '';
+
+            // Se l'id (il codice della presentazione) 
+            // viene specificato si mostrano solo le presentazioni di una data sessione
+            // altrimenti si mostrano tutte
+            if(!id) {
+                // Id non specificato 
+                // Qui è possibile aggiungere una presentazione alla lista delle preferite
+
+                if(tutorials.length > 0) {
+                    dynamicContent = `
+                    <div class="container text-center">
+                    <p>Tutorial<p> 
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Codice</th>
+                                    <th scope="col">Titolo</th>
+                                    <th scope="col">Ora inizio</th>
+                                    <th scope="col">Ora Fine</th>
+                                    <th scope="col">Favorite</th>
+                                </tr>
+                            </thead>
+                            <tbody> ` ;
+                    
+                    for(let i = 0; i < tutorials.length; i++) {
+                        codicePresentazione = tutorials[i]["codicePresentazione"];
+                        oraInizio = tutorials[i]["oraInizio"];
+                        oraFine = tutorials[i]["oraFine"];
+                        titolo = tutorials[i]["titolo"];
+                        
+                        var abilitato = "";
+                        var btnColor = "btn-primary";
+                        for(let i = 0; i < favoritesTutorial.length; i++) {
+                            if(favoritesTutorial[i]["codicePresentazione"] === codicePresentazione) {
+                                abilitato = "disabled";
+                                btnColor = "btn-success";
+                            }
+                        }
+
+                        dynamicContent += `
+                        <tr>
+                            <td>${codicePresentazione}</td>
+                            <td>${titolo}</td>
+                            <td>${oraInizio}</td>
+                            <td>${oraFine}</td>
+                            <td>
+                                <form action="manageFavorites.php" method="post">
+                                    <input type="hidden" name="username" value="${userName}">
+                                    <input type="hidden" name="codice" value="${codicePresentazione}">
+                                    <input type="hidden" name="manageOpt" value="true">
+                                    <button type="submit" ${abilitato} class="btn ${btnColor}"><i class="bi bi-star"></i></button>
+                                </form>
+                            </td>
+                        </tr>`;
+                        
+                        
+                    }
+                    
+                    dynamicContent += `</tbody></table>`;
+                }
+                
+                if(articles.length > 0) {
+                    dynamicContent += `
+                    <div class="container text-center">
+                    <p>Articoli<p> 
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Codice</th>
+                                    <th scope="col">Titolo</th>
+                                    <th scope="col">Ora inizio</th>
+                                    <th scope="col">Ora Fine</th>
+                                    <th scope="col">Presenter</th>
+                                    <th scope="col">Stato</th>
+                                    <th scope="col">Favorite</th>
+                                </tr>
+                            </thead>
+                            <tbody> ` ;
+                    
+                    for(let i = 0; i < articles.length; i++) {
+                        codicePresentazione = articles[i]["codicePresentazione"];
+                        oraInizio = articles[i]["oraInizio"];
+                        oraFine = articles[i]["oraFine"];
+                        titolo = articles[i]["titolo"];
+                        stato = articles[i]["stato"];
+                        presenter = articles[i]["usernamePresenter"];
+                        
+                        var abilitato = "";
+                        var btnColor = "btn-primary";
+                        for(let i = 0; i < favoritesArticoli.length; i++) {
+                            if(favoritesArticoli[i]["codicePresentazione"] === codicePresentazione) {
+                                abilitato = "disabled";
+                                btnColor = "btn-success";
+                            }
+                        }
+
+                        dynamicContent += `
+                        <tr>
+                            <td>${codicePresentazione}</td>
+                            <td>${titolo}</td>
+                            <td>${oraInizio}</td>
+                            <td>${oraFine}</td>
+                            <td>${presenter}</td>
+                            <td>${stato}</td>
+                            <td>
+                                <form action="manageFavorites.php" method="post">
+                                    <input type="hidden" name="username" value="${userName}">
+                                    <input type="hidden" name="codice" value="${codicePresentazione}">
+                                    <input type="hidden" name="manageOpt" value="true">
+                                    <button type="submit" ${abilitato} class="btn ${btnColor}"><i class="bi bi-star"></i></button>
+                                </form>
+                            </td>
+                        </tr>`;
+                    }
+                    
+                    dynamicContent += `</tbody></table>`;
+                    content.innerHTML = dynamicContent;
+                }
+
+            } else {
+                // Id specificato
+                if(tutorials.length !== 0) {
+                    dynamicContent = `
+                    <div class="container text-center">
+                    <p>Tutorial<p> 
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Codice</th>
+                                    <th scope="col">Titolo</th>
+                                    <th scope="col">Data</th>
+                                    <th scope="col">Ora inizio</th>
+                                    <th scope="col">Ora Fine</th>
+                                </tr>
+                            </thead>
+                            <tbody> ` ;
+                    
+                    for(let i = 0; i < tutorials.length; i++) {
+                        codicePresentazione = tutorials[i]["codicePresentazione"];
+                        oraInizio = tutorials[i]["oraInizio"];
+                        oraFine = tutorials[i]["oraFine"];
+                        titolo = tutorials[i]["titolo"];
+                        
+                        if(codicePresentazione === id) {
+                            dynamicContent += `
+                            <tr>
+                                <td>${codicePresentazione}</td>
+                                <td>${titolo}</td>
+                                <td>${data}</td>
+                                <td>${oraInizio}</td>
+                                <td>${oraFine}</td>
+                            </tr>`;
+                        }
+                    }
+                    dynamicContent += `</tbody></table>`;
+                }
+
+                if(articles.length > 0) {
+                    dynamicContent += `
+                    <div class="container text-center">
+                    <p>Articoli<p> 
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Codice</th>
+                                    <th scope="col">Titolo</th>
+                                    <th scope="col">Ora inizio</th>
+                                    <th scope="col">Ora Fine</th>
+                                    <th scope="col">Presenter</th>
+                                    <th scope="col">Stato</th>
+                                </tr>
+                            </thead>
+                            <tbody> ` ;
+                    
+                    for(let i = 0; i < articles.length; i++) {
+                        codicePresentazione = articles[i]["codicePresentazione"];
+                        oraInizio = articles[i]["oraInizio"];
+                        oraFine = articles[i]["oraFine"];
+                        titolo = articles[i]["titolo"];
+                        stato = articles[i]["stato"];
+                        presenter = articles[i]["usernamePresenter"];
+                        if(codicePresentazione === id) {
+                            dynamicContent += `
+                            <tr>
+                                <td>${codicePresentazione}</td>
+                                <td>${titolo}</td>
+                                <td>${oraInizio}</td>
+                                <td>${oraFine}</td>
+                                <td>${presenter}</td>
+                                <td>${stato}</td>
+                            </tr>`;
+                        }
+                    }
+                    
+                    dynamicContent += `</tbody></table>`;
+                }
+                content.innerHTML = dynamicContent;
+            }
         }
 
         function insertMessage() {
@@ -483,11 +694,10 @@
 
                 dynamicContent += ` 
                 <li class="list-group-item d-flex justify-content-between align-items-start">
-                    <div class="ms-2 me-auto">
-                        <span><b>${title}</b></span>
-                        <p class="small">${tipologia}</p>
-                    </div>  
-                    <span><button class="btn btn-primary" data-toggle="modal" data-target="#${titleCompact}"><i class="bi bi-star-fill"></i></button></span>
+                    <div class="container d-flex justify-content-between" >
+                        <span>${title}</span>
+                        <span><button class="btn btn-primary" data-toggle="modal" data-target="#${titleCompact}"><i class="bi bi-star-fill"></i></button></span>
+                    </div>
                 </li>
                 <div id="${titleCompact}" class="modal fade">
                     <div class="modal-dialog modal-dialog-centered">
@@ -504,12 +714,15 @@
                                 Sei sicuro di voler rimuovere <b>${title}</b> dai tuoi preferiti? 
                             </div>
                             <div class="modal-footer">
-                                <form action="removeFavorite.php" method="post" class="container">
+                                <form action="manageFavorites.php" method="post" class="container">
                                     <div class="mb-3 form-group floating">
                                         <input type="hidden" class="form-control floating" name="username" value=${userName} readonly>
                                     </div>
                                     <div class="mb-3 form-group floating">
                                         <input type="hidden" class="form-control floating" name="codice" value=${codice} autocomplete="off">
+                                    </div>
+                                    <div class="mb-3 form-group floating">
+                                        <input type="hidden" class="form-control floating" name="manageOpt" value="false" autocomplete="off">
                                     </div>
                                     <div class="container text-center">
                                         <button type="submit" class="btn btn-danger">Rimuovi</button>
@@ -534,11 +747,10 @@
 
                 dynamicContent += ` 
                 <li class="list-group-item d-flex justify-content-between align-items-start">
-                    <div class="ms-2 me-auto">
-                        <span><b>${title}</b></span>
-                        <p class="small">${tipologia}</p>
+                    <div class="container d-flex justify-content-between">
+                        <span>${title}</span>
+                        <span><button class="btn btn-primary" data-toggle="modal" data-target="#${titleCompact}"><i class="bi bi-star-fill"></i></button></span>
                     </div>  
-                    <span><button class="btn btn-primary" data-toggle="modal" data-target="#${titleCompact}"><i class="bi bi-star-fill"></i></button></span>
                 </li>
                 <div id="${titleCompact}" class="modal fade">
                     <div class="modal-dialog modal-dialog-centered">
@@ -555,7 +767,7 @@
                                 Sei sicuro di voler rimuovere <b>${title}</b> dai tuoi preferiti? 
                             </div>
                             <div class="modal-footer">
-                                <form action="removeFavorite.php" method="post" class="container">
+                                <form action="manageFavorites.php" method="post" class="container">
                                     <div class="mb-3 form-group floating">
                                         <input type="hidden" class="form-control floating" name="username" value=${userName} readonly>
                                     </div>
