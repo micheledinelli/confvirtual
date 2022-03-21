@@ -241,7 +241,7 @@
     function changeChat(clickedId) {
         
         // Check to disable input if the session is closed
-        currentChatId = clickedId;
+        /*currentChatId = clickedId;
         let currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
         currentDate = currentDate.slice(0,10);
         
@@ -249,7 +249,7 @@
             sendInput.readOnly = true;
         } else {
             sendInput.readOnly = false;
-        }
+        }*/
 
         var dynamicContent = '';
         for(let i = 0; i < messaggiSessioniPermesse[clickedId].length; i++) {
@@ -289,25 +289,25 @@
             chatBox.innerHTML = dynamicContent;
         }
             
-    sendBtn.addEventListener("click", function(){
+        sendBtn.addEventListener("click", function(){
 
-        let date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            let date = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-        if(sendInput.value !== '') {
-            const newMessage = `
-            <div class="media w-50 ml-auto mb-3">
-                <div class="media-body">
-                    <div class="bg-primary rounded py-2 px-3 mb-2">
-                        <p class="text-small mb-0 text-white">${sendInput.value}</p>
+            if(sendInput.value !== '') {
+                const newMessage = `
+                <div class="media w-50 ml-auto mb-3">
+                    <div class="media-body">
+                        <div class="bg-primary rounded py-2 px-3 mb-2">
+                            <p class="text-small mb-0 text-white">${sendInput.value}</p>
+                        </div>
+                        <p class="small text-muted">${date}</p>
                     </div>
-                    <p class="small text-muted">${date}</p>
-                </div>
-            </div>`;
-            
-            chatBox.insertAdjacentHTML('beforeend', newMessage);
-            chatIdInput.value = getCurrentChatId();
-        }  
-    });
+                </div>`;
+                
+                chatBox.insertAdjacentHTML('beforeend', newMessage);
+                chatIdInput.value = getCurrentChatId();
+            }  
+        });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
