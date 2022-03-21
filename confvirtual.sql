@@ -181,7 +181,7 @@ CREATE TABLE RISORSA(
     Link VARCHAR(50),
     Descrizione VARCHAR(50),
     CodiceTutorial INT,
-    PRIMARY KEY(UsernameSpeaker),
+    PRIMARY KEY(UsernameSpeaker, CodiceTutorial, Link),
     FOREIGN KEY(UsernameSpeaker) REFERENCES SPEAKER(Username),
     FOREIGN KEY(CodiceTutorial) REFERENCES P_TUTORIAL(CodicePresentazione)
 )ENGINE="INNODB";
@@ -407,6 +407,22 @@ BEGIN
 				INSERT INTO SPEAKER(Username) VALUES(username);
             END IF;
 		END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
+# Aggiunge una relazione speaker tutorial controllando
+# che lo username appartenga ad uno speaker e che il 
+# tutorial esista
+DELIMITER $
+CREATE PROCEDURE AggiungiSpeakerTutorialRel(IN UsernameSpeaker VARCHAR(30), IN CodiceTutorial INT, IN Link VARCHAR(50), IN Descrizione VARCHAR(50))
+BEGIN
+	START TRANSACTION;
+		IF(EXISTS(SELECT * FROM SPEAKER AS S WHERE UsernameSpeaker = S.Username) AND EXISTS(SELECT * FROM P_TUTORIAL WHERE CodicePresentazione = CodiceTutorial)) THEN
+            INSERT INTO RISORSA(UsernameSpeaker, Link, Descrizione, CodiceTutorial) VALUES(UsernameSpeaker, Link, Descrizione, CodiceTutorial);
+		ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AggiungiSpeakerTutorialRel the specified speaker (or tutorial) has not been found';
+        END IF;
     COMMIT WORK;
 END;
 $ DELIMITER ;
