@@ -38,7 +38,7 @@
             array_push($conferenze, $conferenza);
         }
 
-        //creating quey for sessions
+        //creating query for sessions
         $querySessions = ('SELECT * FROM SESSIONE');
         
         $res = $pdo -> prepare($querySessions);
@@ -53,6 +53,66 @@
             $sessione -> numPresentazioni = $row["NumeroPresentazioni"];
             array_push($sessioni, $sessione);
         }
+
+        //creating query for tutorials
+        $queryTutorials = ('SELECT * FROM P_TUTORIAL AS T, PRESENTAZIONE AS P WHERE T.CodicePresentazione = P.Codice');
+
+        $res = $pdo -> prepare($queryTutorials);
+        $res -> execute();
+        $tutorials = array();
+
+        while($row = $res -> fetch()) {
+            $tutorial = new stdClass();
+
+            $tutorial -> codicePresentazione = $row["CodicePresentazione"];
+            $tutorial -> titolo = $row["Titolo"];
+            $tutorial -> oraInizio = $row["OraInizio"];
+            $tutorial -> oraFine = $row["OraFine"];
+            
+            array_push($tutorials, $tutorial);
+        }
+
+        //creating query for articoli
+        $queryArticoli = ('SELECT * FROM P_ARTICOLO AS A, PRESENTAZIONE AS P WHERE A.CodicePresentazione = P.Codice AND A.UsernamePresenter IS NULL');
+
+        $res = $pdo -> prepare($queryArticoli);
+        $res -> execute();
+        $articoli = array();
+
+        while($row = $res -> fetch()) {
+            $articolo = new stdClass();
+
+            $articolo -> codicePresentazione = $row["CodicePresentazione"];
+            $articolo -> titolo = $row["Titolo"];
+            $articolo -> oraInizio = $row["OraInizio"];
+            $articolo -> oraFine = $row["OraFine"];
+            
+            array_push($articoli, $articolo);
+        }
+
+        //creating query for speakers
+        $querySpeakers = ('SELECT * FROM SPEAKER');
+
+        $res = $pdo -> prepare($querySpeakers);
+        $res -> execute();
+        $speakers = array();
+
+        $speaker -> username = $row["Username"];
+        
+        array_push($speakers, $speaker);
+
+
+        //creating query for presenters
+        $queryPresenters = ('SELECT * FROM PRESENTER');
+
+        $res = $pdo -> prepare($queryPresenters);
+        $res -> execute();
+        $presenters = array();
+
+        $presenter -> username = $row["Username"];
+        
+        array_push($presenters, $presenter);
+
 
     ?>
 
@@ -75,11 +135,11 @@
                     <a href="#" onclick="createSession()">Crea Sessione</a>
                 </li>
             
-                <li> <a href="#" onclick="CreatePresentation()">Inserisci presentazioni</a> </li>
+                <li> <a href="#" onclick="createPresentation()">Inserisci presentazioni</a> </li>
 
-                <li> <a href="#" onclick="">Associa speaker</a> </li>
+                <li> <a href="#" onclick="associaSpeaker()">Associa speaker</a></li>
                 
-                <li> <a href="#" onclick="">Associa presenter</a> </li>
+                <li> <a href="#" onclick="associaPresenter()">Associa presenter</a> </li>
 
                 <li> <a href="#" onclick="addSponsor()">Inserisci Sponsor</a> </li>
                 
@@ -144,9 +204,13 @@
 
         const content = document.getElementById("main-content");
 
-        // Array di conferenze e sessioni presi tradotti da php
+        // Array tradotti da php
         var conferenze = <?php echo json_encode($conferenze); ?>;
         var sessioni = <?php echo json_encode($sessioni); ?>;
+        var tutorials =  <?php echo json_encode($tutorials); ?>;
+        var speakers = <?php echo json_encode($speakers); ?>;
+        var presenters = <?php echo json_encode($presenters); ?>;
+        var articoli = <?php echo json_encode($articoli); ?>;
         const userName = <?php echo json_encode($_SESSION["user"]); ?>
 
         function createConference() {
@@ -260,7 +324,7 @@
         
         }
 
-        function CreatePresentation() {
+        function createPresentation() {
             
             content.textContent = '';
             var dynamicContent = `                
@@ -396,6 +460,172 @@
             content.innerHTML = dynamicContent;
 
         }
+        
+        function associaSpeaker(){
+            
+            content.textContent = '';
+            var dynamicContent = '';
+
+
+            for(let i = 0; i < tutorials.length; i++) {
+                codicePresentazione = tutorials[i]["codicePresentazione"];
+                titolo = tutorials[i]["titolo"];
+                oraInizio = tutorials[i]["oraInizio"];
+                oraFine = tutorials[i]["oraFine"];
+                dynamicContent +=  `
+            
+                <div class="list-group">
+                    <div href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${titolo}</h5>
+                        </div>
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${oraInizio}</h5>
+                        </div>
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${oraFine}</h5>
+                        </div>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#${titolo}">Associa speaker</button>
+                    </div>
+                </div>
+                
+                <div id="${titolo}" class="modal fade">
+                <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Sessione</h5>
+                                    <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Sei sicuro di voler aggiungere una sessione a ${titolo}? 
+                                </div>
+                                <div class="modal-footer">
+                                    <form action="associateSpeaker.php" method="post" class="container my-5">
+                                        <div class="mb-3 form-group floating">
+                                            <input type="text" class="form-control floating" name="acronimo" required autocomplete="off" readonly value=${titolo}>
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="" class="form-control floating" name="annoEdizione" required autocomplete="off" readonly value=${titolo}>        
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="text" class="form-control floating" name="titoloSessione" required autocomplete="off">
+                                            <label style="margin:0" for="titoloSessione">Titolo della sessione</label>          
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="date" class="form-control floating" name="dataSessione" required autocomplete="off">
+                                            <label style="margin:0" for="dataSessione">Data della sessione</label>          
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="time" class="form-control floating" name="oraInizio" required autocomplete="off">
+                                            <label style="margin:0" for="oraInizio">Ora di inizio sessione</label>          
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="time" class="form-control floating" name="oraFine" required autocomplete="off">
+                                            <label style="margin:0" for="oraFine">Ora di fine sessione</label>          
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="text" class="form-control floating" name="linkSessione" required autocomplete="off">
+                                            <label style="margin:0" for="linkSessione">Link della sessione</label>          
+                                        </div>
+                                        <div class="container text-center my-5">
+                                            <button type="submit" class="btn btn-primary">Crea sessione</button>
+                                        </div>
+                                    </form>   
+                                </div>
+                            </div>
+                        </div>
+                </div>`
+            }
+            content.innerHTML = dynamicContent;
+        }
+        
+        function associaPresenter(){
+            
+                        
+            content.textContent = '';
+            var dynamicContent = '';
+
+
+            for(let i = 0; i < articoli.length; i++) {
+                codicePresentazione = articoli[i]["codicePresentazione"];
+                titolo = articoli[i]["titolo"];
+                oraInizio = articoli[i]["oraInizio"];
+                oraFine = articoli[i]["oraFine"];
+                dynamicContent +=  `
+            xs
+                <div class="list-group">
+                    <div href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${titolo}</h5>
+                        </div>
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${oraInizio}</h5>
+                        </div>
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${oraFine}</h5>
+                        </div>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#${titolo}">Associa speaker</button>
+                    </div>
+                </div>
+                
+                <div id="${titolo}" class="modal fade">
+                <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Sessione</h5>
+                                    <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Sei sicuro di voler aggiungere una sessione a ${titolo}? 
+                                </div>
+                                <div class="modal-footer">
+                                    <form action="associateSpeaker.php" method="post" class="container my-5">
+                                        <div class="mb-3 form-group floating">
+                                            <input type="text" class="form-control floating" name="acronimo" required autocomplete="off" readonly value=${titolo}>
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="" class="form-control floating" name="annoEdizione" required autocomplete="off" readonly value=${titolo}>        
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="text" class="form-control floating" name="titoloSessione" required autocomplete="off">
+                                            <label style="margin:0" for="titoloSessione">Titolo della sessione</label>          
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="date" class="form-control floating" name="dataSessione" required autocomplete="off">
+                                            <label style="margin:0" for="dataSessione">Data della sessione</label>          
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="time" class="form-control floating" name="oraInizio" required autocomplete="off">
+                                            <label style="margin:0" for="oraInizio">Ora di inizio sessione</label>          
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="time" class="form-control floating" name="oraFine" required autocomplete="off">
+                                            <label style="margin:0" for="oraFine">Ora di fine sessione</label>          
+                                        </div>
+                                        <div class="mb-3 form-group floating">
+                                            <input type="text" class="form-control floating" name="linkSessione" required autocomplete="off">
+                                            <label style="margin:0" for="linkSessione">Link della sessione</label>          
+                                        </div>
+                                        <div class="container text-center my-5">
+                                            <button type="submit" class="btn btn-primary">Crea sessione</button>
+                                        </div>
+                                    </form>   
+                                </div>
+                            </div>
+                        </div>
+                </div>`
+            }
+        }
+
+
 
         function addSponsor() {
             content.innerHTML = `
@@ -488,6 +718,7 @@
             }
         });
     </script>
+
 
 </body>
 </html>

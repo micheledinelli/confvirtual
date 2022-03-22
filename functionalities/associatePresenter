@@ -9,16 +9,10 @@
 <body>
     <?php
         session_start();
-        $usernameAdmin = $_SESSION['user'];
-        $nomeConferenza = $_POST['nomeConferenza'];
-        $annoEdizione = $_POST['annoEdizione'];
-        $acronimo = $_POST['acronimo'];
-        $dataInizio = $_POST['dataInizio'];
-        $dataFine = $_POST['dataFine'];
-
-        //$mysqldate = date( 'Y-m-d', $dataInizio);
-        echo $dataInizio;
-
+        $usernameSpeaker = $_POST['user'];
+        $codiceTutorial = $_POST['codiceTutorial'];
+        $titolo = $_POST['titolo'];
+        
         try {
             
             // Connection to db
@@ -26,26 +20,13 @@
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
-            $sql = 'call creaConferenzaAdmin(:lab1, :lab2, :lab3, :lab4, :lab4)';
+            $sql = 'call associaSpeaker(:lab1, :lab2)';
 
             $stmt = $pdo->prepare($sql);
 
-            $stmt->bindValue(':lab1', $nomeConferenza);
-            $stmt->bindValue(':lab2', $usernameAdmin);
-            $stmt->bindValue(':lab3', $acronimo);
-            $stmt->bindValue(':lab4', $annoEdizione);
-
-            $stmt->execute();
-
-            $sql = 'call InserisciDateSvoglimento(:lab1, :lab2, :lab3, :lab4)';
+            $stmt->bindValue(':lab1', $usernameSpeaker);
+            $stmt->bindValue(':lab2', $codiceTutorial);
             
-            $stmt = $pdo->prepare($sql);
-
-            $stmt->bindValue(':lab1', $acronimo);
-            $stmt->bindValue(':lab2', $annoEdizione);
-            $stmt->bindValue(':lab3', $dataInizio);
-            $stmt->bindValue(':lab4', $dataFine);
-
             $stmt->execute();
 
             // L'ultima operazione è andata a buon fine
