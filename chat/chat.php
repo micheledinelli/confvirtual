@@ -153,7 +153,6 @@
                 </div>
 
                 <!-- Typing area -->
-                <!-- TO DO : Prevent refresh -->
                 <iframe name="votar" style="display:none;"></iframe>
                 <form id="send-form" action="insertMessage.php" method="post" class="bg-light" target="votar">
                     <div class="input-group">
@@ -270,17 +269,18 @@
     }
     
     function changeChat(clickedId) {
-      
-        // Check to disable input if the session is closed
+        
         currentChatId = clickedId;
-        let currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+        // Check to disable input if the session is closed        
+        /*let currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
         currentDate = currentDate.slice(0,10);
         
         if(sessioniPermesse[clickedId-1]["data"] !== currentDate) {
             sendInput.readOnly = true;
         } else {
             sendInput.readOnly = false;
-        }
+        }*/
 
         var dynamicContent = '';
         for(let i = 0; i < messaggiSessioniPermesse[clickedId].length; i++) {
@@ -289,7 +289,6 @@
                 var timeStamp = messaggiSessioniPermesse[clickedId][i]["ts"];
                 var mittente = messaggiSessioniPermesse[clickedId][i]["mittente"];
                 
-
                 if(mittente === usernameAttuale) {
                     // Blue right
                     dynamicContent += `
@@ -321,26 +320,26 @@
     }        
             chatBox.innerHTML = dynamicContent;
         }
+
             
-    sendBtn.addEventListener("click", function(){
+        sendBtn.addEventListener("click", function(){
 
-        let date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-        if(sendInput.value !== '') {
-            const newMessage = `
-            <div class="media w-50 ml-auto mb-3">
-                <div class="media-body">
-                    <div class="bg-primary rounded py-2 px-3 mb-2">
-                        <p class="text-small mb-0 text-white">${sendInput.value}</p>
+            let date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            if(sendInput.value !== '') {
+                const newMessage = `
+                <div class="media w-50 ml-auto mb-3">
+                    <div class="media-body">
+                        <div class="bg-primary rounded py-2 px-3 mb-2">
+                            <p class="text-small mb-0 text-white">${sendInput.value}</p>
+                        </div>
+                        <p class="small text-muted">${date}</p>
                     </div>
-                    <p class="small text-muted">${date}</p>
-                </div>
-            </div>`;
-            
-            chatBox.insertAdjacentHTML('beforeend', newMessage);
-            chatIdInput.value = getCurrentChatId();
-        }  
-    });
+                </div>`;
+                
+                chatBox.insertAdjacentHTML('beforeend', newMessage);
+                chatIdInput.value = getCurrentChatId();
+            }  
+        });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>

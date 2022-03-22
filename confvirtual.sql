@@ -51,7 +51,7 @@ CREATE TABLE REGISTRAZIONE(
 CREATE TABLE UNIVERSITA(
 	NomeUniversità VARCHAR(30),
 	NomeDipartimento VARCHAR(30),
-    PRIMARY KEY(NomeUniversità)
+    PRIMARY KEY(NomeUniversità, NomeDipartimento)
 )ENGINE="INNODB";
 
 CREATE TABLE ADMIN(
@@ -62,22 +62,24 @@ CREATE TABLE ADMIN(
 
 CREATE TABLE PRESENTER(
     Username VARCHAR(30),
-    CurriculumVitae VARCHAR(30),
+    CurriculumVitae VARCHAR(300),
     Foto BLOB,
     NomeUniversità VARCHAR(30),
+    NomeDipartimento VARCHAR(30),
     PRIMARY KEY (Username),
     FOREIGN KEY (Username) REFERENCES UTENTE(Username),
-    FOREIGN KEY(NomeUniversità) REFERENCES UNIVERSITA(NomeUniversità)
+    FOREIGN KEY(NomeUniversità, NomeDipartimento) REFERENCES UNIVERSITA(NomeUniversità, NomeDipartimento)
 ) ENGINE="INNODB";
 
 CREATE TABLE SPEAKER(
     Username VARCHAR(30),
-    CurriculumVitae VARCHAR(30),
+    CurriculumVitae VARCHAR(300),
     Foto BLOB,
     NomeUniversità VARCHAR(30),
+    NomeDipartimento VARCHAR(30),
     PRIMARY KEY (Username),
     FOREIGN KEY (Username) REFERENCES UTENTE(Username),
-	FOREIGN KEY(NomeUniversità) REFERENCES UNIVERSITA(NomeUniversità)
+	FOREIGN KEY(NomeUniversità,NomeDipartimento) REFERENCES UNIVERSITA(NomeUniversità, NomeDipartimento)
 ) ENGINE="INNODB";
 
 CREATE TABLE CREAZIONE(
@@ -179,7 +181,7 @@ CREATE TABLE RISORSA(
     Link VARCHAR(50),
     Descrizione VARCHAR(50),
     CodiceTutorial INT,
-    PRIMARY KEY(UsernameSpeaker),
+    PRIMARY KEY(UsernameSpeaker, CodiceTutorial, Link),
     FOREIGN KEY(UsernameSpeaker) REFERENCES SPEAKER(Username),
     FOREIGN KEY(CodiceTutorial) REFERENCES P_TUTORIAL(CodicePresentazione)
 )ENGINE="INNODB";
@@ -310,8 +312,10 @@ BEGIN
                 
                 SET lastInserted = (SELECT Codice FROM PRESENTAZIONE WHERE Codice = (SELECT MAX(Codice) FROM PRESENTAZIONE));
                 
+                # Possibile specificare o meno il nome del presenter
+                # Se viene inserito dopo parte il trigger che aggiorna il campo "StatoSvolgimento"
 				IF(UsernamePresenter IS NOT NULL AND UsernamePresenter <> '') THEN
-					INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine, UsernamePresenter) VALUES(lastInserted, Titolo, NumeroPagine, UsernamePresenter);
+					INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine, UsernamePresenter, StatoSvolgimento) VALUES(lastInserted, Titolo, NumeroPagine, UsernamePresenter, "COPERTO");
 				ELSE 
 					INSERT INTO P_ARTICOLO(CodicePresentazione, Titolo, NumeroPagine) VALUES(lastInserted, Titolo, NumeroPagine);
 				END IF;
@@ -370,6 +374,26 @@ BEGIN
 END;
 $ DELIMITER ;
 
+# Aggiunge o modifica un'affiliazione universitaria
+DELIMITER $
+CREATE PROCEDURE AffiliazioneUni(IN NomeUni VARCHAR(30), IN NomeDip VARCHAR(30), IN UsernameIN VARCHAR(30))
+BEGIN
+	START TRANSACTION;
+		IF(EXISTS (SELECT * FROM UNIVERSITA AS U WHERE NomeUni = U.NomeUniversità)) THEN
+			IF(EXISTS(SELECT * FROM PRESENTER P WHERE P.Username = UsernameIN)) THEN
+				UPDATE PRESENTER SET NomeUniversità = NomeUni WHERE UsernameIN = Username; 
+				UPDATE PRESENTER SET NomeDipartimento = NomeDip WHERE Username = UsernameIN; 
+			ELSE 
+				UPDATE SPEAKER SET NomeUniversità = NomeUni WHERE UsernameIN = Username; 
+				UPDATE SPEAKER SET NomeDipartimento = NomeDip WHERE Username = UsernameIN; 
+			END IF;
+        ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AffiliazioneUni the specified uni has not been found';
+        END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
 # Cambia il ruolo di un utente esistente
 DELIMITER $
 CREATE PROCEDURE CambiaRuolo(IN username VARCHAR(30), IN newRole ENUM("ADMIN","SPEAKER","PRESENTER"))
@@ -385,6 +409,37 @@ BEGIN
 				INSERT INTO SPEAKER(Username) VALUES(username);
             END IF;
 		END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
+# Aggiunge una relazione speaker tutorial controllando
+# che lo username appartenga ad uno speaker e che il 
+# tutorial esista
+DELIMITER $
+CREATE PROCEDURE AggiungiSpeakerTutorialRel(IN UsernameSpeaker VARCHAR(30), IN CodiceTutorial INT, IN Link VARCHAR(50), IN Descrizione VARCHAR(50))
+BEGIN
+	START TRANSACTION;
+		IF(EXISTS(SELECT * FROM SPEAKER AS S WHERE UsernameSpeaker = S.Username) AND EXISTS(SELECT * FROM P_TUTORIAL WHERE CodicePresentazione = CodiceTutorial)) THEN
+            INSERT INTO RISORSA(UsernameSpeaker, Link, Descrizione, CodiceTutorial) VALUES(UsernameSpeaker, Link, Descrizione, CodiceTutorial);
+		ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AggiungiSpeakerTutorialRel the specified speaker (or tutorial) has not been found';
+        END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
+DELIMITER $
+CREATE PROCEDURE AssociaPresenter(IN UsernamePresenter VARCHAR(30), IN CodiceArticolo INT)
+BEGIN
+	START TRANSACTION;
+		IF(EXISTS(SELECT * FROM PRESENTER AS P WHERE P.Username = UsernamePresenter) AND
+			EXISTS (SELECT * FROM P_ARTICOLO AS PA WHERE PA.CodicePresentazione = CodiceArticolo)) THEN
+				UPDATE P_ARTICOLO SET UsernamePresenter = UsernamePresenter WHERE P_ARTICOLO.CodicePresentazione = CodiceArticolo;
+				#UPDATE P_ARTICOLO SET StatoSvolgimento = "COPERTO" WHERE P_ARTICOLO.CodicePresentazione = CodiceArticolo;
+		ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AssociaPresenter the specified presenter (or article) has not been found';
+        END IF;
     COMMIT WORK;
 END;
 $ DELIMITER ;
@@ -427,6 +482,7 @@ BEGIN
 END;
 $ DELIMITER ;
 
+/*
 DELIMITER $
 CREATE TRIGGER CheckAutoreArticolo
 BEFORE INSERT ON P_ARTICOLO
@@ -442,8 +498,8 @@ BEGIN
     END IF;
 END;
 $ DELIMITER ;
-
-/*DELIMITER $
+*/
+DELIMITER $
 CREATE TRIGGER CheckOrariMessaggi
 BEFORE INSERT ON MESSAGGIO
 FOR EACH ROW
@@ -455,16 +511,104 @@ BEGIN
     END IF;
 END;
 $ DELIMITER ;
-*/
-# Si vuole fare in modo che il numero di sequenza di ogni presentazione dipenda dalla 
-# data e dall'ora della sessione in cui è programmata, perciò ogni numero di sequenza
-# associato ad una presentazione farà fede alla sequenza propria della sua sessione
-$ DELIMITER 
-CREATE TRIGGER NumeriSequenza
-BEFORE INSERT ON PRESENTAZIONE
-FOR EACH ROW
+
+SET GLOBAL event_scheduler = ON;
+
+# VIEW
+DROP VIEW IF EXISTS MaxDataConferenze;
+CREATE VIEW MaxDataConferenze(Acronimo, MaxData) AS
+SELECT C.Acronimo, D.Data FROM CONFERENZA AS C, DATASVOLGIMENTO AS D 
+WHERE C.Acronimo = D.AcronimoConferenza AND D.Data IN(SELECT MAX(Data) FROM DATASVOLGIMENTO AS D2 WHERE D2.AcronimoConferenza = C.Acronimo);
+
+# TESTATO
+DELIMITER $
+CREATE EVENT CompletaConferenza
+ON SCHEDULE EVERY '1' DAY
+DO
 BEGIN
-	
+	# Per evitare il prevent update dato che 
+    # utilizziamo una view che dipende dal
+    # risultato dell'update
+	CREATE TEMPORARY TABLE TMP
+	SELECT * FROM MaxDataConferenze;
+    
+	UPDATE CONFERENZA SET SVOLGIMENTO = "COMPLETATA" WHERE Acronimo IN (SELECT Acronimo FROM TMP WHERE MaxData < CURRENT_DATE);
+
+	DROP TEMPORARY TABLE TMP;
 END;
 $ DELIMITER ;
 
+DELIMITER $
+CREATE PROCEDURE AssegnaSequenza(IN CodiceSessioneIN INT)
+BEGIN
+	DROP TEMPORARY TABLE IF EXISTS AssegnaNumeroSequenza;
+	CREATE TEMPORARY TABLE AssegnaNumeroSequenza
+	SELECT P.codice AS CodicePresentazione, P.CodiceSessione AS CodiceSessione, Titolo, P.OraInizio, @n := @n + 1 AS Sequenza 
+	FROM PRESENTAZIONE AS P, SESSIONE AS S, (SELECT @n := 0) counter
+	WHERE P.CodiceSessione = S.Codice AND S.Codice = CodiceSessioneIN
+	ORDER BY P.OraInizio;
+
+	UPDATE PRESENTAZIONE 
+	SET NumeroSequenza = (
+		SELECT Sequenza 
+		FROM AssegnaNumeroSequenza
+		WHERE AssegnaNumeroSequenza.CodicePresentazione = PRESENTAZIONE.Codice)
+	WHERE PRESENTAZIONE.CodiceSessione = CodiceSessioneIN;
+END;
+$ DELIMITER ;
+
+# Si vuole fare in modo che il numero di sequenza di ogni presentazione dipenda dalla 
+# data e dall'ora della sessione in cui è programmata, perciò ogni numero di sequenza
+# associato ad una presentazione farà fede alla sequenza propria della sua sessione
+DELIMITER  $
+CREATE TRIGGER NumeriSequenzaArtcioli
+BEFORE INSERT ON P_ARTICOLO
+FOR EACH ROW
+BEGIN
+	set @codiceSessione=(SELECT CodiceSessione FROM PRESENTAZIONE AS P WHERE P.Codice = NEW.CodicePresentazione);
+    call AssegnaSequenza(@codiceSessione);
+END
+$ DELIMITER ;
+
+DELIMITER  $
+CREATE TRIGGER NumeriSequenzaTutorial
+BEFORE INSERT ON P_TUTORIAL
+FOR EACH ROW
+BEGIN
+	set @codiceSessione=(SELECT CodiceSessione FROM PRESENTAZIONE AS P WHERE P.Codice = NEW.CodicePresentazione);
+    call AssegnaSequenza(@codiceSessione);
+END
+$ DELIMITER ;
+
+# Trigger per cambiare lo stato di svolgimento di una presentazione
+# di articolo, COPERTO se viene specificato un PRESENTER
+# Questa operazione è intriseca nell'operazione di associazione
+# di un presenter ad un articolo, quindi al momento di
+# associazione è gia possibile cambiare lo stato di svolgimento 
+# ma viene comunque implementato come da specifica
+DELIMITER $
+CREATE TRIGGER CopriArticolo
+BEFORE UPDATE ON P_ARTICOLO
+FOR EACH ROW
+BEGIN
+	IF(EXISTS(SELECT * FROM PRESENTER WHERE Username = NEW.UsernamePresenter)) THEN
+		SET NEW.StatoSvolgimento = "COPERTO";
+    END IF;
+END;
+$ DELIMITER ;
+
+# VIEW 
+CREATE VIEW Classifica(Voto, Username, Tipologia) AS
+SELECT Voto, UsernameSpeaker AS Username, "SPEAKER" AS Tipologia 
+FROM VALUTAZIONE AS V, SPEAKER_TUTORIAL AS ST, SPEAKER AS S
+WHERE V.CodicePresentazione = ST.CodiceTutorial
+UNION
+SELECT Voto, UsernamePresenter AS Uername, "PRESENTER" AS Tipologia FROM VALUTAZIONE AS V, P_ARTICOLO AS PA
+WHERE V.CodicePresentazione = PA.CodicePresentazione;
+
+/* Operazione per ottenere la classifica in base al voto medio
+SELECT ROUND(AVG(Voto),1) AS MediaVoto, Username, Tipologia
+FROM CLASSIFICA
+GROUP BY Username
+order by voto DESC;
+*/

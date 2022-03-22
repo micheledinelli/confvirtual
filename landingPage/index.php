@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <title>CONFVIRTUAL</title>
 </head>
 <body>
@@ -105,42 +106,63 @@
             $row = $res -> fetch();
             $numUtenti = $row["Counter"];
 
-            /**
-             * TO DO : Classifica per il voto medio
-             */
+            $queryClassifica = '
+                SELECT ROUND(AVG(Voto),1) AS MediaVoto, Username, Tipologia
+                FROM CLASSIFICA
+                GROUP BY Username
+                order by voto DESC;';
+
+            $res = $pdo -> prepare($queryClassifica);
+            $res -> execute();
+
+            $classificati = array();
+            while($row = $res -> fetch()) {
+                $utente = new StdClass();
+                $utente -> username = $row['Username'];
+                $utente -> tipologia = $row['Tipologia'];
+                $utente -> votoMedio = $row['MediaVoto'];
+                array_push($classificati, $utente);
+            }
 
         } catch( PDOException $e ) {
             echo("[ERRORE]".$e->getMessage());
             exit();
         }
     ?>
-    
-    <div class="counter container-fluid my-5">
-        <div class="row">
-            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
-                <div class="counter">
-                    <p class="counter-count bg-primary"><?php echo "{$conf}" ?></p>
-                    <p class="p-counter">Conferenze Registrate</p>
-                </div>
-            </div>
-            
-            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
-                <div class="counter">
-                    <p class="counter-count bg-primary"><?php echo "{$confAttive}" ?></p>
-                    <p class="p-counter">Conferenze Attive</p>
-                </div>
-            </div>
 
-            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
-                <div class="counter">
-                    <p class="counter-count bg-primary"><?php echo "{$numUtenti}"?></p>
-                    <p class="p-counter">Utenti</p>
+    <div class="container-fluid bg-light" id="stats">
+        <div class="container jumbotron my-5 text-center" style="padding-top:30px;">
+            <h1 class="display-5">Confvirtual è pronta ad ospitare anche la tua conferenza!</h1>
+            <p class="lead my-3">Unisciti alla nostra community <a href="register.html">Sign Up</a></p>
+        </div>
+
+        <div class="counter container-fluid my-5">
+            <div class="row">
+                <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
+                    <div class="counter">
+                        <p class="counter-count bg-primary"><?php echo "{$conf}" ?></p>
+                        <p class="p-counter">Conferenze registrate</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
+                    <div class="counter">
+                        <p class="counter-count bg-primary"><?php echo "{$confAttive}"?></p>
+                        <p class="p-counter">Conferenze attive</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
+                    <div class="counter">
+                        <p class="counter-count bg-primary"><?php echo "{$numUtenti}"?></p>
+                        <p class="p-counter">Utenti</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="container sponsors text-center" id="ourSponsors">
+    <div class="container-fluid sponsors text-center" id="ourSponsors">
         <div class="container jumbotron my-5 text-center">
             <h1 class="display-4">Alcuni dei nostri sponsor</h1>
             <p class="lead my-3">Gli sponsor di confvirtual permettono che il nostro servizio sia il migliore possibile</p>
@@ -177,11 +199,38 @@
             </div>
         </div>
     </div>
-    <!--
-    <div class="container text-center">
-        <img id="sme" height="200px" src="https://zindex99.com/front/assets/img/effetti-speciali.gif" alt="ciao">
+
+
+    <div class="container-fluid bg-light mt-5 h-75vh" id="classifica">
+        <div class="container jumbotron text-center pt-5">
+            <h1 class="display-4">I migliori speaker e presentatori</h1>
+            <p class="lead my-3">Ecco il podio dei nostri speaker e presenter
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-list-ol ml-3" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5z"/>
+                        <path d="M1.713 11.865v-.474H2c.217 0 .363-.137.363-.317 0-.185-.158-.31-.361-.31-.223 0-.367.152-.373.31h-.59c.016-.467.373-.787.986-.787.588-.002.954.291.957.703a.595.595 0 0 1-.492.594v.033a.615.615 0 0 1 .569.631c.003.533-.502.8-1.051.8-.656 0-1-.37-1.008-.794h.582c.008.178.186.306.422.309.254 0 .424-.145.422-.35-.002-.195-.155-.348-.414-.348h-.3zm-.004-4.699h-.604v-.035c0-.408.295-.844.958-.844.583 0 .96.326.96.756 0 .389-.257.617-.476.848l-.537.572v.03h1.054V9H1.143v-.395l.957-.99c.138-.142.293-.304.293-.508 0-.18-.147-.32-.342-.32a.33.33 0 0 0-.342.338v.041zM2.564 5h-.635V2.924h-.031l-.598.42v-.567l.629-.443h.635V5z"/>
+                </svg>
+            </p>
+            <p class="lead small">I voti sono inseriti dagli admin della piattafroma</p>
+        </div>
+
+        <div id="my-carousel" data-interval="5000" class="container carousel slide carousel-fade w-75 pb-5" data-ride="carousel" style="margin-top:50px;">
+            <ol class="carousel-indicators">
+                <li data-target="#my-carousel" data-slide-to="0" class="active"></li>
+                <li data-target="#my-carousel" data-slide-to="1"></li>
+                <li data-target="#my-carousel" data-slide-to="2"></li>
+            </ol>
+            
+            <a class="carousel-control-prev" style='text-decoration:none;' href="#my-carousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only visually-hidden">Previous</span>
+            </a>
+            <a class="carousel-control-next" style='text-decoration:none;' href="#my-carousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only visually-hidden">Next</span>
+            </a>
+
+        </div>
     </div>
-    -->
 
     <div class="relative-bottom">
         <!-- style="background-color: #3f51b5" cool color to eventually use... -->
@@ -191,7 +240,7 @@
                     <div class="row text-center d-flex justify-content-center pt-5">
                         <div class="col-md-2">
                             <h6 class="text-uppercase font-weight-bold">
-                                <a href="#" class="text-white">About us</a>
+                                <a href="sideParts/aboutUs.html" class="text-white">About us</a>
                             </h6>
                         </div>
                         <div class="col-md-2">
@@ -261,6 +310,114 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js" integrity="sha384-VHvPCCyXqtD5DqJeNxl2dtTyhF78xXNXdkwX1CZeRusQfRKp+tA7hAShOK/B/fQ2" crossorigin="anonymous"></script>
+    <script>
+        const classificati = <?php echo json_encode($classificati); ?>;
+        const myCarousel = document.getElementById("my-carousel");    
+        const divInner = document.createElement("div");
+        divInner.classList.add("carousel-inner");
+        var dynamicContent = '';
+
+        
+        for(let i = 0; i < classificati.length; i++) {
+            votoMedio = classificati[i]["votoMedio"];
+            username = classificati[i]["username"];
+            tipologia = classificati[i]["tipologia"];
+            stars = calcStarRating(votoMedio);
+            // Per definire il primo attivo
+            if(i === 0) {
+                dynamicContent +=  `
+                <div class="carousel-item text-center active">
+                    <div class="container card border-dark mb-3" style="max-width: 18rem;">
+                        <div class="card-body text-dark">
+                            <h5 class="card-text">Posizione: ${i+1}</h5>
+                            <h5 class="card-title">${username}</h5>
+                            <p class="card-text">${tipologia}</p>
+                            <p class="card-text">Voto Medio: ${votoMedio}</p>
+                            ${stars}
+                        </div>
+                    </div>
+                </div>`;
+            } else {
+                dynamicContent +=  `
+                <div class="carousel-item text-center">
+                    <div class="container card border-dark mb-3" style="max-width: 18rem;">
+                        <div class="card-body text-dark">
+                            <h5 class="card-text">Posizione: ${i+1}</h5>
+                            <h5 class="card-title">${username}</h5>
+                            <p class="card-text">${tipologia}</p>
+                            <p class="card-text">Voto Medio: ${votoMedio}</p>
+                            ${stars}
+                        </div>
+                    </div>
+                </div>`;
+            }
+               
+        }
+
+        divInner.innerHTML = dynamicContent;
+        myCarousel.append(divInner);
+
+        function calcStarRating(votoMedio) {
+            starRating = Math.round(votoMedio * 0.5);
+            stars = '';
+            if(starRating === 5) {
+                stars +=`     
+                <p>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                </p>`
+                return stars;
+
+            } else if(starRating === 4) {
+                stars +=`     
+                <p>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star'></span>
+                </p>`
+                return stars;
+
+            } else if(starRating === 3) {
+                stars +=`     
+                <p>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star'></span>
+                    <span class='bi bi-star'></span>
+                </p>`
+                return stars;
+
+            } else if(starRating === 2) {
+                stars +=`     
+                <p>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star'></span>
+                    <span class='bi bi-star'></span>
+                    <span class='bi bi-star'></span>
+                </p>`
+                return stars;
+
+            } else if(starRating === 1) {
+                stars +=`     
+                <p>
+                    <span class='bi bi-star-fill' style='color: #f3da35'></span>
+                    <span class='bi bi-star'></span>
+                    <span class='bi bi-star'></span>
+                    <span class='bi bi-star'></span>
+                    <span class='bi bi-star'></span>
+                </p>`
+                return stars;
+
+            }
+        }
+    </script>
 </body>
 </body>
 </html>

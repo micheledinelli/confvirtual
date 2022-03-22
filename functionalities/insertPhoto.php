@@ -10,33 +10,37 @@
     <?php
         session_start();
 
-        if(!empty($_POST["photo"])) {
-            $file = $_POST["photo"];
-        }
-
         try {
 
             // Connection to db
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
-            
-            if($_SESSION["userType"] == "SPEAKER") {
+
+            if(!empty($_POST["photo"])) {
+                $file = $_POST["photo"];
+                
+                if($_SESSION["userType"] == "SPEAKER") {
                 $query = 'UPDATE CONFVIRTUAL.SPEAKER SET Foto = :lab1  WHERE Username = :lab2';
             
-            } elseif($_SESSION["userType"] == "PRESENTER") {
-                $query = 'UPDATE CONFVIRTUAL.PRESENTER SET Foto = :lab1  WHERE Username = :lab2';
-            } 
+                } elseif($_SESSION["userType"] == "PRESENTER") {
+                    $query = 'UPDATE CONFVIRTUAL.PRESENTER SET Foto = :lab1  WHERE Username = :lab2';
+                }
+                
+                $res = $pdo -> prepare($query);
+                $res -> bindValue(":lab1", $file, PDO::PARAM_LOB);
+                $res -> bindValue(":lab2", $_SESSION["user"]);
+                
+                $res -> execute();
 
-            $res = $pdo -> prepare($query);
-            $res -> bindValue(":lab1", $file, PDO::PARAM_LOB);
-            $res -> bindValue(":lab2", $_SESSION["user"]);
+                $_SESSION["opSuccesfull"] = 0;
+
+                header('Location: speaker_presenter.php'); 
             
-            $res -> execute();
-
-            $_SESSION["opSuccesfull"] = 0;
-
-            header('Location: speaker_presenter.php');
+            } else {
+                $_SESSION["error"] = 1;
+                header('Location: speaker_presenter.php'); 
+            }
         
         } catch (PDOException $e) {
             
