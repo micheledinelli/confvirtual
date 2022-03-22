@@ -444,6 +444,20 @@ BEGIN
 END;
 $ DELIMITER ;
 
+DELIMITER $
+CREATE PROCEDURE AssociaSpeaker(IN UsernameSpeaker VARCHAR(30), IN CodiceTutorial INT)
+BEGIN
+	START TRANSACTION;
+		IF(EXISTS(SELECT * FROM SPEAKER AS S WHERE S.Username = UsernameSpeaker) AND
+			EXISTS (SELECT * FROM P_TUTORIAL AS PT WHERE PT.CodicePresentazione = CodiceTutorial)) THEN
+				INSERT INTO SPEAKER_TUTORIAL(UsernameSpeaker, CodiceTutorial) VALUES(UsernameSpeaker, CodiceTutorial);
+		ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AssociaSpeaker the specified speaker (or tutorial) has not been found';
+        END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
 ######## TRIGGER #########
 
 # Incrementa il campo totale sponsorizzazioni ogni volta che si aggiunge uno sponsor per una determinata conferenza

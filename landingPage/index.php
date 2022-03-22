@@ -25,6 +25,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#ourSponsors">I nostri sponsor</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#classifica">Classifica migliori speaker/utenti</a>
+                </li>
             </ul>
         </div>
         
@@ -140,10 +143,10 @@
             ]);
 
             $queryClassifica = '
-                SELECT ROUND(AVG(Voto),1) AS MediaVoto, Username, Tipologia
-                FROM CLASSIFICA
-                GROUP BY Username
-                order by voto DESC;';
+            SELECT ROUND(AVG(Voto),1) AS MediaVoto, Username, Tipologia
+            FROM CLASSIFICA
+            GROUP BY Username, Tipologia
+            order by ROUND(AVG(Voto),1) DESC';
 
             $res = $pdo -> prepare($queryClassifica);
             $res -> execute();
@@ -233,7 +236,6 @@
         </div>
     </div>
 
-
     <div class="container-fluid bg-light mt-5 h-75vh" id="classifica">
         <div class="container jumbotron text-center pt-5">
             <h1 class="display-4">I migliori speaker e presentatori</h1>
@@ -283,7 +285,7 @@
                         </div>
                         <div class="col-md-2">
                             <h6 class="text-uppercase font-weight-bold">
-                                <a href="sideParts/mail.php" class="text-white" id="contact-us">Contact us</a>
+                                <a href="sideParts/contactUs.html" class="text-white" id="contact-us">Contact us</a>
                             </h6>
                         </div>
                     </div>
