@@ -152,7 +152,7 @@
         function createConference() {
             content.innerHTML = `
             <div class="container-fluid text-center w-50">
-                <h2>Registrati</h2>
+                <h2>Crea conferenza</h2>
                 <hr class="my-4">
                 <form action="createConferenceAdmin.php" method="post" class="container my-5">
                     <div class="mb-3 form-group floating">
@@ -167,8 +167,16 @@
                         <input type="number" class="form-control floating" name="annoEdizione" required autocomplete="off">
                         <label for="annoEdizione">Anno Edizione</label>          
                     </div>
-                    <div class="container text-center my-5">
-                        <button type="submit" class="btn btn-primary">Register</button>
+                    <div class="mb-3 form-group floating">
+                        <input type="date" class="form-control floating" name="dataInizio" required autocomplete="off">
+                        <label style="margin:0" for="dataSessione">Data di inizio</label>          
+                    </div>
+                    <div class="mb-3 form-group floating">
+                        <input type="date" class="form-control floating" name="dataFine" required autocomplete="off">
+                        <label style="margin:0" for="dataSessione">Data di fine</label>          
+                    </div>
+                    <div class="container text-center my-3">
+                        <button type="submit" class="btn btn-primary">Crea</button>
                     </div>
                 </form>
             </div>

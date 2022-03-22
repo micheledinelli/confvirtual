@@ -149,7 +149,6 @@
                 </div>
 
                 <!-- Typing area -->
-                <!-- TO DO : Prevent refresh -->
                 <iframe name="votar" style="display:none;"></iframe>
                 <form id="send-form" action="insertMessage.php" method="post" class="bg-light" target="votar">
                     <div class="input-group">
@@ -240,9 +239,10 @@
     
     function changeChat(clickedId) {
         
-        // Check to disable input if the session is closed
-        /*currentChatId = clickedId;
-        let currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        currentChatId = clickedId;
+
+        // Check to disable input if the session is closed        
+        /*let currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
         currentDate = currentDate.slice(0,10);
         
         if(sessioniPermesse[clickedId-1]["data"] !== currentDate) {
@@ -258,7 +258,6 @@
                 var timeStamp = messaggiSessioniPermesse[clickedId][i]["ts"];
                 var mittente = messaggiSessioniPermesse[clickedId][i]["mittente"];
                 
-
                 if(mittente === usernameAttuale) {
                     // Blue right
                     dynamicContent += `
@@ -288,11 +287,11 @@
             
             chatBox.innerHTML = dynamicContent;
         }
+
             
         sendBtn.addEventListener("click", function(){
 
             let date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
             if(sendInput.value !== '') {
                 const newMessage = `
                 <div class="media w-50 ml-auto mb-3">

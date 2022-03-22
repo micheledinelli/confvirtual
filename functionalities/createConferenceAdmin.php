@@ -13,8 +13,11 @@
         $nomeConferenza = $_POST['nomeConferenza'];
         $annoEdizione = $_POST['annoEdizione'];
         $acronimo = $_POST['acronimo'];
+        $dataInizio = $_POST['dataInizio'];
+        $dataFine = $_POST['dataFine'];
 
-        echo $usernameAdmin . " "  . $annoEdizione .  " " . $nomeConferenza . " " . $acronimo;
+        //$mysqldate = date( 'Y-m-d', $dataInizio);
+        echo $dataInizio;
 
         try {
             
@@ -31,6 +34,17 @@
             $stmt->bindValue(':lab2', $usernameAdmin);
             $stmt->bindValue(':lab3', $acronimo);
             $stmt->bindValue(':lab4', $annoEdizione);
+
+            $stmt->execute();
+
+            $sql = 'call InserisciDateSvoglimento(:lab1, :lab2, :lab3, :lab4)';
+            
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->bindValue(':lab1', $acronimo);
+            $stmt->bindValue(':lab2', $annoEdizione);
+            $stmt->bindValue(':lab3', $dataInizio);
+            $stmt->bindValue(':lab4', $dataFine);
 
             $stmt->execute();
 
