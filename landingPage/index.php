@@ -87,6 +87,12 @@
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
+            require '../vendor/autoload.php';
+            $client = new MongoDB\Client("mongodb://localhost:27017");
+            $collection = $client->demo->beers;
+            $result = $collection->insertOne( [ 'name' => 'Hinterland', 'brewery' => 'BrewDog' ] );
+            echo "Inserted with Object ID '{$result->getInsertedId()}'";
+
             $query1 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.CONFERENZA WHERE Svolgimento = 'COMPLETATA'");
             $res = $pdo -> prepare($query1);
             $res -> execute();
