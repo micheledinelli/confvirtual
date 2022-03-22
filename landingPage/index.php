@@ -215,7 +215,7 @@
             <p class="lead small">I voti sono inseriti dagli admin della piattafroma</p>
         </div>
 
-        <div id="my-carousel" data-interval="5000" class="container carousel slide carousel-fade w-75 pb-5" data-ride="carousel" style="margin-top:50px;">
+        <div id="my-carousel" data-interval="2000" class="container carousel slide carousel-fade w-75 pb-5" data-ride="carousel" style="margin-top:50px;">
             <ol class="carousel-indicators">
                 <li data-target="#my-carousel" data-slide-to="0" class="active"></li>
                 <li data-target="#my-carousel" data-slide-to="1"></li>
