@@ -83,33 +83,60 @@
         }
          
         try {
+            //MySQL
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
+            //MongoDB
             require '../vendor/autoload.php';
-            $client = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $client->demo->beers;
-            $result = $collection->insertOne( [ 'name' => 'Hinterland', 'brewery' => 'BrewDog' ] );
-            echo "Inserted with Object ID '{$result->getInsertedId()}'";
+            $conn = new MongoDB\Client("mongodb://localhost:27017");
+            $collection = $conn -> CONFVIRTUAL_log -> log;
 
+            //MySQL
             $query1 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.CONFERENZA WHERE Svolgimento = 'COMPLETATA'");
             $res = $pdo -> prepare($query1);
             $res -> execute();
             $row = $res -> fetch();
             $conf = $row["Counter"];
 
+            //MongoDB
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'R',
+                'InveolvedTable'	=> 'CONFERENZA'
+            ]);
+
+            //MySQL
             $query2 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.CONFERENZA WHERE Svolgimento = 'ATTIVA'");
             $res = $pdo -> prepare($query2);
             $res -> execute();
             $row = $res -> fetch();
             $confAttive = $row["Counter"];
 
+            //MongoDB
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'R',
+                'InveolvedTable'	=> 'CONFERENZA'
+            ]);
+
+            //MySQL
             $query3 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.UTENTE");
             $res = $pdo -> prepare($query3);
             $res -> execute();
             $row = $res -> fetch();
             $numUtenti = $row["Counter"];
+
+            //MongoDB
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'R',
+                'InveolvedTable'	=> 'CONFERENZA'
+            ]);
 
             /**
              * TO DO : Classifica per il voto medio

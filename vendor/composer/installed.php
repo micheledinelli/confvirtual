@@ -18,6 +18,8 @@
             'aliases' => array(),
             'reference' => '355c5912f21b470bf848c701b7639086aa6012d5',
             'dev_requirement' => false,
+            'reference' => '826295f1d72f9a4d2df77ab05b848089c7d091b2',
+            'dev_requirement' => false
         ),
         'jean85/pretty-package-versions' => array(
             'pretty_version' => '2.0.5',
