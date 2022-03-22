@@ -109,7 +109,7 @@
             $queryClassifica = '
                 SELECT ROUND(AVG(Voto),1) AS MediaVoto, Username, Tipologia
                 FROM CLASSIFICA
-                GROUP BY Username
+                GROUP BY Username, Tipologia
                 order by voto DESC;';
 
             $res = $pdo -> prepare($queryClassifica);
