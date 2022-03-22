@@ -17,7 +17,7 @@
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
             'reference' => '826295f1d72f9a4d2df77ab05b848089c7d091b2',
-            'dev_requirement' => false,
+            'dev_requirement' => false
         ),
         'jean85/pretty-package-versions' => array(
             'pretty_version' => '2.0.5',
