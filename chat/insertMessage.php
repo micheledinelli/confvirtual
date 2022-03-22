@@ -12,7 +12,6 @@
         ini_set('display_errors', 1); 
         error_reporting(-1);
         session_start();
-        
         $username = $_SESSION["user"]; 
         $text = $_POST["msg"];
         $chatId = $_POST["chatId"];
@@ -20,7 +19,6 @@
         date_default_timezone_set('Europe/Rome');
         $date = new DateTime();
         $currentDate = $date -> format('Y-m-d H:i:s');
-            
         try {
             
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='root');
@@ -31,17 +29,17 @@
             $res = $pdo -> prepare($query);
             $res -> bindValue(":lab1", $username);
             $res -> bindValue(":lab2", $text);
-            //:lab3 chat Id TO DO
             $res -> bindValue(":lab3", $chatId);
             $res -> bindValue(":lab4", $currentDate);
             
             $res -> execute();
-            header('Location:/DBProject2021/chat/chat.php');
+            header('Location:chat.php');
 
             $_SESSION["chatError"] = 0;
         } catch( PDOException $e ) {
+            
             $_SESSION["chatError"] = 1;
-            header('Location:/DBProject2021/chat/chat.php');
+            header('Location:chat.php');
             echo("[ERRORE]".$e->getMessage());
             exit();
         }

@@ -27,8 +27,6 @@
             $articolo=true;
         }
         
-    
-
         try {
             
             // Connection to db

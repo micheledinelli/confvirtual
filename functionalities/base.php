@@ -25,7 +25,7 @@
         $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo -> exec('SET NAMES "utf8"');
 
-        // SESSIONS
+        // CONFERENCES
         $query = ('SELECT * FROM CONFERENZA WHERE Svolgimento = "ATTIVA"');
 
         $res = $pdo -> prepare($query);
@@ -40,6 +40,7 @@
             array_push($conferenze, $conferenza);
         }
         
+        // SESSIONS
         $querySessions = ('SELECT * FROM SESSIONE');
         
         $res = $pdo -> prepare($querySessions);
