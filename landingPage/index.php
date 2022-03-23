@@ -108,8 +108,8 @@
             $insertOneResult = $collection->insertOne([
                 'TimeStamp' 		=> time(),
                 'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'R',
-                'InveolvedTable'	=> 'CONFERENZA'
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	=> 'CONFERENZA'
             ]);
 
             //MySQL
@@ -123,8 +123,8 @@
             $insertOneResult = $collection->insertOne([
                 'TimeStamp' 		=> time(),
                 'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'R',
-                'InveolvedTable'	=> 'CONFERENZA'
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	=> 'CONFERENZA'
             ]);
 
             //MySQL
@@ -138,8 +138,8 @@
             $insertOneResult = $collection->insertOne([
                 'TimeStamp' 		=> time(),
                 'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'R',
-                'InveolvedTable'	=> 'CONFERENZA'
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	=> 'CONFERENZA'
             ]);
 
             $queryClassifica = '
@@ -150,6 +150,14 @@
 
             $res = $pdo -> prepare($queryClassifica);
             $res -> execute();
+
+            //MongoDB
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	=> 'VIEW CLASSIFICA'
+            ]);
 
             $classificati = array();
             while($row = $res -> fetch()) {

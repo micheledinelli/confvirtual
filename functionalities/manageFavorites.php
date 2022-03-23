@@ -13,11 +13,17 @@
         
         try {
             
-            // Connection to db
+            // Connection to MySQL db
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
 
+            //Connection to MongoDB
+            require '../vendor/autoload.php';
+            $conn = new MongoDB\Client("mongodb://localhost:27017");
+            $collection = $conn -> CONFVIRTUAL_log -> log;
+
+            //MySQL
             if($mode == "delete") {
                 $query = ('DELETE FROM FAVORITE WHERE Username = :lab1 AND CodicePresentazione = :lab2');
 
@@ -25,6 +31,14 @@
                 $res -> bindValue(":lab1", $username);
                 $res -> bindValue(":lab2", $codice);
                 $res -> execute();
+
+                //MongoDB
+                $insertOneResult = $collection->insertOne([
+                    'TimeStamp' 		=> time(),
+                    'User'				=> $_SESSION['user'],
+                    'OperationType'		=> 'DELETE',
+                    'InvolvedTable'	    => 'FAVORITE'
+                ]);
 
                 // L'ultima operazione è andata a buon fine
                 $_SESSION["opSuccesfull"] = 0;
@@ -40,6 +54,15 @@
                 $res -> bindValue(":lab1", $username);
                 $res -> bindValue(":lab2", $codice);
                 $res -> execute();
+
+                $DATA = array("Username"=>$username, "CodicePresentazione"=>$codice);
+                $insertOneResult = $collection->insertOne([
+                    'TimeStamp' 		=> time(),
+                    'User'				=> $_SESSION['user'],
+                    'OperationType'		=> 'INSERT',
+                    'InvolvedTable'	    => 'FAVORITE',
+                    'Input'				=> $DATA
+                ]);
 
                 $_SESSION["opSuccesfull"] = 0;
                 

@@ -26,11 +26,16 @@
         
         try {
             
-            // Connection to db
+            // Connection to MySQL db
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
+            //MongoDB
+            require '../vendor/autoload.php';
+            $conn = new MongoDB\Client("mongodb://localhost:27017");
+            $collection = $conn -> CONFVIRTUAL_log -> log;	
+
             // Check if the username already exists, if not is inserted into UTENTE
             // Eventually possible to use stored procedure defined in the db
             $query = ('INSERT INTO UTENTE(Username, Password, Nome, Cognome, DataNascita, Luogo) 
@@ -46,6 +51,17 @@
             echo 'User inserted into table UTENTE';
             $_SESSION['user'] = $username;
             $_SESSION['userType'] = "BASE";
+
+            //MongoDB
+            $DATA = array("Username"=>$username, "Password"=>$password, "Nome"=>$name, "Cognome"=>$surname,
+                "DataNascita"=>$date, "Luogo"=>$birthplace);
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'INSERT',
+                'InvolvedTable'	    => 'UTENTE',
+                'Input'				=> $DATA
+            ]);
             
             // Redirect
             header('Location:index.php');

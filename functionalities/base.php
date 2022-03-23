@@ -25,6 +25,12 @@
         $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo -> exec('SET NAMES "utf8"');
 
+        //Connection to MongoDB
+        require '../vendor/autoload.php';
+        $conn = new MongoDB\Client("mongodb://localhost:27017");
+        $collection = $conn -> CONFVIRTUAL_log -> log;	
+
+        //MySQL
         // CONFERENCES
         $query = ('SELECT * FROM CONFERENZA WHERE Svolgimento = "ATTIVA"');
 
@@ -39,7 +45,16 @@
             $conferenza -> annoEdizione = $row["AnnoEdizione"];
             array_push($conferenze, $conferenza);
         }
+
+        //MongoDB
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => 'CONFERENZA'
+        ]);
         
+        //MySQL
         // SESSIONS
         $querySessions = ('SELECT * FROM SESSIONE');
         
@@ -59,6 +74,15 @@
             array_push($sessioni, $sessione);
         }
 
+        //MongoDB
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => 'SESSIONE'
+        ]);
+
+        //MySQL
         $querySessionsPermitted = ('SELECT *
                             FROM REGISTRAZIONE AS R, SESSIONE AS S
                             WHERE R.AcronimoConferenza = S.AcronimoConferenza AND Username = :lab1');
@@ -78,8 +102,17 @@
             array_push($sessionsPermitted, $sessione);
         }
 
-        // PRESENTATIONS
+        //MongoDB
+        $DATA = array("REGISTRAZIONE", "SESSIONE");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
 
+        //MySQL
+        // PRESENTATIONS
         // Considerare l'operazione UNION ma si perderebbe specificità
         // alcuni campi non sono comuni nei tutorial e negli articoli
         // e.g abstract...
@@ -102,6 +135,16 @@
             array_push($articles, $article);
         }
 
+        //MongoDB
+        $DATA = array("PRESENTAZIONE", "P_ARTICOLO");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
+
+        //MySQL
         $queryPresTutorial = 'SELECT * 
                             FROM PRESENTAZIONE AS P, P_TUTORIAL AS PT
                             WHERE P.Codice = PT.CodicePresentazione;
@@ -120,6 +163,16 @@
             array_push($tutorials, $tutorial);
         }
 
+        //MongoDB
+        $DATA = array("PRESENTAZIONE", "P_TUTORIAL");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
+
+        //MySQL
         // FAVORITES
         $query = ('SELECT * 
                 FROM FAVORITE AS F, P_ARTICOLO AS PA, PRESENTAZIONE AS P 
@@ -140,6 +193,16 @@
             array_push($favoritesArticoli, $favoriteArticolo);
         }
 
+        //MongoDB
+        $DATA = array("FAVORITE", "P_ARTICOLO", "PRESENTAZIONE");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
+
+        //MySQL
         $query = ('SELECT * 
                 FROM FAVORITE AS F, P_TUTORIAL AS PT, PRESENTAZIONE AS P 
                 WHERE Username = :lab1 AND F.CodicePresentazione = PT.CodicePresentazione AND PT.CodicePresentazione = P.Codice');
@@ -158,6 +221,15 @@
             $favoriteTutorial -> titolo = $row["Titolo"];
             array_push($favoritesTutorial, $favoriteTutorial);
         }
+
+        //MongoDB
+        $DATA = array("FAVORITE", "P_TUTORIAL", "PRESENTAZIONE");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
 
     ?>
     
