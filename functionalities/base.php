@@ -26,19 +26,14 @@
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
 
-<<<<<<< HEAD
+            //Connection to MongoDB
+            require '../vendor/autoload.php';
+            $conn = new MongoDB\Client("mongodb://localhost:27017");
+            $collection = $conn -> CONFVIRTUAL_log -> log;	
+
+            //MySQL
             // CONFERENCES
             $query = ('SELECT * FROM CONFERENZA WHERE Svolgimento = "ATTIVA"');
-=======
-        //Connection to MongoDB
-        require '../vendor/autoload.php';
-        $conn = new MongoDB\Client("mongodb://localhost:27017");
-        $collection = $conn -> CONFVIRTUAL_log -> log;	
-
-        //MySQL
-        // CONFERENCES
-        $query = ('SELECT * FROM CONFERENZA WHERE Svolgimento = "ATTIVA"');
->>>>>>> d518ce0880685e5fff294f481cc6740be0c9a873
 
             $res = $pdo -> prepare($query);
             $res -> execute();
@@ -184,8 +179,6 @@
             'InvolvedTable'	    => 'CONFERENZA'
         ]);
         
-<<<<<<< HEAD
-=======
         //MySQL
         // SESSIONS
         $querySessions = ('SELECT * FROM SESSIONE');
@@ -353,7 +346,6 @@
             $favoriteTutorial -> titolo = $row["Titolo"];
             array_push($favoritesTutorial, $favoriteTutorial);
         }
->>>>>>> d518ce0880685e5fff294f481cc6740be0c9a873
 
         //MongoDB
         $DATA = array("FAVORITE", "P_TUTORIAL", "PRESENTAZIONE");
