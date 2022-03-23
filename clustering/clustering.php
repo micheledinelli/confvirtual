@@ -11,10 +11,45 @@
     <title>Clustering</title>
 </head>
 <body>
+    <?php
+        session_start();
+        if(time() > $_SESSION['expire']) {
+            session_unset();
+            session_destroy();
+            header('Location:/DBProject2021/landingPage/index.php');
+        } 
 
-    
+        try{
+            // Connection to db
+            $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
+            $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo -> exec('SET NAMES "utf8"');
+
+            $query = '  SELECT COUNT(*) AS NumeroIscrizioni, U.Username AS Username, Tipologia, TIMESTAMPDIFF(YEAR,DataNascita,CURDATE()) AS Eta
+                        FROM REGISTRAZIONE AS R, UTENTE AS U
+                        WHERE U.Username = R.Username AND Tipologia <> "ADMIN"
+                        GROUP BY U.Username';
+             
+            $res = $pdo -> prepare($query);
+            $res -> execute();
+            $dataset = array(); 
+
+            while($row = $res -> fetch())  {
+                $user = new StdClass();
+                $user -> numeroIscrizioni = $row["NumeroIscrizioni"];
+                $user -> username = $row["Username"];
+                $user -> tipologia = $row["Tipologia"];
+                $user -> eta = $row["Eta"];
+                array_push($dataset, $user);
+            }
+           
+        } catch( PDOException $e ) {
+            header('Location:index.php');
+            echo("[ERRORE]".$e->getMessage());
+            exit();
+        }
+    ?>
     <div class="container p-3">
-        
         <div class="container my-2">
             <a class="btn btn-primary" href="../functionalities/admin.php" role="button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
@@ -59,6 +94,10 @@
         </div>
     </div>
 
+    <div id="clusters" class="container text-center my-5">
+        
+    </div>
+
     <script src="kmeans.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script>
@@ -66,7 +105,10 @@
         const statsDiv = document.getElementById("stats");
         const clusters = document.getElementById("select-clusters");
         const rootContent = document.getElementById("root");
+        const clustersDiv = document.getElementById("clusters");
 
+        const dataFromSystem = <?php echo json_encode($dataset); ?>
+        
         var stats = '';
         var numberOfClusters = 2; // deafault
         
@@ -75,17 +117,22 @@
         })
 
         document.getElementById("2d").addEventListener("click", () => {
-            stats = start(2, numberOfClusters);
+            var dataSet = preProcessData(dataFromSystem);
+            stats = start(2, numberOfClusters, dataSet);
             produceStats(stats);
+            printClusters();
         });
 
         document.getElementById("3d").addEventListener("click", () => {
-            stats = start(3, numberOfClusters);
+            var dataSet = preProcessData(dataFromSystem);
+            stats = start(3, numberOfClusters, dataSet);
             produceStats(stats);
+            printClusters();
         });
 
         function produceStats(stats) {
             
+            console.log(mapOfUsers);
             var dynamicContent = `
                 <h3>Stats</h3>
                 <hr>`;
@@ -108,6 +155,34 @@
             dynamicContent += `<p class="text-left text-muted">MSE: ${stats.mse}</p>`; 
 
             statsDiv.innerHTML = dynamicContent;
+        }
+
+        function printClusters() {
+            var dynamicContent = '';
+            dynamicContent += `
+                <div class="accordion" id="accordionExample">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                Visualizza Clusters Utenti
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">`;
+            for(let i = 0; i < dataFromSystem.length; i++) {
+                username = dataFromSystem[i]["username"];
+                centroid = mapOfUsers.get(username);
+                dynamicContent += `<p class="lead">${username} è stato asseganto al cluster con centoride in ${centroid}</p>`;
+                
+            }
+            
+            dynamicContent += ` 
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+           
+            clustersDiv.innerHTML = dynamicContent;
         }
 
     </script>

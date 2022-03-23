@@ -31,6 +31,7 @@
             </ul>
         </div>
         
+        <!--Se loggati viene mostrato il bottone per il menu-->
         <?php
             session_start();
             if (isset($_SESSION['user'])) {

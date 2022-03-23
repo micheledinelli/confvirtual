@@ -20,144 +20,151 @@
             header('Location:/DBProject2021/landingPage/index.php');
         } 
 
-        // Connection to db
-        $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
-        $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $pdo -> exec('SET NAMES "utf8"');
+        try{
+            // Connection to db
+            $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
+            $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo -> exec('SET NAMES "utf8"');
 
-        // CONFERENCES
-        $query = ('SELECT * FROM CONFERENZA WHERE Svolgimento = "ATTIVA"');
+            // CONFERENCES
+            $query = ('SELECT * FROM CONFERENZA WHERE Svolgimento = "ATTIVA"');
 
-        $res = $pdo -> prepare($query);
-        $res -> execute();
-        $conferenze = array(); 
+            $res = $pdo -> prepare($query);
+            $res -> execute();
+            $conferenze = array(); 
 
-        while($row = $res -> fetch()) {
-            $conferenza = new stdClass();
-            $conferenza -> acronimo = $row["Acronimo"];
-            $conferenza -> nome = $row["Nome"];
-            $conferenza -> annoEdizione = $row["AnnoEdizione"];
-            array_push($conferenze, $conferenza);
+            while($row = $res -> fetch()) {
+                $conferenza = new stdClass();
+                $conferenza -> acronimo = $row["Acronimo"];
+                $conferenza -> nome = $row["Nome"];
+                $conferenza -> annoEdizione = $row["AnnoEdizione"];
+                array_push($conferenze, $conferenza);
+            }
+            
+            // SESSIONS
+            $querySessions = ('SELECT * FROM SESSIONE');
+            
+            $res = $pdo -> prepare($querySessions);
+            $res -> execute();
+            $sessioni = array();
+
+            while($row = $res -> fetch()) {
+                $sessione = new stdClass();
+                $sessione -> codice = $row["Codice"];
+                $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
+                $sessione -> titoloSessione = $row["Titolo"];
+                $sessione -> numPresentazioni = $row["NumeroPresentazioni"];
+                $sessione -> oraInizio = $row["OraInizio"];
+                $sessione -> oraFine = $row["OraFine"];
+                $sessione -> data = $row["Data"];
+                array_push($sessioni, $sessione);
+            }
+
+            $querySessionsPermitted = ('SELECT *
+                                FROM REGISTRAZIONE AS R, SESSIONE AS S
+                                WHERE R.AcronimoConferenza = S.AcronimoConferenza AND Username = :lab1');
+            
+            $res = $pdo -> prepare($querySessionsPermitted);
+            $res -> bindValue(":lab1", $_SESSION['user']);
+            $res -> execute();
+
+            $sessionsPermitted = array();
+            while($row = $res -> fetch()) {
+                $sessione = new stdClass();
+                $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
+                $sessione -> titoloSessione = $row["Titolo"];
+                $sessione -> data = $row["Data"];
+                $sessione -> oraInizio = $row["OraInizio"];
+                $sessione -> oraFine = $row["OraFine"];
+                array_push($sessionsPermitted, $sessione);
+            }
+
+            // PRESENTATIONS
+
+            // Considerare l'operazione UNION ma si perderebbe specificità
+            // alcuni campi non sono comuni nei tutorial e negli articoli
+            // e.g abstract...
+            $queryPresArticoli = 'SELECT * 
+                                FROM PRESENTAZIONE AS P, P_ARTICOLO AS PA
+                                WHERE P.Codice = PA.CodicePresentazione;';
+            $res = $pdo -> prepare($queryPresArticoli);
+            $res -> execute();
+
+            $articles = array();
+            while($row = $res -> fetch()) {
+                $article = new stdClass();
+                $article -> codicePresentazione = $row["CodicePresentazione"];
+                $article -> oraInizio = $row["OraInizio"];
+                $article -> oraFine = $row["OraFine"];
+                $article -> tipologia = $row["Tipologia"];
+                $article -> titolo = $row["Titolo"];
+                $article -> presenter = $row["UsernamePresenter"];
+                $article -> stato = $row["StatoSvolgimento"];
+                array_push($articles, $article);
+            }
+
+            $queryPresTutorial = 'SELECT * 
+                                FROM PRESENTAZIONE AS P, P_TUTORIAL AS PT
+                                WHERE P.Codice = PT.CodicePresentazione;
+                                ';
+            $res = $pdo -> prepare($queryPresTutorial);
+            $res -> execute();
+
+            $tutorials = array();
+            while($row = $res -> fetch()) {
+                $tutorial = new stdClass();
+                $tutorial -> codicePresentazione = $row["CodicePresentazione"];
+                $tutorial -> oraInizio = $row["OraInizio"];
+                $tutorial -> oraFine = $row["OraFine"];
+                $tutorial -> tipologia = $row["Tipologia"];
+                $tutorial -> titolo = $row["Titolo"];
+                array_push($tutorials, $tutorial);
+            }
+
+            // FAVORITES
+            $query = ('SELECT * 
+                    FROM FAVORITE AS F, P_ARTICOLO AS PA, PRESENTAZIONE AS P 
+                    WHERE Username = :lab1 AND F.CodicePresentazione = PA.CodicePresentazione AND PA.CodicePresentazione = P.Codice');
+            
+            $res = $pdo -> prepare($query);
+            $res -> bindValue(":lab1", $_SESSION['user']);
+            $res -> execute();
+            
+            $favoritesArticoli = array();
+            while($row = $res -> fetch()) {
+                $favoriteArticolo = new stdClass();
+                $favoriteArticolo -> codicePresentazione = $row["CodicePresentazione"];
+                $favoriteArticolo -> oraInizio = $row["OraInizio"];
+                $favoriteArticolo -> oraFine = $row["OraFine"];
+                $favoriteArticolo -> tipologia = $row["Tipologia"];
+                $favoriteArticolo -> titolo = $row["Titolo"];
+                array_push($favoritesArticoli, $favoriteArticolo);
+            }
+
+            $query = ('SELECT * 
+                    FROM FAVORITE AS F, P_TUTORIAL AS PT, PRESENTAZIONE AS P 
+                    WHERE Username = :lab1 AND F.CodicePresentazione = PT.CodicePresentazione AND PT.CodicePresentazione = P.Codice');
+            
+            $res = $pdo -> prepare($query);
+            $res -> bindValue(":lab1", $_SESSION['user']);
+            $res -> execute();
+
+            $favoritesTutorial = array();
+            while($row = $res -> fetch()) {
+                $favoriteTutorial = new stdClass();
+                $favoriteTutorial -> codicePresentazione = $row["CodicePresentazione"];
+                $favoriteTutorial -> oraInizio = $row["OraInizio"];
+                $favoriteTutorial -> oraFine = $row["OraFine"];
+                $favoriteTutorial -> tipologia = $row["Tipologia"];
+                $favoriteTutorial -> titolo = $row["Titolo"];
+                array_push($favoritesTutorial, $favoriteTutorial);
+            }
+        } catch( PDOException $e ) {
+            header('Location:index.php');
+            echo("[ERRORE]".$e->getMessage());
+            exit();
         }
         
-        // SESSIONS
-        $querySessions = ('SELECT * FROM SESSIONE');
-        
-        $res = $pdo -> prepare($querySessions);
-        $res -> execute();
-        $sessioni = array();
-
-        while($row = $res -> fetch()) {
-            $sessione = new stdClass();
-            $sessione -> codice = $row["Codice"];
-            $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
-            $sessione -> titoloSessione = $row["Titolo"];
-            $sessione -> numPresentazioni = $row["NumeroPresentazioni"];
-            $sessione -> oraInizio = $row["OraInizio"];
-            $sessione -> oraFine = $row["OraFine"];
-            $sessione -> data = $row["Data"];
-            array_push($sessioni, $sessione);
-        }
-
-        $querySessionsPermitted = ('SELECT *
-                            FROM REGISTRAZIONE AS R, SESSIONE AS S
-                            WHERE R.AcronimoConferenza = S.AcronimoConferenza AND Username = :lab1');
-        
-        $res = $pdo -> prepare($querySessionsPermitted);
-        $res -> bindValue(":lab1", $_SESSION['user']);
-        $res -> execute();
-
-        $sessionsPermitted = array();
-        while($row = $res -> fetch()) {
-            $sessione = new stdClass();
-            $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
-            $sessione -> titoloSessione = $row["Titolo"];
-            $sessione -> data = $row["Data"];
-            $sessione -> oraInizio = $row["OraInizio"];
-            $sessione -> oraFine = $row["OraFine"];
-            array_push($sessionsPermitted, $sessione);
-        }
-
-        // PRESENTATIONS
-
-        // Considerare l'operazione UNION ma si perderebbe specificità
-        // alcuni campi non sono comuni nei tutorial e negli articoli
-        // e.g abstract...
-        $queryPresArticoli = 'SELECT * 
-                            FROM PRESENTAZIONE AS P, P_ARTICOLO AS PA
-                            WHERE P.Codice = PA.CodicePresentazione;';
-        $res = $pdo -> prepare($queryPresArticoli);
-        $res -> execute();
-
-        $articles = array();
-        while($row = $res -> fetch()) {
-            $article = new stdClass();
-            $article -> codicePresentazione = $row["CodicePresentazione"];
-            $article -> oraInizio = $row["OraInizio"];
-            $article -> oraFine = $row["OraFine"];
-            $article -> tipologia = $row["Tipologia"];
-            $article -> titolo = $row["Titolo"];
-            $article -> presenter = $row["UsernamePresenter"];
-            $article -> stato = $row["StatoSvolgimento"];
-            array_push($articles, $article);
-        }
-
-        $queryPresTutorial = 'SELECT * 
-                            FROM PRESENTAZIONE AS P, P_TUTORIAL AS PT
-                            WHERE P.Codice = PT.CodicePresentazione;
-                            ';
-        $res = $pdo -> prepare($queryPresTutorial);
-        $res -> execute();
-
-        $tutorials = array();
-        while($row = $res -> fetch()) {
-            $tutorial = new stdClass();
-            $tutorial -> codicePresentazione = $row["CodicePresentazione"];
-            $tutorial -> oraInizio = $row["OraInizio"];
-            $tutorial -> oraFine = $row["OraFine"];
-            $tutorial -> tipologia = $row["Tipologia"];
-            $tutorial -> titolo = $row["Titolo"];
-            array_push($tutorials, $tutorial);
-        }
-
-        // FAVORITES
-        $query = ('SELECT * 
-                FROM FAVORITE AS F, P_ARTICOLO AS PA, PRESENTAZIONE AS P 
-                WHERE Username = :lab1 AND F.CodicePresentazione = PA.CodicePresentazione AND PA.CodicePresentazione = P.Codice');
-        
-        $res = $pdo -> prepare($query);
-        $res -> bindValue(":lab1", $_SESSION['user']);
-        $res -> execute();
-        
-        $favoritesArticoli = array();
-        while($row = $res -> fetch()) {
-            $favoriteArticolo = new stdClass();
-            $favoriteArticolo -> codicePresentazione = $row["CodicePresentazione"];
-            $favoriteArticolo -> oraInizio = $row["OraInizio"];
-            $favoriteArticolo -> oraFine = $row["OraFine"];
-            $favoriteArticolo -> tipologia = $row["Tipologia"];
-            $favoriteArticolo -> titolo = $row["Titolo"];
-            array_push($favoritesArticoli, $favoriteArticolo);
-        }
-
-        $query = ('SELECT * 
-                FROM FAVORITE AS F, P_TUTORIAL AS PT, PRESENTAZIONE AS P 
-                WHERE Username = :lab1 AND F.CodicePresentazione = PT.CodicePresentazione AND PT.CodicePresentazione = P.Codice');
-        
-        $res = $pdo -> prepare($query);
-        $res -> bindValue(":lab1", $_SESSION['user']);
-        $res -> execute();
-
-        $favoritesTutorial = array();
-        while($row = $res -> fetch()) {
-            $favoriteTutorial = new stdClass();
-            $favoriteTutorial -> codicePresentazione = $row["CodicePresentazione"];
-            $favoriteTutorial -> oraInizio = $row["OraInizio"];
-            $favoriteTutorial -> oraFine = $row["OraFine"];
-            $favoriteTutorial -> tipologia = $row["Tipologia"];
-            $favoriteTutorial -> titolo = $row["Titolo"];
-            array_push($favoritesTutorial, $favoriteTutorial);
-        }
 
     ?>
     
@@ -270,7 +277,7 @@
     <script>
         
         const content = document.getElementById("main-content");
-        const userName = <?php echo json_encode($_SESSION["user"]); ?>
+        const userName = <?php echo json_encode($_SESSION["user"]); ?>;
         
         var conferenze = <?php echo json_encode($conferenze); ?>;
 

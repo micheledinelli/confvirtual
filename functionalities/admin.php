@@ -143,7 +143,7 @@
 
                 <li> <a href="#" onclick="addSponsor()">Inserisci Sponsor</a> </li>
                 
-                <li> <a href="../clustering/clustering.html">Viusalizza cluster utenti</a> </li>
+                <li> <a href="../clustering/clustering.php">Viusalizza cluster utenti</a> </li>
                                 
                 <li> <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Valutazioni</a>
                     <ul class="collapse list-unstyled" id="pageSubmenu">

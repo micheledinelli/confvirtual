@@ -31,8 +31,6 @@
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
-            // Check if the username already exists, if not is inserted into UTENTE
-            // Eventually possible to use stored procedure defined in the db
             $query = ('INSERT INTO UTENTE(Username, Password, Nome, Cognome, DataNascita, Luogo) 
                 VALUES(:lab1, :lab2, :lab3, :lab4, :lab5, :lab6)');
             $res = $pdo -> prepare($query);
