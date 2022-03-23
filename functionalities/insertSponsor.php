@@ -31,11 +31,17 @@
         }
 
         try {
-            // Connection to db
+            // Connection to MySQL db
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
 
+            //Connection to MongoDB
+            require '../vendor/autoload.php';
+            $conn = new MongoDB\Client("mongodb://localhost:27017");
+            $collection = $conn -> CONFVIRTUAL_log -> log;
+
+            //MySQL
             if( $bothInsert ) {
 
                 // La procedura inserisce automaticamente anche lo sponsor 
@@ -49,6 +55,18 @@
                 $res -> bindValue(":lab4", $annoEdizione);
 
                 $res -> execute();
+
+                //MongoDB
+                $DATA = array("NomeSponsor"=>$nomeSponsor, "AnnoEdizione"=>$annoEdizione, 
+                    "AcronimoConferenza"=>$acronimoConferenza, "Importo"=>$importo);
+                $insertOneResult = $collection->insertOne([
+                    'TimeStamp' 		=> time(),
+                    'User'				=> $_SESSION['user'],
+                    'OperationType'		=> 'INSERT',
+                    'InvolvedTable'	    => 'SPONSORIZZAZIONE',
+                    'Input'				=> $DATA
+                ]);
+
                 $_SESSION["opSuccesfull"] = 0;
 
                 header('Location: admin.php');
@@ -61,6 +79,17 @@
                 $res -> bindValue(":lab2", $logo, PDO::PARAM_LOB);
 
                 $res -> execute();
+
+                //MongoDB
+                $DATA = array("Nome"=>$nomeSponsor, "Logo"=>$logo);
+                $insertOneResult = $collection->insertOne([
+                    'TimeStamp' 		=> time(),
+                    'User'				=> $_SESSION['user'],
+                    'OperationType'		=> 'INSERT',
+                    'InvolvedTable'	    => 'SPONSOR',
+                    'Input'				=> $DATA
+                ]);
+                
                 $_SESSION["opSuccesfull"] = 0;
 
                 header('Location: admin.php');
@@ -71,6 +100,16 @@
                 $res -> bindValue(":lab1", $nomeSponsor);
 
                 $res -> execute();
+
+                //MongoDB
+                $insertOneResult = $collection->insertOne([
+                    'TimeStamp' 		=> time(),
+                    'User'				=> $_SESSION['user'],
+                    'OperationType'		=> 'INSERT',
+                    'InvolvedTable'	    => 'SPONSOR',
+                    'Input'				=> $nomeSponsor
+                ]);
+
                 $_SESSION["opSuccesfull"] = 0;
 
                 header('Location: admin.php');

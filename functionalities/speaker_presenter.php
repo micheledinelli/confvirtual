@@ -21,21 +21,47 @@
         } 
         
         try{
-            // Connection to db
+            // Connection to MySQL db
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
 
+            //Connetion to MongoDB
+            require '../vendor/autoload.php';
+            $conn = new MongoDB\Client("mongodb://localhost:27017");
+            $collection = $conn -> CONFVIRTUAL_log -> log;	
+
+            //MySQL
             if($_SESSION["userType"] == "SPEAKER") {
                 $query = 'SELECT CurriculumVitae FROM SPEAKER WHERE Username = :lab1';
+                
+                $res = $pdo -> prepare($query);
+                $res -> bindValue(":lab1", $_SESSION["user"]);
+                $res -> execute();
+
+                //MongoDB
+                $insertOneResult = $collection->insertOne([
+                    'TimeStamp' 		=> time(),
+                    'User'				=> $_SESSION['user'],
+                    'OperationType'		=> 'SELECT',
+                    'InvolvedTable'	    => 'SPEAKER'
+                ]);
             
             } elseif($_SESSION["userType"] == "PRESENTER") {
                 $query = 'SELECT CurriculumVitae FROM PRESENTER WHERE Username = :lab1';
+
+                $res = $pdo -> prepare($query);
+                $res -> bindValue(":lab1", $_SESSION["user"]);
+                $res -> execute();
+
+                //MongoDB
+                $insertOneResult = $collection->insertOne([
+                    'TimeStamp' 		=> time(),
+                    'User'				=> $_SESSION['user'],
+                    'OperationType'		=> 'SELECT',
+                    'InvolvedTable'	    => 'PRESENTER'
+                ]);
             }
-            
-            $res = $pdo -> prepare($query);
-            $res -> bindValue(":lab1", $_SESSION["user"]);
-            $res -> execute();
 
             while($row = $res -> fetch()) {
                 $userCurriculum = $row["CurriculumVitae"];
@@ -44,6 +70,14 @@
             $query = 'SELECT * FROM UNIVERSITA';
             $res = $pdo -> prepare($query);            
             $res -> execute();
+
+            //MongoDB
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	    => 'UNIVERSITA'
+            ]);
 
             $università = array(); 
             while($row = $res -> fetch()) {
@@ -55,13 +89,35 @@
 
             if($_SESSION['userType'] == "SPEAKER") {
                 $queryUniAttuale = 'SELECT * FROM SPEAKER AS S WHERE S.Username = :lab1';
+                
+                $res = $pdo -> prepare($queryUniAttuale);
+                $res -> bindValue(":lab1", $_SESSION["user"]);
+                $res -> execute();
+
+                //MongoDB
+                $insertOneResult = $collection->insertOne([
+                    'TimeStamp' 		=> time(),
+                    'User'				=> $_SESSION['user'],
+                    'OperationType'		=> 'SELECT',
+                    'InvolvedTable'	    => 'SPEAKER'
+                ]);
+
             } else {
                 $queryUniAttuale = 'SELECT * FROM  PRESENTER AS P WHERE P.Username = :lab1';
+
+                $res = $pdo -> prepare($queryUniAttuale);
+                $res -> bindValue(":lab1", $_SESSION["user"]);
+                $res -> execute();
+
+                //MongoDB
+                $insertOneResult = $collection->insertOne([
+                    'TimeStamp' 		=> time(),
+                    'User'				=> $_SESSION['user'],
+                    'OperationType'		=> 'SELECT',
+                    'InvolvedTable'	    => 'PRESENTER'
+                ]);
             }
             
-            $res = $pdo -> prepare($queryUniAttuale);
-            $res -> bindValue(":lab1", $_SESSION["user"]);
-            $res -> execute();
             while($row = $res -> fetch()) {
                 $uniAttuale = $row["NomeUniversità"];
                 $dipAttuale = $row["NomeDipartimento"];
@@ -74,6 +130,16 @@
             $res -> bindValue(":lab1", $_SESSION["user"]);
             $res -> execute();
 
+            //MongoDB
+            $DATA = array("SPEAKER_TUTORIAL", "P_TUTORIAL");
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	    => $DATA
+            ]);
+
+            //MySQL
             $tutorialsPermitted = array();
             while($row = $res -> fetch()) {
                 $tutorial = new StdClass();
@@ -89,6 +155,15 @@
             $res = $pdo -> prepare($queyRisorse);
             $res -> bindValue(":lab1", $_SESSION["user"]);
             $res -> execute();
+
+            //MongoDB
+            $DATA = array("RISORSA", "P_TUTORIAL");
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	    => $DATA
+            ]);
 
             $risorse = array();
             while($row = $res -> fetch()) {

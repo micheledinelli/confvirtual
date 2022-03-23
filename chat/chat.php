@@ -20,11 +20,17 @@
         }
 
         try {
-            
+            //Connection to MySQL db
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
+            //Connection to MongoDB
+            require '../vendor/autoload.php';
+            $conn = new MongoDB\Client("mongodb://localhost:27017");
+            $collection = $conn -> CONFVIRTUAL_log -> log;	
+
+            //MySQL
             $queryMessages = ('SELECT *
                             FROM REGISTRAZIONE AS R, SESSIONE AS S
                             WHERE R.AcronimoConferenza = S.AcronimoConferenza AND Username = :lab1');
@@ -33,6 +39,16 @@
             $res -> bindValue(":lab1", $_SESSION['user']);
             $res -> execute();
 
+            //MongoDB
+            $DATA = array("REGISTRAZIONE", "SESSIONE"); 
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	    => $DATA
+            ]);
+
+            //MySQL
             $sessionsPermitted = array();
             while($row = $res -> fetch()) {
                 $sessione = new stdClass();
@@ -54,6 +70,14 @@
                 $res = $pdo -> prepare($query);
                 $res -> bindValue(":lab1", $curCodice);
                 $res -> execute();
+
+                //MongoDB
+                $insertOneResult = $collection->insertOne([
+                    'TimeStamp' 		=> time(),
+                    'User'				=> $_SESSION['user'],
+                    'OperationType'		=> 'SELECT',
+                    'InvolvedTable'	    => 'MESSAGGIO'
+                ]);
                 
                 while($row = $res -> fetch()) {
                     $messaggio = new stdClass();
@@ -177,10 +201,17 @@
     <?php
         function getMessages($codiceSessione){
             try {
+                //Connection to MySQL db
                 $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='root');
                 $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 $pdo -> exec('SET NAMES "utf8"');
                 
+                //Connection to MongoDB
+                require '../vendor/autoload.php';
+                $conn = new MongoDB\Client("mongodb://localhost:27017");
+                $collection = $conn -> CONFVIRTUAL_log -> log;
+
+                //MySQL
                 $queryMessagesSessions = ('SELECT *
                                 FROM MESSAGGIO AS M
                                 WHERE M.ChatID = :lab1');
@@ -191,6 +222,14 @@
                 while($row = $res -> fetch()){
                     echo $row["Testo"];
                 }
+
+                //MongoDB
+                $insertOneResult = $collection->insertOne([
+                    'TimeStamp' 		=> time(),
+                    'User'				=> $_SESSION['user'],
+                    'OperationType'		=> 'SELECT',
+                    'InvolvedTable'	    => 'MESSAGGIO'
+                ]);
 
         }catch( PDOException $e ) {
             echo("[ERRORE]".$e->getMessage());

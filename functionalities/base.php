@@ -26,8 +26,19 @@
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
 
+<<<<<<< HEAD
             // CONFERENCES
             $query = ('SELECT * FROM CONFERENZA WHERE Svolgimento = "ATTIVA"');
+=======
+        //Connection to MongoDB
+        require '../vendor/autoload.php';
+        $conn = new MongoDB\Client("mongodb://localhost:27017");
+        $collection = $conn -> CONFVIRTUAL_log -> log;	
+
+        //MySQL
+        // CONFERENCES
+        $query = ('SELECT * FROM CONFERENZA WHERE Svolgimento = "ATTIVA"');
+>>>>>>> d518ce0880685e5fff294f481cc6740be0c9a873
 
             $res = $pdo -> prepare($query);
             $res -> execute();
@@ -164,7 +175,194 @@
             echo("[ERRORE]".$e->getMessage());
             exit();
         }
+
+        //MongoDB
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => 'CONFERENZA'
+        ]);
         
+<<<<<<< HEAD
+=======
+        //MySQL
+        // SESSIONS
+        $querySessions = ('SELECT * FROM SESSIONE');
+        
+        $res = $pdo -> prepare($querySessions);
+        $res -> execute();
+        $sessioni = array();
+
+        while($row = $res -> fetch()) {
+            $sessione = new stdClass();
+            $sessione -> codice = $row["Codice"];
+            $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
+            $sessione -> titoloSessione = $row["Titolo"];
+            $sessione -> numPresentazioni = $row["NumeroPresentazioni"];
+            $sessione -> oraInizio = $row["OraInizio"];
+            $sessione -> oraFine = $row["OraFine"];
+            $sessione -> data = $row["Data"];
+            array_push($sessioni, $sessione);
+        }
+
+        //MongoDB
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => 'SESSIONE'
+        ]);
+
+        //MySQL
+        $querySessionsPermitted = ('SELECT *
+                            FROM REGISTRAZIONE AS R, SESSIONE AS S
+                            WHERE R.AcronimoConferenza = S.AcronimoConferenza AND Username = :lab1');
+        
+        $res = $pdo -> prepare($querySessionsPermitted);
+        $res -> bindValue(":lab1", $_SESSION['user']);
+        $res -> execute();
+
+        $sessionsPermitted = array();
+        while($row = $res -> fetch()) {
+            $sessione = new stdClass();
+            $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
+            $sessione -> titoloSessione = $row["Titolo"];
+            $sessione -> data = $row["Data"];
+            $sessione -> oraInizio = $row["OraInizio"];
+            $sessione -> oraFine = $row["OraFine"];
+            array_push($sessionsPermitted, $sessione);
+        }
+
+        //MongoDB
+        $DATA = array("REGISTRAZIONE", "SESSIONE");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
+
+        //MySQL
+        // PRESENTATIONS
+        // Considerare l'operazione UNION ma si perderebbe specificità
+        // alcuni campi non sono comuni nei tutorial e negli articoli
+        // e.g abstract...
+        $queryPresArticoli = 'SELECT * 
+                            FROM PRESENTAZIONE AS P, P_ARTICOLO AS PA
+                            WHERE P.Codice = PA.CodicePresentazione;';
+        $res = $pdo -> prepare($queryPresArticoli);
+        $res -> execute();
+
+        $articles = array();
+        while($row = $res -> fetch()) {
+            $article = new stdClass();
+            $article -> codicePresentazione = $row["CodicePresentazione"];
+            $article -> oraInizio = $row["OraInizio"];
+            $article -> oraFine = $row["OraFine"];
+            $article -> tipologia = $row["Tipologia"];
+            $article -> titolo = $row["Titolo"];
+            $article -> presenter = $row["UsernamePresenter"];
+            $article -> stato = $row["StatoSvolgimento"];
+            array_push($articles, $article);
+        }
+
+        //MongoDB
+        $DATA = array("PRESENTAZIONE", "P_ARTICOLO");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
+
+        //MySQL
+        $queryPresTutorial = 'SELECT * 
+                            FROM PRESENTAZIONE AS P, P_TUTORIAL AS PT
+                            WHERE P.Codice = PT.CodicePresentazione;
+                            ';
+        $res = $pdo -> prepare($queryPresTutorial);
+        $res -> execute();
+
+        $tutorials = array();
+        while($row = $res -> fetch()) {
+            $tutorial = new stdClass();
+            $tutorial -> codicePresentazione = $row["CodicePresentazione"];
+            $tutorial -> oraInizio = $row["OraInizio"];
+            $tutorial -> oraFine = $row["OraFine"];
+            $tutorial -> tipologia = $row["Tipologia"];
+            $tutorial -> titolo = $row["Titolo"];
+            array_push($tutorials, $tutorial);
+        }
+
+        //MongoDB
+        $DATA = array("PRESENTAZIONE", "P_TUTORIAL");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
+
+        //MySQL
+        // FAVORITES
+        $query = ('SELECT * 
+                FROM FAVORITE AS F, P_ARTICOLO AS PA, PRESENTAZIONE AS P 
+                WHERE Username = :lab1 AND F.CodicePresentazione = PA.CodicePresentazione AND PA.CodicePresentazione = P.Codice');
+        
+        $res = $pdo -> prepare($query);
+        $res -> bindValue(":lab1", $_SESSION['user']);
+        $res -> execute();
+        
+        $favoritesArticoli = array();
+        while($row = $res -> fetch()) {
+            $favoriteArticolo = new stdClass();
+            $favoriteArticolo -> codicePresentazione = $row["CodicePresentazione"];
+            $favoriteArticolo -> oraInizio = $row["OraInizio"];
+            $favoriteArticolo -> oraFine = $row["OraFine"];
+            $favoriteArticolo -> tipologia = $row["Tipologia"];
+            $favoriteArticolo -> titolo = $row["Titolo"];
+            array_push($favoritesArticoli, $favoriteArticolo);
+        }
+
+        //MongoDB
+        $DATA = array("FAVORITE", "P_ARTICOLO", "PRESENTAZIONE");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
+
+        //MySQL
+        $query = ('SELECT * 
+                FROM FAVORITE AS F, P_TUTORIAL AS PT, PRESENTAZIONE AS P 
+                WHERE Username = :lab1 AND F.CodicePresentazione = PT.CodicePresentazione AND PT.CodicePresentazione = P.Codice');
+        
+        $res = $pdo -> prepare($query);
+        $res -> bindValue(":lab1", $_SESSION['user']);
+        $res -> execute();
+
+        $favoritesTutorial = array();
+        while($row = $res -> fetch()) {
+            $favoriteTutorial = new stdClass();
+            $favoriteTutorial -> codicePresentazione = $row["CodicePresentazione"];
+            $favoriteTutorial -> oraInizio = $row["OraInizio"];
+            $favoriteTutorial -> oraFine = $row["OraFine"];
+            $favoriteTutorial -> tipologia = $row["Tipologia"];
+            $favoriteTutorial -> titolo = $row["Titolo"];
+            array_push($favoritesTutorial, $favoriteTutorial);
+        }
+>>>>>>> d518ce0880685e5fff294f481cc6740be0c9a873
+
+        //MongoDB
+        $DATA = array("FAVORITE", "P_TUTORIAL", "PRESENTAZIONE");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
 
     ?>
     

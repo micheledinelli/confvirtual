@@ -21,19 +21,45 @@
                 $file = $_POST["photo"];
                 
                 if($_SESSION["userType"] == "SPEAKER") {
-                $query = 'UPDATE CONFVIRTUAL.SPEAKER SET Foto = :lab1  WHERE Username = :lab2';
+                    $query = 'UPDATE CONFVIRTUAL.SPEAKER SET Foto = :lab1  WHERE Username = :lab2';
+
+                    $res = $pdo -> prepare($query);
+                    $res -> bindValue(":lab1", $file, PDO::PARAM_LOB);
+                    $res -> bindValue(":lab2", $_SESSION["user"]);
+                    
+                    $res -> execute();
+
+                    //MongoDB
+                    $insertOneResult = $collection->insertOne([
+                        'TimeStamp' 		=> time(),
+                        'User'				=> $_SESSION['user'],
+                        'OperationType'		=> 'UPDATE',
+                        'InvolvedTable'	    => 'SPEAKER',
+                        'Input'				=> $file
+                    ]);
+
+                    $_SESSION["opSuccesfull"] = 0;
             
                 } elseif($_SESSION["userType"] == "PRESENTER") {
                     $query = 'UPDATE CONFVIRTUAL.PRESENTER SET Foto = :lab1  WHERE Username = :lab2';
-                }
-                
-                $res = $pdo -> prepare($query);
-                $res -> bindValue(":lab1", $file, PDO::PARAM_LOB);
-                $res -> bindValue(":lab2", $_SESSION["user"]);
-                
-                $res -> execute();
 
-                $_SESSION["opSuccesfull"] = 0;
+                    $res = $pdo -> prepare($query);
+                    $res -> bindValue(":lab1", $file, PDO::PARAM_LOB);
+                    $res -> bindValue(":lab2", $_SESSION["user"]);
+                    
+                    $res -> execute();
+                    
+                    //MongoDB
+                    $insertOneResult = $collection->insertOne([
+                        'TimeStamp' 		=> time(),
+                        'User'				=> $_SESSION['user'],
+                        'OperationType'		=> 'UPDATE',
+                        'InvolvedTable'	    => 'PRESENTER',
+                        'Input'				=> $file
+                    ]);
+
+                    $_SESSION["opSuccesfull"] = 0;
+                }
 
                 header('Location: speaker_presenter.php'); 
             
