@@ -574,7 +574,7 @@
                         oraFine = articles[i]["oraFine"];
                         titolo = articles[i]["titolo"];
                         stato = articles[i]["stato"];
-                        presenter = articles[i]["usernamePresenter"];
+                        presenter = articles[i]["presenter"];
                         
                         var abilitato = "";
                         var btnColor = "btn-primary";
@@ -669,7 +669,7 @@
                         oraFine = articles[i]["oraFine"];
                         titolo = articles[i]["titolo"];
                         stato = articles[i]["stato"];
-                        presenter = articles[i]["usernamePresenter"];
+                        presenter = articles[i]["presenter"];
                         if(codicePresentazione === id) {
                             dynamicContent += `
                             <tr>
