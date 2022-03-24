@@ -12,15 +12,15 @@ const MAX_ITERATIONS = 50;
 ];*/
 
 var tmp = [
-        ['1', 2, '62'],
-        ['1', 2, '22'],
-        ['1', 2, '54'],
-        ['1', 1, '22'],
-        ['1', 2, '58'],
-        ['1', 2, '21'],
-        ['2', 2, '22'],
-        ['2', 0, '21'],
-        ['2', 1, '22']
+        [1, 2, 62],
+        [1, 2, 22],
+        [1, 2, 54],
+        [1, 1, 22],
+        [1, 2, 58],
+        [1, 2, 21],
+        [2, 2, 22],
+        [2, 0, 21],
+        [2, 1, 22]
 ]
 
 const K = 3;
@@ -53,7 +53,6 @@ function preProcessData(data) {
         dataSet.push(singleData);
         users.set(singleData, username);
     }
-    console.log(dataSet);
     return dataSet;
 }
 
@@ -74,15 +73,17 @@ function restoreDataForStats(results) {
  * @param dataSet
 */
 function start(visualizer, K, dataSet) {
-    results = kMeansAlgorithm(dataSet, K, MAX_ITERATIONS, THRESHOLD);
+    results = kMeansAlgorithm(tmp, K, MAX_ITERATIONS, THRESHOLD);
     if( visualizer === 2 ) {
-        draw2d(dataSet, results.centroids);
+        draw2d(results);
     } else {
-        draw3d(dataSet, results.centroids)
+        draw3d(results);
     }
 
     return results;
 }
+
+//kMeansAlgorithm(tmp, K, MAX_ITERATIONS, THRESHOLD);
 
 /**
  * 
@@ -96,7 +97,6 @@ function start(visualizer, K, dataSet) {
     // Si inizializzano i centroidi
     let centroids = getRandomCentroids(dataset, k);
     let tags = assign(dataset, centroids);
-
     let iterations = 0;
     while(iterations < maxIterations && mse(tags) > threshold) {
         
@@ -118,11 +118,12 @@ function start(visualizer, K, dataSet) {
       iterations: iterations,
       converged: iterations < MAX_ITERATIONS,
       mse : mse(tags),
-      threshold : threshold
+      threshold : threshold,
+      observations : dataset
     };
     
     mapOfUsers = restoreDataForStats(results);
-    console.log(results);
+    //console.log(results);
     return results;
 }
 
@@ -242,7 +243,7 @@ function clusterMean(dataset) {
         var sum = 0;
 
         for(let j = 0; j < dataset.length; j++) {
-            sum += dataset[j][i];
+            sum += Number(dataset[j][i]);
         }
 
         means.push((sum/dataset.length).toFixed(2));
@@ -270,7 +271,6 @@ function relocateCentroids(dataset, tags, k) {
             // non ci sono osservazioni che appartengono ad un centroide è bene riposizionarlo.
             centroid = getRandomCentroids(dataset, 1)[0];
         }
-
         newCentroids.push(centroid);
     }
 
@@ -326,7 +326,10 @@ function domainTranslation(users) {
     return Number(Math.pow(sum, 2)).toFixed(2);
 }
 
-function draw3d(dataset, centroids) {
+function draw3d(results) {
+
+    centroids = results.centroids;
+    dataset = results.observations;
 
     var x = [];
     var y = [];
@@ -426,17 +429,18 @@ function draw3d(dataset, centroids) {
     Plotly.newPlot('root', data, layout);
 }
 
-function draw2d(dataset, centroids) {
+function draw2d(results) {
 
+    centroids = results.centroids;
+    dataset = results.observations;
+    
     var x = [];
-    var z = [];
+    var y = [];
     for(let i = 0; i < dataset.length; i++) {
         x[i] = dataset[i][0];
-        z[i] = dataset[i][2];
+        y[i] = dataset[i][2];
     }
-
-    console.log(z);
-
+    
     var xCentroids = [];
     var yCentroids = [];
 
@@ -445,9 +449,10 @@ function draw2d(dataset, centroids) {
         yCentroids[i] = centroids[i][2];
     }
     
+    
     var trace1 = {
         x: x,
-        y: z,
+        y: y,
         mode: 'markers',
         type: 'scatter',
         name: 'obs'

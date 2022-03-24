@@ -508,7 +508,7 @@ BEGIN
 	CREATE TEMPORARY TABLE ViewAutori
 	SELECT A.Nome AS Autore, S.CodiceArticolo AS CodiceArticolo
 	FROM AUTORE AS A, SCRITTURA AS S, P_ARTICOLO AS PA
-	WHERE A.Nome = S.NomeAutore AND S.CodiceArticolo = 1 AND S.CodiceArticolo = CodicePresentazione;
+	WHERE A.Nome = S.NomeAutore AND S.CodiceArticolo = NEW.CodicePresentazione AND S.CodiceArticolo = CodicePresentazione;
 	
     IF (NEW.UsernamePresenter <> '') THEN
 		IF(New.UsernamePresenter NOT IN (SELECT Username FROM ViewAutori, UTENTE AS U WHERE ViewAutori.Autore = U.Nome)) THEN
@@ -529,7 +529,7 @@ BEGIN
 	CREATE TEMPORARY TABLE ViewAutori
 	SELECT A.Nome AS Autore, S.CodiceArticolo AS CodiceArticolo
 	FROM AUTORE AS A, SCRITTURA AS S, P_ARTICOLO AS PA
-	WHERE A.Nome = S.NomeAutore AND S.CodiceArticolo = 1 AND S.CodiceArticolo = CodicePresentazione;
+	WHERE A.Nome = S.NomeAutore AND S.CodiceArticolo = NEW.CodicePresentazione AND S.CodiceArticolo = CodicePresentazione;
 	
     IF (NEW.UsernamePresenter <> '') THEN
 		IF(New.UsernamePresenter NOT IN (SELECT Username FROM ViewAutori, UTENTE AS U WHERE ViewAutori.Autore = U.Nome)) THEN

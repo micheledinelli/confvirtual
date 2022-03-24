@@ -98,7 +98,7 @@
         
     </div>
 
-    <script src="kmeans.js"></script>
+    <script src="kmeansV1.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script>
 
@@ -117,22 +117,22 @@
         })
 
         document.getElementById("2d").addEventListener("click", () => {
-            var dataSet = preProcessData(dataFromSystem);
-            stats = start(2, numberOfClusters, dataSet);
+            //var dataSet = preProcessData(dataFromSystem);
+            stats = start(2, numberOfClusters);
             produceStats(stats);
-            printClusters();
+            //printClusters();
         });
 
         document.getElementById("3d").addEventListener("click", () => {
-            var dataSet = preProcessData(dataFromSystem);
-            stats = start(3, numberOfClusters, dataSet);
+            //var dataSet = preProcessData(dataFromSystem);
+            stats = start(3, numberOfClusters);
             produceStats(stats);
-            printClusters();
+            //printClusters();
         });
+
 
         function produceStats(stats) {
             
-            console.log(mapOfUsers);
             var dynamicContent = `
                 <h3>Stats</h3>
                 <hr>`;
@@ -157,6 +157,7 @@
             statsDiv.innerHTML = dynamicContent;
         }
 
+        /*
         function printClusters() {
             var dynamicContent = '';
             dynamicContent += `
@@ -183,7 +184,7 @@
             </div>`;
            
             clustersDiv.innerHTML = dynamicContent;
-        }
+        }*/
 
     </script>
 </body>
