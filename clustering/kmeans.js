@@ -11,6 +11,18 @@ const MAX_ITERATIONS = 50;
     [7,1,4]
 ];*/
 
+var tmp = [
+        ['1', 2, '62'],
+        ['1', 2, '22'],
+        ['1', 2, '54'],
+        ['1', 1, '22'],
+        ['1', 2, '58'],
+        ['1', 2, '21'],
+        ['2', 2, '22'],
+        ['2', 0, '21'],
+        ['2', 1, '22']
+]
+
 const K = 3;
 const THRESHOLD = 1500;
 
@@ -23,9 +35,9 @@ var mapOfUsers;
 function preProcessData(data) {
     var dataSet = new Array();
     for(let i = 0; i < data.length; i++) {
-        numIscrizioni = data[i]["numeroIscrizioni"];
+        numIscrizioni = Number(data[i]["numeroIscrizioni"]);
         tipologia = data[i]["tipologia"];
-        eta = data[i]["eta"];
+        eta = Number(data[i]["eta"]);
         username = data[i]["username"];
 
         if(tipologia === "PRESENTER") {
@@ -41,6 +53,7 @@ function preProcessData(data) {
         dataSet.push(singleData);
         users.set(singleData, username);
     }
+    console.log(dataSet);
     return dataSet;
 }
 
@@ -63,7 +76,6 @@ function restoreDataForStats(results) {
 function start(visualizer, K, dataSet) {
     results = kMeansAlgorithm(dataSet, K, MAX_ITERATIONS, THRESHOLD);
     if( visualizer === 2 ) {
-        console.log(dataSet);
         draw2d(dataSet, results.centroids);
     } else {
         draw3d(dataSet, results.centroids)
@@ -418,11 +430,12 @@ function draw2d(dataset, centroids) {
 
     var x = [];
     var z = [];
-
     for(let i = 0; i < dataset.length; i++) {
         x[i] = dataset[i][0];
         z[i] = dataset[i][2];
     }
+
+    console.log(z);
 
     var xCentroids = [];
     var yCentroids = [];

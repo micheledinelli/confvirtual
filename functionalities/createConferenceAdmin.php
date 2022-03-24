@@ -32,7 +32,7 @@
             $collection = $conn -> CONFVIRTUAL_log -> log;	
 
             //MySQL
-            $sql = 'call creaConferenzaAdmin(:lab1, :lab2, :lab3, :lab4, :lab4)';
+            $sql = 'call creaConferenzaAdmin(:lab1, :lab2, :lab3, :lab4)';
 
             $stmt = $pdo->prepare($sql);
 
