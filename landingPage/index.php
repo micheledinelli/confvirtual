@@ -167,7 +167,7 @@
                 $utente -> tipologia = $row['Tipologia'];
                 $utente -> votoMedio = $row['MediaVoto'];
                 array_push($classificati, $utente);
-            }
+            }*/
 
         } catch( PDOException $e ) {
             echo("[ERRORE]".$e->getMessage());

@@ -240,6 +240,8 @@ BEGIN
 END;
 $ DELIMITER ;
 
+
+
 # Aggiunge una nuova sponsorizzazione, se lo sponsor esiste già si inserisce solo 
 # la sponsorizzazione, altrimenti si salva anche il nuovo sponsor
 DELIMITER $
@@ -373,6 +375,21 @@ BEGIN
 END;
 $ DELIMITER ;
 
+# Inserisce una valutazione 
+DELIMITER $ 
+CREATE PROCEDURE InserisciValutazione(IN UsernameAdmin VARCHAR(30), IN Voto int, IN Commento VARCHAR(200), IN Codice int)
+BEGIN
+	START TRANSACTION;
+		IF(EXISTS(SELECT * FROM PRESENTAZIONE AS P WHERE P.Codice = Codice)) THEN
+			INSERT INTO VALUTAZIONE(UsernameAdmin, Voto, Note, CodicePresentazione) VALUES(UsernameAdmin, Voto, Commento, Codice);
+        ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on InserisiciValutazione the specified presentation has not been found';
+        END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
+
 # Aggiunge o modifica un'affiliazione universitaria
 DELIMITER $
 CREATE PROCEDURE AffiliazioneUni(IN NomeUni VARCHAR(30), IN NomeDip VARCHAR(30), IN UsernameIN VARCHAR(30))
@@ -423,6 +440,21 @@ BEGIN
             INSERT INTO RISORSA(UsernameSpeaker, Link, Descrizione, CodiceTutorial) VALUES(UsernameSpeaker, Link, Descrizione, CodiceTutorial);
 		ELSE 
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AggiungiSpeakerTutorialRel the specified speaker (or tutorial) has not been found';
+        END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
+DELIMITER $
+CREATE PROCEDURE AssociaSpeaker(IN UsernameSpeaker VARCHAR(30), IN CodiceTutorial INT)
+BEGIN
+	START TRANSACTION;
+		IF(EXISTS(SELECT * FROM SPEAKER AS S WHERE S.Username = UsernameSpeaker) AND
+			EXISTS (SELECT * FROM P_TUTORIAL AS PT WHERE PT.CodicePresentazione = CodiceTutorial)) THEN
+				INSERT SPEAKER_TUTORIAL (UsernameSpeaker, CodiceTutorial) VALUES (UsernameSpeaker, CodiceTutorial);
+		ELSE 
+			SELECT * FROM SPEAKER_TUTORIAL;
+			#SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AssociaSpeaker the specified speaker (or tutorial) has not been found';
         END IF;
     COMMIT WORK;
 END;
