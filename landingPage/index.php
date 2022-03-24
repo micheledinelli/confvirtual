@@ -25,9 +25,13 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#ourSponsors">I nostri sponsor</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#classifica">Classifica migliori speaker/utenti</a>
+                </li>
             </ul>
         </div>
         
+        <!--Se loggati viene mostrato il bottone per il menu-->
         <?php
             session_start();
             if (isset($_SESSION['user'])) {
@@ -84,36 +88,77 @@
         }
          
         try {
+            //MySQL
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
+            //MongoDB
+            require '../vendor/autoload.php';
+            $conn = new MongoDB\Client("mongodb://localhost:27017");
+            $collection = $conn -> CONFVIRTUAL_log -> log;
+
+            //MySQL
             $query1 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.CONFERENZA WHERE Svolgimento = 'COMPLETATA'");
             $res = $pdo -> prepare($query1);
             $res -> execute();
             $row = $res -> fetch();
             $conf = $row["Counter"];
 
+            //MongoDB
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	=> 'CONFERENZA'
+            ]);
+
+            //MySQL
             $query2 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.CONFERENZA WHERE Svolgimento = 'ATTIVA'");
             $res = $pdo -> prepare($query2);
             $res -> execute();
             $row = $res -> fetch();
             $confAttive = $row["Counter"];
 
+            //MongoDB
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	=> 'CONFERENZA'
+            ]);
+
+            //MySQL
             $query3 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.UTENTE");
             $res = $pdo -> prepare($query3);
             $res -> execute();
             $row = $res -> fetch();
             $numUtenti = $row["Counter"];
-            /*
+
+            //MongoDB
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	=> 'CONFERENZA'
+            ]);
+
             $queryClassifica = '
-                SELECT ROUND(AVG(Voto),1) AS MediaVoto, Username, Tipologia
-                FROM CLASSIFICA
-                GROUP BY Username, Tipologia
-                order by voto DESC;';
+            SELECT ROUND(AVG(Voto),1) AS MediaVoto, Username, Tipologia
+            FROM CLASSIFICA
+            GROUP BY Username, Tipologia
+            order by ROUND(AVG(Voto),1) DESC';
 
             $res = $pdo -> prepare($queryClassifica);
             $res -> execute();
+
+            //MongoDB
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	=> 'VIEW CLASSIFICA'
+            ]);
 
             $classificati = array();
             while($row = $res -> fetch()) {
@@ -200,7 +245,6 @@
         </div>
     </div>
 
-
     <div class="container-fluid bg-light mt-5 h-75vh" id="classifica">
         <div class="container jumbotron text-center pt-5">
             <h1 class="display-4">I migliori speaker e presentatori</h1>
@@ -213,7 +257,7 @@
             <p class="lead small">I voti sono inseriti dagli admin della piattafroma</p>
         </div>
 
-        <div id="my-carousel" data-interval="5000" class="container carousel slide carousel-fade w-75 pb-5" data-ride="carousel" style="margin-top:50px;">
+        <div id="my-carousel" data-interval="2000" class="container carousel slide carousel-fade w-75 pb-5" data-ride="carousel" style="margin-top:50px;">
             <ol class="carousel-indicators">
                 <li data-target="#my-carousel" data-slide-to="0" class="active"></li>
                 <li data-target="#my-carousel" data-slide-to="1"></li>
@@ -250,7 +294,7 @@
                         </div>
                         <div class="col-md-2">
                             <h6 class="text-uppercase font-weight-bold">
-                                <a href="sideParts/mail.php" class="text-white" id="contact-us">Contact us</a>
+                                <a href="sideParts/contactUs.html" class="text-white" id="contact-us">Contact us</a>
                             </h6>
                         </div>
                     </div>

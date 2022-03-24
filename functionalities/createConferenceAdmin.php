@@ -21,12 +21,18 @@
 
         try {
             
-            // Connection to db
+            // Connection to MySQL db
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
-            $sql = 'call creaConferenzaAdmin(:lab1, :lab2, :lab3, :lab4, :lab4)';
+            //Connection to MongoDB
+            require '../vendor/autoload.php';
+            $conn = new MongoDB\Client("mongodb://localhost:27017");
+            $collection = $conn -> CONFVIRTUAL_log -> log;	
+
+            //MySQL
+            $sql = 'call creaConferenzaAdmin(:lab1, :lab2, :lab3, :lab4)';
 
             $stmt = $pdo->prepare($sql);
 
@@ -37,6 +43,38 @@
 
             $stmt->execute();
 
+            //MongoDB
+            $DATA = array("Nome"=>$nomeConferenza, "Acronimo"=>$acronimo, "AnnoEdizione"=>$annoEdizione,
+                "Svolgimento"=>"*ENUM*");
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'INSERT',
+                'InvolvedTable'	    => 'CONFERENZA',
+                'Input'				=> $DATA
+            ]);
+
+            $DATA = array("Username"=>$usernameAdmin, "AcronimoConferenza"=>$acronimo,
+                "AnnoEdizione"=>$annoEdizione);
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'INSERT',
+                'InvolvedTable'	    => 'REGISTRAZIONE',
+                'Input'				=> $DATA
+            ]);
+
+            $DATA = array("UsernameAdmin"=>$usernameAdmin, "AcronimoConferenza"=>$acronimo,
+                "AnnoEdizione"=>$annoEdizione);
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'INSERT',
+                'InvolvedTable'	    => 'CREAZIONE',
+                'Input'				=> $DATA
+            ]);
+
+            //MySQL
             $sql = 'call InserisciDateSvoglimento(:lab1, :lab2, :lab3, :lab4)';
             
             $stmt = $pdo->prepare($sql);
@@ -47,6 +85,17 @@
             $stmt->bindValue(':lab4', $dataFine);
 
             $stmt->execute();
+
+            //MongoDB
+            $DATA = array("AcronimoConferenza"=>$acronimo, "AnnoEdizione"=>$annoEdizione, 
+                "DataInizio"=>$dataInizio, "DataFine"=>$dataFine);
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'INSERT',
+                'InvolvedTable'	    => 'DATESVOLGIMENTO',
+                'Input'				=> $DATA
+            ]);
 
             // L'ultima operazione è andata a buon fine
             $_SESSION["opSuccesfull"] = 0;

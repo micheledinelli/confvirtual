@@ -212,7 +212,6 @@ CREATE TABLE MESSAGGIO(
 	FOREIGN KEY(ChatID) REFERENCES SESSIONE(Codice)
 )ENGINE="INNODB";
 
-
 # Stored Procedures
 
 # Iserisce un nuovo utente
@@ -312,7 +311,7 @@ BEGIN
 			IF(EXISTS(SELECT * FROM SESSIONE AS S WHERE S.Codice = CodiceSessione)) THEN
 				INSERT INTO PRESENTAZIONE(CodiceSessione, OraInizio, OraFine, Tipologia) VALUES(CodiceSessione, OraInizio, OraFine, "ARTICOLO");
                 
-                SET lastInserted = (SELECT Codice FROM PRESENTAZIONE WHERE Codice = (SELECT MAX(Codice) FROM PRESENTAZIONE));
+                SET lastInserted = (SELECT Codice FROM PRESENTAZIONE WHERE Codice IN (SELECT MAX(Codice) FROM PRESENTAZIONE));
                 
                 # Possibile specificare o meno il nome del presenter
                 # Se viene inserito dopo parte il trigger che aggiorna il campo "StatoSvolgimento"
@@ -476,6 +475,20 @@ BEGIN
 END;
 $ DELIMITER ;
 
+DELIMITER $
+CREATE PROCEDURE AssociaSpeaker(IN UsernameSpeaker VARCHAR(30), IN CodiceTutorial INT)
+BEGIN
+	START TRANSACTION;
+		IF(EXISTS(SELECT * FROM SPEAKER AS S WHERE S.Username = UsernameSpeaker) AND
+			EXISTS (SELECT * FROM P_TUTORIAL AS PT WHERE PT.CodicePresentazione = CodiceTutorial)) THEN
+				INSERT INTO SPEAKER_TUTORIAL(UsernameSpeaker, CodiceTutorial) VALUES(UsernameSpeaker, CodiceTutorial);
+		ELSE 
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AssociaSpeaker the specified speaker (or tutorial) has not been found';
+        END IF;
+    COMMIT WORK;
+END;
+$ DELIMITER ;
+
 ######## TRIGGER #########
 
 # Incrementa il campo totale sponsorizzazioni ogni volta che si aggiunge uno sponsor per una determinata conferenza
@@ -514,23 +527,50 @@ BEGIN
 END;
 $ DELIMITER ;
 
-/*
+# Controlla che il presenter inserito sia un autore dell'articolo
+# questo triggere copre il caso in cui si inserisca una presentazione
+# di articolo e contestulamente si associa anche il presenter
+# (una singola operazione di insert)
 DELIMITER $
-CREATE TRIGGER CheckAutoreArticolo
+CREATE TRIGGER CheckAutoreArticoloInsert
 BEFORE INSERT ON P_ARTICOLO
 FOR EACH ROW 
 BEGIN
-	IF(NEW.UsernamePresenter IS NOT NULL AND NEW.UsernamePresenter <> '') THEN
-        IF(NOT EXISTS( SELECT * FROM P_ARTICOLO AS P WHERE P.CodicePresentazione = ANY(SELECT CodiceArticolo FROM SCRITTURA AS S WHERE NEW.CodicePresentazione = S.CodiceArticolo AND
-		S.NomeAutore IN (SELECT Nome FROM UTENTE AS U WHERE U.Username = NEW.UsernamePresenter)))) THEN
-		
-			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NON AUTORE';
-		
-        END IF;
+	DROP TEMPORARY TABLE IF EXISTS ViewAutori;
+	CREATE TEMPORARY TABLE ViewAutori
+	SELECT A.Nome AS Autore, S.CodiceArticolo AS CodiceArticolo
+	FROM AUTORE AS A, SCRITTURA AS S, P_ARTICOLO AS PA
+	WHERE A.Nome = S.NomeAutore AND S.CodiceArticolo = 1 AND S.CodiceArticolo = CodicePresentazione;
+	
+    IF (NEW.UsernamePresenter <> '') THEN
+		IF(New.UsernamePresenter NOT IN (SELECT Username FROM ViewAutori, UTENTE AS U WHERE ViewAutori.Autore = U.Nome)) THEN
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on trigger CheckAutoreArticolo: the specified Username does not belongs to an author';
+		END IF;
     END IF;
 END;
 $ DELIMITER ;
-*/
+
+# Gestisce il caso di cui sopra
+# però considerando un'associazione successiva
+DELIMITER $
+CREATE TRIGGER CheckAutoreArticoloUpdate
+BEFORE UPDATE ON P_ARTICOLO
+FOR EACH ROW 
+BEGIN
+	DROP TEMPORARY TABLE IF EXISTS ViewAutori;
+	CREATE TEMPORARY TABLE ViewAutori
+	SELECT A.Nome AS Autore, S.CodiceArticolo AS CodiceArticolo
+	FROM AUTORE AS A, SCRITTURA AS S, P_ARTICOLO AS PA
+	WHERE A.Nome = S.NomeAutore AND S.CodiceArticolo = 1 AND S.CodiceArticolo = CodicePresentazione;
+	
+    IF (NEW.UsernamePresenter <> '') THEN
+		IF(New.UsernamePresenter NOT IN (SELECT Username FROM ViewAutori, UTENTE AS U WHERE ViewAutori.Autore = U.Nome)) THEN
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on trigger CheckAutoreArticolo: the specified Username does not belongs to an author';
+		END IF;
+    END IF;
+END;
+$ DELIMITER ;
+
 DELIMITER $
 CREATE TRIGGER CheckOrariMessaggi
 BEFORE INSERT ON MESSAGGIO
@@ -563,7 +603,7 @@ BEGIN
     # risultato dell'update
 	CREATE TEMPORARY TABLE TMP
 	SELECT * FROM MaxDataConferenze;
-    
+
 	UPDATE CONFERENZA SET SVOLGIMENTO = "COMPLETATA" WHERE Acronimo IN (SELECT Acronimo FROM TMP WHERE MaxData < CURRENT_DATE);
 
 	DROP TEMPORARY TABLE TMP;

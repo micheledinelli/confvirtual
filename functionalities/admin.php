@@ -18,11 +18,17 @@
             session_destroy();
             header('Location:/DBProject2021/landingPage/index.php');
         } 
-        // Connection to db
+        // Connection to MySQL db
         $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user = 'root', $pass = 'root');
         $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo -> exec('SET NAMES "utf8"');
 
+        //Connection to MongoDB
+        require '../vendor/autoload.php';
+        $conn = new MongoDB\Client("mongodb://localhost:27017");
+        $collection = $conn -> CONFVIRTUAL_log -> log;	
+
+        //MySQL
         //creating query for active conferences
         $query = ('SELECT * FROM CONFERENZA WHERE Svolgimento = "ATTIVA"');
 
@@ -38,6 +44,15 @@
             array_push($conferenze, $conferenza);
         }
 
+        //MongoDB
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => 'CONFERENZA'
+        ]);
+
+        //MySQL
         //creating query for sessions
         $querySessions = ('SELECT * FROM SESSIONE');
         
@@ -80,6 +95,15 @@
             array_push($presentazioni, $presentazione);
         }
 
+        //MongoDB
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => 'SESSIONE'
+        ]);
+
+        //MySQL
         //creating query for tutorials
         $queryTutorials = ('SELECT * FROM P_TUTORIAL AS T, PRESENTAZIONE AS P WHERE T.CodicePresentazione = P.Codice');
 
@@ -98,6 +122,16 @@
             array_push($tutorials, $tutorial);
         }
 
+        //MongoDB
+        $DATA = array("P_TUTORIAL", "PRESENTAZIONE");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
+
+        //MySQL
         //creating query for articoli
         $queryArticoli = ('SELECT * FROM P_ARTICOLO AS A, PRESENTAZIONE AS P WHERE A.CodicePresentazione = P.Codice AND A.UsernamePresenter IS NULL');
 
@@ -116,6 +150,16 @@
             array_push($articoli, $articolo);
         }
 
+        //MongoDB
+        $DATA = array("P_ARTICOLO", "PRESENTAZIONE");
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => $DATA
+        ]);
+
+        //MySQL
         //creating query for speakers
         $querySpeakers = ('SELECT * FROM SPEAKER');
 
@@ -130,7 +174,15 @@
             $speaker -> username = $row["Username"];
             array_push($speakers, $speaker);
         }
+        //MongoDB
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => 'SPEAKER'
+        ]);
 
+        //MySQL
         //creating query for presenters
         $queryPresenters = ('SELECT * FROM PRESENTER');
 
@@ -151,7 +203,13 @@
         
         array_push($presenters, $presenter);
 
-
+        //MongoDB
+        $insertOneResult = $collection->insertOne([
+            'TimeStamp' 		=> time(),
+            'User'				=> $_SESSION['user'],
+            'OperationType'		=> 'SELECT',
+            'InvolvedTable'	    => 'PRESENTER'
+        ]);
     ?>
 
     <div class="wrapper">
@@ -181,7 +239,7 @@
 
                 <li> <a href="#" onclick="addSponsor()">Inserisci Sponsor</a> </li>
                 
-                <li> <a href="../clustering/clustering.html">Viusalizza cluster utenti</a> </li>
+                <li> <a href="../clustering/clustering.php">Viusalizza cluster utenti</a> </li>
                                 
                 <li> <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Valutazioni</a>
                     <ul class="collapse list-unstyled" id="pageSubmenu">

@@ -14,9 +14,7 @@
         session_start();
         
         $_SESSION['start'] = time(); 
-
         $inactive = 2400; //40 minutes in seconds
-
         $_SESSION['expire'] = time() + $inactive;
 
         $username = $_POST["username"];
@@ -24,10 +22,17 @@
         
         // Connection to db to save data
         try {
+            //MySQL
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
+
+            //MongoDB
+            require '../vendor/autoload.php';
+            $conn = new MongoDB\Client("mongodb://localhost:27017");
+            $collection = $conn -> CONFVIRTUAL_log -> log;	
             
+            //MySQL
             $query = ("SELECT COUNT(*) AS Counter, Tipologia 
                         FROM CONFVIRTUAL.UTENTE 
                         WHERE Username = :lab1 AND Password = :lab2");
@@ -36,7 +41,15 @@
             $res -> bindValue(":lab1", $username);
             $res -> bindValue(":lab2", $password);
             $res -> execute();
-        
+            
+            //MongoDB
+            $insertOneResult = $collection->insertOne([
+                'TimeStamp' 		=> time(),
+                'User'				=> $_SESSION['user'],
+                'OperationType'		=> 'SELECT',
+                'InvolvedTable'	    => 'UTENTE'
+            ]);
+
             $row = $res -> fetch();
             $_SESSION['userType'] = $row["Tipologia"];
 

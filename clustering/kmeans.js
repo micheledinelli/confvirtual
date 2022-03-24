@@ -1,5 +1,5 @@
 const MAX_ITERATIONS = 50;
-const dataset = [
+/*const dataset = [
     [21,0,33],
     [22,0,34],
     [29,0,30],
@@ -9,21 +9,76 @@ const dataset = [
     [6,1,5],
     [8,1,2],
     [7,1,4]
-];
+];*/
+
+var tmp = [
+        ['1', 2, '62'],
+        ['1', 2, '22'],
+        ['1', 2, '54'],
+        ['1', 1, '22'],
+        ['1', 2, '58'],
+        ['1', 2, '21'],
+        ['2', 2, '22'],
+        ['2', 0, '21'],
+        ['2', 1, '22']
+]
+
 const K = 3;
 const THRESHOLD = 1500;
+
+// Mappa vettore preprocessato => username associato
+const users = new Map();
+
+// Mappa Utenti => Cluster associtato
+var mapOfUsers;
+
+function preProcessData(data) {
+    var dataSet = new Array();
+    for(let i = 0; i < data.length; i++) {
+        numIscrizioni = Number(data[i]["numeroIscrizioni"]);
+        tipologia = data[i]["tipologia"];
+        eta = Number(data[i]["eta"]);
+        username = data[i]["username"];
+
+        if(tipologia === "PRESENTER") {
+            tipologia = 0;
+        } else if(tipologia === "SPEAKER") {
+            tipologia = 1;
+        } else if(tipologia === "BASE") {
+            tipologia = 2;
+        }
+
+        singleData = [numIscrizioni, tipologia, eta];
+
+        dataSet.push(singleData);
+        users.set(singleData, username);
+    }
+    console.log(dataSet);
+    return dataSet;
+}
+
+function restoreDataForStats(results) {
+    usersCentroids = new Map();
+    for(let i = 0; i < results.k; i++) {
+        for(let j = 0; j < results.clusters[i]["observations"].length; j++) {
+            usersCentroids.set(users.get(results.clusters[i]["observations"][j]), results.clusters[i].centroid);
+        }
+    }
+    return usersCentroids;
+}
 
 /**
  * 
  * @param {*} visualizer 2 o 3(2D o 3D)
  * @param K numero di cluster
+ * @param dataSet
 */
-function start(visualizer, K) {
-    results = kMeansAlgorithm(dataset, K, MAX_ITERATIONS, THRESHOLD);
+function start(visualizer, K, dataSet) {
+    results = kMeansAlgorithm(dataSet, K, MAX_ITERATIONS, THRESHOLD);
     if( visualizer === 2 ) {
-        draw2d(dataset, results.centroids);
+        draw2d(dataSet, results.centroids);
     } else {
-        draw3d(dataset, results.centroids)
+        draw3d(dataSet, results.centroids)
     }
 
     return results;
@@ -66,6 +121,7 @@ function start(visualizer, K) {
       threshold : threshold
     };
     
+    mapOfUsers = restoreDataForStats(results);
     console.log(results);
     return results;
 }
@@ -374,11 +430,12 @@ function draw2d(dataset, centroids) {
 
     var x = [];
     var z = [];
-
     for(let i = 0; i < dataset.length; i++) {
         x[i] = dataset[i][0];
         z[i] = dataset[i][2];
     }
+
+    console.log(z);
 
     var xCentroids = [];
     var yCentroids = [];
@@ -408,5 +465,3 @@ function draw2d(dataset, centroids) {
       
       Plotly.newPlot('root', data);
 }
-
-kMeansAlgorithm(dataset, K, MAX_ITERATIONS, THRESHOLD);
