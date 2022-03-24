@@ -3,11 +3,13 @@ call confvirtual.InserisciUtente('mic', 'micki', 'Michele', 'Dinelli', '2000-07-
 call confvirtual.InserisciUtente('benze', 'bra', 'Filippo', 'Brajucha', '2000-11-10', 'Treviso');
 call confvirtual.InserisciUtente('pino', 'accio', 'Youssef', 'Hanna', '2000-02-21', 'VDA');
 call confvirtual.InserisciUtente('fede', 'bella', 'Federico', 'Bellati', '2000-01-11', 'VDA');
+call confvirtual.InserisciUtente('bepo', 'fachine', 'Gabriel', 'Pitti', '2000-09-29', 'VDA');
 
 call confvirtual.CambiaRuolo('mic', 'PRESENTER');
 call confvirtual.CambiaRuolo('benze', 'ADMIN');
 call confvirtual.CambiaRuolo('pino', 'SPEAKER');
 call confvirtual.CambiaRuolo('fede', 'SPEAKER');
+call confvirtual.CambiaRuolo('bepo', 'PRESENTER');
 
 call confvirtual.CreaConferenzaAdmin('IEEEConference', 'benze', 'IEEE', 2022);
 call confvirtual.CreaConferenzaAdmin('MLConference', 'benze', 'MLC', 2022);
@@ -23,7 +25,7 @@ call confvirtual.CreaSessione('AI4H', 'AI4H1', 2022, '2022-05-3', '17:00:00', '1
 call confvirtual.CreaSessione('AI4H', 'AI4H2', 2022, '2022-05-4', '15:00:00', '15:30:00', 'www.teams.com');
 
 call confvirtual.InserisciArticolo(1, '11:00:00', '13:00:00', 'Le pinacce', 100, '');
-call confvirtual.InserisciArticolo(2, '11:30:00', '13:00:00', 'Le pinacce P.2', 100, '');
+call confvirtual.InserisciArticolo(2, '11:30:00', '13:00:00', 'Le pinacce Pt2', 100, '');
 call confvirtual.InserisciTutorial(2, '12:00:00', '13:40:00', 'Michele in viaggio', 'mic era in viaggio blah blah blah');
 call confvirtual.InserisciTutorial(1, '12:00:00', '12:45:00', 'Pino insegna JS', 'Pino insegna Js');
 call confvirtual.InserisciTutorial(3, '17:30:00', '17:40:00', 'Pino insegna CSS', 'Pino insegna CSS');
@@ -65,13 +67,14 @@ INSERT INTO FAVORITE(Username, CodicePresentazione) VALUES("mic", "3");
 INSERT INTO SCRITTURA(NomeAutore, CognomeAutore, CodiceArticolo) VALUES("Youssef", "Hanna", 1);
 */
 
-call confvirtual.AssociaPresenter('mic', 1);
-call confvirtual.AssociaPresenter('mic', 2);
+#call confvirtual.AssociaPresenter('mic', 1);
+#call confvirtual.AssociaPresenter('mic', 2);
 call confvirtual.AssociaSpeaker('pino', 3);
 call confvirtual.AssociaSpeaker('fede', 4);
 
+call confvirtual.InserisciValutazione('benze',10,'Molto bello, a dir poco fantastico', 2);
+
 INSERT INTO VALUTAZIONE(UsernameAdmin, Voto, CodicePresentazione) VALUES("benze",10,1);
-INSERT INTO VALUTAZIONE(UsernameAdmin, Voto, CodicePresentazione) VALUES("benze",7,2);
+#INSERT INTO VALUTAZIONE(UsernameAdmin, Voto, CodicePresentazione) VALUES("benze",7,2);
 INSERT INTO VALUTAZIONE(UsernameAdmin, Voto, CodicePresentazione) VALUES("benze", 5, 3);
 INSERT INTO VALUTAZIONE(UsernameAdmin, Voto, CodicePresentazione) VALUES("benze", 9, 4);
-
