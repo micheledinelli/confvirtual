@@ -105,11 +105,11 @@
             $res -> execute();
             $row = $res -> fetch();
             $numUtenti = $row["Counter"];
-
+            /*
             $queryClassifica = '
                 SELECT ROUND(AVG(Voto),1) AS MediaVoto, Username, Tipologia
                 FROM CLASSIFICA
-                GROUP BY Username
+                GROUP BY Username, Tipologia
                 order by voto DESC;';
 
             $res = $pdo -> prepare($queryClassifica);
@@ -122,7 +122,7 @@
                 $utente -> tipologia = $row['Tipologia'];
                 $utente -> votoMedio = $row['MediaVoto'];
                 array_push($classificati, $utente);
-            }
+            }*/
 
         } catch( PDOException $e ) {
             echo("[ERRORE]".$e->getMessage());

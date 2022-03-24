@@ -9,9 +9,10 @@
 <body>
     <?php
         session_start();
-        $usernameSpeaker = $_POST['user'];
-        $codiceTutorial = $_POST['codiceTutorial'];
-        $titolo = $_POST['titolo'];
+        $usernameAdmin = $_SESSION['user'];
+        $voto = $_POST['voto'];
+        $commento = $_POST['commento'];
+        $codicePresentazione = $_POST['codice'];
         
         try {
             
@@ -20,12 +21,14 @@
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
-            $sql = 'call associaSpeaker(:lab1, :lab2)';
+            $sql = 'call inserisciValutazione(:lab1, :lab2, :lab3, :lab4)';
 
             $stmt = $pdo->prepare($sql);
 
-            $stmt->bindValue(':lab1', $usernameSpeaker);
-            $stmt->bindValue(':lab2', $codiceTutorial);
+            $stmt->bindValue(':lab1', $usernameAdmin);
+            $stmt->bindValue(':lab2', $voto);
+            $stmt->bindValue(':lab3', $commento);
+            $stmt->bindValue(':lab4', $codicePresentazione);
             
             $stmt->execute();
 
@@ -33,7 +36,7 @@
             $_SESSION["opSuccesfull"] = 0;
 
             // Redirect
-            header('Location:admin.php');
+            //header('Location:admin.php');
             
             $pdo = null;
 

@@ -9,10 +9,10 @@
 <body>
     <?php
         session_start();
-        $usernameSpeaker = $_POST['username'];
+        $usernamePresenter = $_POST['username'];
         $codicePresentazione = $_POST['codicePresentazione'];
        
-        echo $usernameSpeaker;
+        echo $usernamePresenter;
         echo $codicePresentazione;
         
         try {
@@ -22,11 +22,11 @@
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
             
-            $sql = 'call AssociaSpeaker(:lab1, :lab2)';
+            $sql = 'call associaPresenter(:lab1, :lab2)';
 
             $stmt = $pdo->prepare($sql);
 
-            $stmt->bindValue(':lab1', $usernameSpeaker);
+            $stmt->bindValue(':lab1', $usernamePresenter);
             $stmt->bindValue(':lab2', $codicePresentazione);
             
             $stmt->execute();
