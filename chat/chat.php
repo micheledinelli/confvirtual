@@ -20,7 +20,7 @@
         }
 
         try {
-            //Connection to MySQL db
+            
             $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='root');
             $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo -> exec('SET NAMES "utf8"');
@@ -30,7 +30,6 @@
             $conn = new MongoDB\Client("mongodb://localhost:27017");
             $collection = $conn -> CONFVIRTUAL_log -> log;	
 
-            //MySQL
             $queryMessages = ('SELECT *
                             FROM REGISTRAZIONE AS R, SESSIONE AS S
                             WHERE R.AcronimoConferenza = S.AcronimoConferenza AND Username = :lab1');
@@ -39,20 +38,17 @@
             $res -> bindValue(":lab1", $_SESSION['user']);
             $res -> execute();
 
-            //MongoDB
-            $DATA = array("REGISTRAZIONE", "SESSIONE"); 
+            $tables = array("REGISTRAZIONE", "SESSIONE");
             $insertOneResult = $collection->insertOne([
                 'TimeStamp' 		=> time(),
                 'User'				=> $_SESSION['user'],
                 'OperationType'		=> 'SELECT',
-                'InvolvedTable'	    => $DATA
+                'InvolvedTable'	    => $tables
             ]);
 
-            //MySQL
             $sessionsPermitted = array();
             while($row = $res -> fetch()) {
                 $sessione = new stdClass();
-                $sessione -> codiceSessione = $row["Codice"];
                 $sessione -> acronimoConferenza = $row["AcronimoConferenza"];
                 $sessione -> codiceSessione = $row["Codice"];
                 $sessione -> titoloSessione = $row["Titolo"];
@@ -70,14 +66,6 @@
                 $res = $pdo -> prepare($query);
                 $res -> bindValue(":lab1", $curCodice);
                 $res -> execute();
-
-                //MongoDB
-                $insertOneResult = $collection->insertOne([
-                    'TimeStamp' 		=> time(),
-                    'User'				=> $_SESSION['user'],
-                    'OperationType'		=> 'SELECT',
-                    'InvolvedTable'	    => 'MESSAGGIO'
-                ]);
                 
                 while($row = $res -> fetch()) {
                     $messaggio = new stdClass();
@@ -132,9 +120,8 @@
                     <div class="messages-box">
                         <?php
                             foreach($sessionsPermitted as $i => $i_value) {
-
-                                $codiceSessione = $i_value->codiceSessione;
-                                $currentConference = $i_value->acronimoConferenza;
+                                $currentConference = $i_value -> acronimoConferenza;
+                                $codiceSessione = $i_value -> codiceSessione;
                                 $titoloSessione = $i_value -> titoloSessione;
                                 $data = $i_value -> data;
                                 $oraInizio = $i_value -> oraInizio;
@@ -168,8 +155,6 @@
                 </div>
             </div>
               
-            
-
             <!-- Chat Box-->
             <div class="col-7 px-0">
                 <div class="px-4 py-5 chat-box bg-white" id="chat-box">
@@ -196,48 +181,6 @@
 
         </div>
     </div>
-
-
-    <?php
-        function getMessages($codiceSessione){
-            try {
-                //Connection to MySQL db
-                $pdo = new PDO('mysql:host=localhost;dbname=CONFVIRTUAL', $user ='root', $pass='root');
-                $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $pdo -> exec('SET NAMES "utf8"');
-                
-                //Connection to MongoDB
-                require '../vendor/autoload.php';
-                $conn = new MongoDB\Client("mongodb://localhost:27017");
-                $collection = $conn -> CONFVIRTUAL_log -> log;
-
-                //MySQL
-                $queryMessagesSessions = ('SELECT *
-                                FROM MESSAGGIO AS M
-                                WHERE M.ChatID = :lab1');
-
-                $res = $pdo -> prepare($queryMessagesSessions);
-                $res -> bindValue(":lab1", $codiceSessione);
-                $res -> execute();
-                while($row = $res -> fetch()){
-                    echo $row["Testo"];
-                }
-
-                //MongoDB
-                $insertOneResult = $collection->insertOne([
-                    'TimeStamp' 		=> time(),
-                    'User'				=> $_SESSION['user'],
-                    'OperationType'		=> 'SELECT',
-                    'InvolvedTable'	    => 'MESSAGGIO'
-                ]);
-
-        }catch( PDOException $e ) {
-            echo("[ERRORE]".$e->getMessage());
-            exit();
-        }
-    }
-    ?>
-
 
     <style>
        
@@ -331,7 +274,6 @@
                 if(mittente === usernameAttuale) {
                     // Blue right
                     dynamicContent += `
-
                     <div class="media w-50 ml-auto mb-3">
                         <div class="media-body">
                             <div class="bg-primary rounded py-2 px-3 mb-2">
@@ -355,8 +297,7 @@
                     }
                 }
             }
-        }
-    }        
+            
             chatBox.innerHTML = dynamicContent;
         }
 

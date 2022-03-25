@@ -226,11 +226,11 @@ $ DELIITER ;
 
 # Creazione di una conferenza da parte di un admin, che viene registrato ad essa automaticamente
 DELIMITER $
-CREATE PROCEDURE CreaConferenzaAdmin(IN Nome VARCHAR(30), IN UsernameAdmin VARCHAR(30), IN Acronimo VARCHAR(30), IN AnnoEdizione INT) 
+CREATE PROCEDURE CreaConferenzaAdmin(IN Nome VARCHAR(30), IN UsernameAdmin VARCHAR(30), IN Acronimo VARCHAR(30), IN AnnoEdizione INT, IN LOGO BLOB) 
 BEGIN
 	START TRANSACTION;
 		IF(EXISTS(SELECT * FROM ADMIN WHERE ADMIN.Username = UsernameAdmin)) THEN
-			INSERT INTO CONFERENZA(Nome, Acronimo, AnnoEdizione, Svolgimento) VALUES(Nome, Acronimo, AnnoEdizione, Svolgimento);
+			INSERT INTO CONFERENZA(Nome, Acronimo, AnnoEdizione, Svolgimento, Logo) VALUES(Nome, Acronimo, AnnoEdizione, Svolgimento, Logo);
 			INSERT INTO REGISTRAZIONE(Username, AcronimoConferenza, AnnoEdizione) VALUES(UsernameAdmin, Acronimo, AnnoEdizione);
             INSERT INTO CREAZIONE(UsernameAdmin, AcronimoConferenza, AnnoEdizione) VALUES(UsernameAdmin, Acronimo, AnnoEdizione);
 		ELSE 
@@ -286,7 +286,7 @@ $ DELIMITER ;
 # Crea una sessione per una conferenza, si controlla che la data della sessione sia una data che è 
 # prevista per lo svolgimento della conferenza
 DELIMITER $
-CREATE PROCEDURE CreaSessione(IN AcronimoConferenza VARCHAR(30), IN Titolo VARCHAR(30), IN Anno INT ,IN Data DATE, IN OraInizio TIME, IN OraFine TIME, IN Link VARCHAR(50))
+CREATE PROCEDURE CreaSessione(IN AcronimoConferenza VARCHAR(30), IN Titolo VARCHAR(100), IN Anno INT ,IN Data DATE, IN OraInizio TIME, IN OraFine TIME, IN Link VARCHAR(50))
 BEGIN
 	START TRANSACTION;
         IF(EXISTS(SELECT * FROM DATASVOLGIMENTO AS D WHERE D.AcronimoConferenza = AcronimoConferenza AND D.Data = Data)) THEN

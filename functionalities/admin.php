@@ -191,16 +191,11 @@
         $presenters = array();
         
         while($row = $res -> fetch()){
-
             $presenter = new stdClass();
-
             $presenter -> username = $row["Username"];
             array_push($presenters, $presenter);
-            
         }
 
-        
-        
         array_push($presenters, $presenter);
 
         //MongoDB
@@ -339,8 +334,8 @@
             content.innerHTML = `
             <div class="container-fluid text-center w-50">
                 <h2>Crea conferenza</h2>
-                <hr class="my-4">
-                <form action="createConferenceAdmin.php" method="post" class="container my-5">
+                <hr>
+                <form action="createConferenceAdmin.php" method="post" class="container">
                     <div class="mb-3 form-group floating">
                         <input type="text" class="form-control floating" name="nomeConferenza" required autocomplete="off">
                         <label for="nomeConferenza">Nome della Conferenza</label>          
@@ -361,12 +356,21 @@
                         <input type="date" class="form-control floating" name="dataFine" required autocomplete="off">
                         <label style="margin:0" for="dataSessione">Data di fine</label>          
                     </div>
+                    <div class="mb-5 form-group floating">
+                        <input type="button" class="btn btn-primary" id="photo" value="carica il logo" onclick="document.getElementById('hidden-photo-input').click();" />
+                        <input type="file" style="display:none;" id="hidden-photo-input" name="logo"/>                    
+                    </div>
                     <div class="container text-center my-3">
                         <button type="submit" class="btn btn-primary">Crea</button>
                     </div>
                 </form>
             </div>
             `;
+
+            const hiddenInput = document.getElementById('hidden-photo-input');
+            hiddenInput.addEventListener("change", function() {
+                alert("Logo aggiunto con successo");
+             });
         }
 
         //creazione sessione
