@@ -83,7 +83,7 @@
             if(time() > $_SESSION['expire']) {
                 session_unset();
                 session_destroy();
-                header('Location:/DBProject2021/landingPage/index.php');
+                header('Location:/landingPage/index.php');
             } 
         }
          

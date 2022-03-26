@@ -474,17 +474,19 @@
                 titleSession = sessioni[i]["titoloSessione"];
                 codiceSessione = sessioni[i]["codiceSessione"];
                 numPresentazioni = sessioni[i]["numPresentazioni"];
+                idArtificial1 = titleSession.split(" ").join("")+acr;
+                idArtificial2 = acr+titleSession.split(" ").join("");
                 dynamicContent += `
                 <tr>
                     <th scope="row">${i+1}</th>                    
                         <td>${acr}</td>
                         <td>${titleSession}</td>
                         <td>${numPresentazioni}</td>
-                        <td><button type="text" class="btn btn-primary" data-toggle="modal" data-target="#${acr}${titleSession}" >+ </button></td> 
-                        <td><button type="text" class="btn btn-primary" data-toggle="modal" data-target="#${titleSession}${acr}" >+ </button></td> 
+                        <td><button type="text" class="btn btn-primary" data-toggle="modal" data-target="#${idArtificial1}" >+ </button></td> 
+                        <td><button type="text" class="btn btn-primary" data-toggle="modal" data-target="#${idArtificial2}" >+ </button></td> 
                     
                     <!-- creazione articolo -->
-                    <div id="${acr}${titleSession}" class="modal fade">
+                    <div id="${idArtificial1}" class="modal fade">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -497,6 +499,9 @@
                                 </div>
                                 <div class="modal-body">
                                     Sei sicuro di voler aggiungere la presentazione di un articolo a ${titleSession}? 
+                                    
+                                </div>
+                                <div class="modal-footer">
                                     <form action="createPresentation.php" method="post" class="container my-5">
                                         <div class="mb-3 form-group floating">
                                             <input type="text" class="form-control floating" name="codiceSessione" required autocomplete="off" readonly value=${codiceSessione}>
@@ -526,13 +531,11 @@
                                         </div>
                                     </form>
                                 </div>
-                                <div class="modal-footer">
-                                </div>
                             </div>
                         </div>
                     </div>
                     <!-- creazione presentazione -->
-                    <div id="${titleSession}${acr}" class="modal fade">
+                    <div id="${idArtificial2}" class="modal fade">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -592,6 +595,10 @@
             content.textContent = '';
             var dynamicContent = '';
 
+            if(tutorials.length === 0) {
+                dynamicContent += `<p>Non ci sono tutorial al momento</p>`;
+                content.innerHTML = dynamicContent;
+            }
 
             for(let i = 0; i < tutorials.length; i++) {
                 codicePresentazione = tutorials[i]["codicePresentazione"];
@@ -670,11 +677,14 @@
         }
         
         function associaPresenter(){
-            
-                        
+                 
             content.textContent = '';
             var dynamicContent = '';
 
+            if(articoli.length === 0) {
+                dynamicContent += `<p>Non ci sono articoli al momento</p>`;
+                content.innerHTML = dynamicContent;
+            }
 
             for(let i = 0; i < articoli.length; i++) {
                 codicePresentazione = articoli[i]["codicePresentazione"];
@@ -751,8 +761,6 @@
                 })
             })
         }
-
-
 
         function addSponsor() {
             content.innerHTML = `
@@ -833,12 +841,15 @@
             })
         }
 
-        //creazione sessione
         function inserisciValutazione() {
             content.textContent = '';
             let div = document.createElement('div');
             div.classList.add('row');
             var cardContent = "";
+            
+            if(presentazioni.length === 0) {
+                content.innerHTML += `<p>Non ci sono presentazione nel DB al momento</p>`;
+            }
 
             for(let i = 0; i < presentazioni.length; i++) {
                 tipologia = presentazioni[i]["tipologia"];
@@ -904,6 +915,10 @@
             let div = document.createElement('div');
             div.classList.add('row');
             var cardContent = "";
+
+            if(valutazioni.length === 0) {
+                content.innerHTML = `<p>Non ci sono valutazioni nel DB al momento</p>`;
+            }
 
             for(let i = 0; i < valutazioni.length; i++) {
                 usernameAdmin = valutazioni[i]["usernameAdmin"];

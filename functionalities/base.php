@@ -257,6 +257,7 @@
             $article -> titolo = $row["Titolo"];
             $article -> presenter = $row["UsernamePresenter"];
             $article -> stato = $row["StatoSvolgimento"];
+            $article -> codiceSessione = $row["CodiceSessione"];
             array_push($articles, $article);
         }
 
@@ -285,6 +286,7 @@
             $tutorial -> oraFine = $row["OraFine"];
             $tutorial -> tipologia = $row["Tipologia"];
             $tutorial -> titolo = $row["Titolo"];
+            $tutorial -> codiceSessione = $row["CodiceSessione"];
             array_push($tutorials, $tutorial);
         }
 
@@ -297,7 +299,6 @@
             'InvolvedTable'	    => $DATA
         ]);
 
-        //MySQL
         // FAVORITES
         $query = ('SELECT * 
                 FROM FAVORITE AS F, P_ARTICOLO AS PA, PRESENTAZIONE AS P 
@@ -756,8 +757,9 @@
                         oraInizio = tutorials[i]["oraInizio"];
                         oraFine = tutorials[i]["oraFine"];
                         titolo = tutorials[i]["titolo"];
+                        codiceSessione = tutorials[i]["codiceSessione"];
                         
-                        if(codicePresentazione === id) {
+                        if(codiceSessione === id) {
                             dynamicContent += `
                             <tr>
                                 <td>${codicePresentazione}</td>
@@ -795,7 +797,8 @@
                         titolo = articles[i]["titolo"];
                         stato = articles[i]["stato"];
                         presenter = articles[i]["presenter"];
-                        if(codicePresentazione === id) {
+                        codiceSessione = articles[i]["codiceSessione"];
+                        if(codiceSessione === id) {
                             dynamicContent += `
                             <tr>
                                 <td>${codicePresentazione}</td>

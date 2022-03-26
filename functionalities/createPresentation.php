@@ -9,6 +9,7 @@
 <body>
     <?php
         session_start();
+        echo "im here";
         $usernameAdmin = $_SESSION['user'];
         $codiceSessione = $_POST['codiceSessione'];
         $titoloSessione = $_POST['titoloSessione'];
@@ -97,7 +98,7 @@
             $_SESSION["opSuccesfull"] = 0;
 
             // Redirect
-            header('Location:admin.php');
+            //header('Location:admin.php');
             
             $pdo = null;
 
