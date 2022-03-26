@@ -146,6 +146,7 @@
             $queryClassifica = '
             SELECT ROUND(AVG(Voto),1) AS MediaVoto, Username, Tipologia
             FROM CLASSIFICA
+            WHERE Username IS NOT NULL
             GROUP BY Username, Tipologia
             order by ROUND(AVG(Voto),1) DESC';
 
@@ -167,7 +168,7 @@
                 $utente -> tipologia = $row['Tipologia'];
                 $utente -> votoMedio = $row['MediaVoto'];
                 array_push($classificati, $utente);
-            }*/
+            }
 
         } catch( PDOException $e ) {
             echo("[ERRORE]".$e->getMessage());
@@ -360,7 +361,6 @@
         const divInner = document.createElement("div");
         divInner.classList.add("carousel-inner");
         var dynamicContent = '';
-
         
         for(let i = 0; i < classificati.length; i++) {
             votoMedio = classificati[i]["votoMedio"];

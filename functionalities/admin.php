@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
-    <link rel="stylesheet" href="/DBProject2021/css/form.css">
-    <link rel="stylesheet" href="/DBProject2021/css/base.css">
+    <link rel="stylesheet" href="../css/form.css">
+    <link rel="stylesheet" href="../css/base.css">
     <title>Base</title>
 </head>
 <body>
@@ -191,16 +191,11 @@
         $presenters = array();
         
         while($row = $res -> fetch()){
-
             $presenter = new stdClass();
-
             $presenter -> username = $row["Username"];
             array_push($presenters, $presenter);
-            
         }
 
-        
-        
         array_push($presenters, $presenter);
 
         //MongoDB
@@ -210,6 +205,29 @@
             'OperationType'		=> 'SELECT',
             'InvolvedTable'	    => 'PRESENTER'
         ]);
+
+        //MySQL
+        //creating query for valutazioni
+        $queryValutazioni = 
+        ('SELECT UsernameAdmin, Voto, Note, V.CodicePresentazione, Titolo FROM VALUTAZIONE AS V, P_TUTORIAL AS T WHERE V.CodicePresentazione = T.CodicePresentazione
+        UNION
+        SELECT UsernameAdmin, Voto, Note, V.CodicePresentazione, Titolo FROM VALUTAZIONE AS V, P_ARTICOLO AS A WHERE V.CodicePresentazione = A.CodicePresentazione');
+        $res = $pdo -> prepare($queryValutazioni);
+        $res -> execute();
+        $valutazioni = array();
+
+        while($row = $res -> fetch()) {
+            $valutazione = new stdClass();
+
+            $valutazione -> usernameAdmin = $row["UsernameAdmin"];
+            $valutazione -> voto = $row["Voto"];
+            $valutazione -> note = $row["Note"];
+            $valutazione -> codicePresentazione = $row["CodicePresentazione"];
+            $valutazione -> titolo = $row["Titolo"];
+            
+            array_push($valutazioni, $valutazione);
+        }
+
     ?>
 
     <div class="wrapper">
@@ -308,6 +326,7 @@
         var speakers = <?php echo json_encode($speakers); ?>;
         var presenters = <?php echo json_encode($presenters); ?>;
         var articoli = <?php echo json_encode($articoli); ?>;
+        var valutazioni = <?php echo json_encode($valutazioni); ?>;
         const userName = <?php echo json_encode($_SESSION["user"]); ?>
 
 
@@ -315,8 +334,8 @@
             content.innerHTML = `
             <div class="container-fluid text-center w-50">
                 <h2>Crea conferenza</h2>
-                <hr class="my-4">
-                <form action="createConferenceAdmin.php" method="post" class="container my-5">
+                <hr>
+                <form action="createConferenceAdmin.php" method="post" class="container">
                     <div class="mb-3 form-group floating">
                         <input type="text" class="form-control floating" name="nomeConferenza" required autocomplete="off">
                         <label for="nomeConferenza">Nome della Conferenza</label>          
@@ -337,12 +356,21 @@
                         <input type="date" class="form-control floating" name="dataFine" required autocomplete="off">
                         <label style="margin:0" for="dataSessione">Data di fine</label>          
                     </div>
+                    <div class="mb-5 form-group floating">
+                        <input type="button" class="btn btn-primary" id="photo" value="carica il logo" onclick="document.getElementById('hidden-photo-input').click();" />
+                        <input type="file" style="display:none;" id="hidden-photo-input" name="logo"/>                    
+                    </div>
                     <div class="container text-center my-3">
                         <button type="submit" class="btn btn-primary">Crea</button>
                     </div>
                 </form>
             </div>
             `;
+
+            const hiddenInput = document.getElementById('hidden-photo-input');
+            hiddenInput.addEventListener("change", function() {
+                alert("Logo aggiunto con successo");
+             });
         }
 
         //creazione sessione
@@ -877,69 +905,18 @@
             div.classList.add('row');
             var cardContent = "";
 
-            for(let i = 0; i < presentazioni.length; i++) {
-                tipologia = presentazioni[i]["tipologia"];
-                titolo = presentazioni[i]["titolo"];
-                codice = presentazioni[i]["codice"];
-                oraInizio = presentazioni[i]["oraInizio"];
-                oraFine = presentazioni[i]["oraFine"];
+            for(let i = 0; i < valutazioni.length; i++) {
+                usernameAdmin = valutazioni[i]["usernameAdmin"];
+                voto = valutazioni[i]["voto"];
+                note = valutazioni[i]["note"];
+                codicePresentazione = valutazioni[i]["codicePresentazione"];
+                titolo = valutazioni[i]["titolo"];
                 cardContent += ` 
                     <div class="card" style="width: 18rem; margin: 5px 5px">
                         <div class="card-body">
-                            <h5 class="card-title">${titolo}</h5>
-                            <p class="card-text">Tipologia: ${tipologia} <br> codice: ${codice} </p>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#${codice}">Crea sessione</button>
-                        </div>
-                    </div>
-
-                    <div id="${codice}" class="modal fade">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Sessione</h5>
-                                    <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    Sei sicuro di voler aggiungere una sessione a ${titolo}? 
-                                </div>
-                                <div class="modal-footer">
-                                    <form action="createSession.php" method="post" class="container my-5">
-                                        <div class="mb-3 form-group floating">
-                                            <input type="text" class="form-control floating" name="acronimo" required autocomplete="off" readonly value=${titolo}>
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="" class="form-control floating" name="annoEdizione" required autocomplete="off" readonly value=${titolo}>        
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="text" class="form-control floating" name="titoloSessione" required autocomplete="off">
-                                            <label style="margin:0" for="titoloSessione">Titolo della sessione</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="date" class="form-control floating" name="dataSessione" required autocomplete="off">
-                                            <label style="margin:0" for="dataSessione">Data della sessione</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="time" class="form-control floating" name="oraInizio" required autocomplete="off">
-                                            <label style="margin:0" for="oraInizio">Ora di inizio sessione</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="time" class="form-control floating" name="oraFine" required autocomplete="off">
-                                            <label style="margin:0" for="oraFine">Ora di fine sessione</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="text" class="form-control floating" name="linkSessione" required autocomplete="off">
-                                            <label style="margin:0" for="linkSessione">Link della sessione</label>          
-                                        </div>
-                                        <div class="container text-center my-5">
-                                            <button type="submit" class="btn btn-primary">Crea sessione</button>
-                                        </div>
-                                    </form>   
-                                </div>
-                            </div>
+                            <h5 class="card-title">${titolo} <br> voto: ${voto} <br> Commento: ${note}</h5>
+                            <p class="card-text"> Codice: ${codicePresentazione} <br> Valutazione rilasciata da ${usernameAdmin}</p>
+                            
                         </div>
                     </div>`;
             }

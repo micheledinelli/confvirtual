@@ -226,11 +226,11 @@ $ DELIITER ;
 
 # Creazione di una conferenza da parte di un admin, che viene registrato ad essa automaticamente
 DELIMITER $
-CREATE PROCEDURE CreaConferenzaAdmin(IN Nome VARCHAR(30), IN UsernameAdmin VARCHAR(30), IN Acronimo VARCHAR(30), IN AnnoEdizione INT) 
+CREATE PROCEDURE CreaConferenzaAdmin(IN Nome VARCHAR(30), IN UsernameAdmin VARCHAR(30), IN Acronimo VARCHAR(30), IN AnnoEdizione INT, IN LOGO BLOB) 
 BEGIN
 	START TRANSACTION;
 		IF(EXISTS(SELECT * FROM ADMIN WHERE ADMIN.Username = UsernameAdmin)) THEN
-			INSERT INTO CONFERENZA(Nome, Acronimo, AnnoEdizione, Svolgimento) VALUES(Nome, Acronimo, AnnoEdizione, Svolgimento);
+			INSERT INTO CONFERENZA(Nome, Acronimo, AnnoEdizione, Svolgimento, Logo) VALUES(Nome, Acronimo, AnnoEdizione, Svolgimento, Logo);
 			INSERT INTO REGISTRAZIONE(Username, AcronimoConferenza, AnnoEdizione) VALUES(UsernameAdmin, Acronimo, AnnoEdizione);
             INSERT INTO CREAZIONE(UsernameAdmin, AcronimoConferenza, AnnoEdizione) VALUES(UsernameAdmin, Acronimo, AnnoEdizione);
 		ELSE 
@@ -286,7 +286,7 @@ $ DELIMITER ;
 # Crea una sessione per una conferenza, si controlla che la data della sessione sia una data che è 
 # prevista per lo svolgimento della conferenza
 DELIMITER $
-CREATE PROCEDURE CreaSessione(IN AcronimoConferenza VARCHAR(30), IN Titolo VARCHAR(30), IN Anno INT ,IN Data DATE, IN OraInizio TIME, IN OraFine TIME, IN Link VARCHAR(50))
+CREATE PROCEDURE CreaSessione(IN AcronimoConferenza VARCHAR(30), IN Titolo VARCHAR(100), IN Anno INT ,IN Data DATE, IN OraInizio TIME, IN OraFine TIME, IN Link VARCHAR(50))
 BEGIN
 	START TRANSACTION;
         IF(EXISTS(SELECT * FROM DATASVOLGIMENTO AS D WHERE D.AcronimoConferenza = AcronimoConferenza AND D.Data = Data)) THEN
@@ -475,20 +475,6 @@ BEGIN
 END;
 $ DELIMITER ;
 
-DELIMITER $
-CREATE PROCEDURE AssociaSpeaker(IN UsernameSpeaker VARCHAR(30), IN CodiceTutorial INT)
-BEGIN
-	START TRANSACTION;
-		IF(EXISTS(SELECT * FROM SPEAKER AS S WHERE S.Username = UsernameSpeaker) AND
-			EXISTS (SELECT * FROM P_TUTORIAL AS PT WHERE PT.CodicePresentazione = CodiceTutorial)) THEN
-				INSERT INTO SPEAKER_TUTORIAL(UsernameSpeaker, CodiceTutorial) VALUES(UsernameSpeaker, CodiceTutorial);
-		ELSE 
-			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error on AssociaSpeaker the specified speaker (or tutorial) has not been found';
-        END IF;
-    COMMIT WORK;
-END;
-$ DELIMITER ;
-
 ######## TRIGGER #########
 
 # Incrementa il campo totale sponsorizzazioni ogni volta che si aggiunge uno sponsor per una determinata conferenza
@@ -540,7 +526,7 @@ BEGIN
 	CREATE TEMPORARY TABLE ViewAutori
 	SELECT A.Nome AS Autore, S.CodiceArticolo AS CodiceArticolo
 	FROM AUTORE AS A, SCRITTURA AS S, P_ARTICOLO AS PA
-	WHERE A.Nome = S.NomeAutore AND S.CodiceArticolo = 1 AND S.CodiceArticolo = CodicePresentazione;
+	WHERE A.Nome = S.NomeAutore AND S.CodiceArticolo = NEW.CodicePresentazione AND S.CodiceArticolo = CodicePresentazione;
 	
     IF (NEW.UsernamePresenter <> '') THEN
 		IF(New.UsernamePresenter NOT IN (SELECT Username FROM ViewAutori, UTENTE AS U WHERE ViewAutori.Autore = U.Nome)) THEN
@@ -561,7 +547,7 @@ BEGIN
 	CREATE TEMPORARY TABLE ViewAutori
 	SELECT A.Nome AS Autore, S.CodiceArticolo AS CodiceArticolo
 	FROM AUTORE AS A, SCRITTURA AS S, P_ARTICOLO AS PA
-	WHERE A.Nome = S.NomeAutore AND S.CodiceArticolo = 1 AND S.CodiceArticolo = CodicePresentazione;
+	WHERE A.Nome = S.NomeAutore AND S.CodiceArticolo = NEW.CodicePresentazione AND S.CodiceArticolo = CodicePresentazione;
 	
     IF (NEW.UsernamePresenter <> '') THEN
 		IF(New.UsernamePresenter NOT IN (SELECT Username FROM ViewAutori, UTENTE AS U WHERE ViewAutori.Autore = U.Nome)) THEN

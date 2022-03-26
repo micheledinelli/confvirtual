@@ -15,6 +15,7 @@
         $acronimo = $_POST['acronimo'];
         $dataInizio = $_POST['dataInizio'];
         $dataFine = $_POST['dataFine'];
+        $logo = $_POST['logo'];
 
         //$mysqldate = date( 'Y-m-d', $dataInizio);
         echo $dataInizio;
@@ -32,7 +33,7 @@
             $collection = $conn -> CONFVIRTUAL_log -> log;	
 
             //MySQL
-            $sql = 'call creaConferenzaAdmin(:lab1, :lab2, :lab3, :lab4)';
+            $sql = 'call creaConferenzaAdmin(:lab1, :lab2, :lab3, :lab4, :lab5)';
 
             $stmt = $pdo->prepare($sql);
 
@@ -40,6 +41,7 @@
             $stmt->bindValue(':lab2', $usernameAdmin);
             $stmt->bindValue(':lab3', $acronimo);
             $stmt->bindValue(':lab4', $annoEdizione);
+            $stmt -> bindValue(":lab5", $logo, PDO::PARAM_LOB);
 
             $stmt->execute();
 
