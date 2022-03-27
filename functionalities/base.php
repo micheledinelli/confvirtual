@@ -615,7 +615,6 @@
 
             content.textContent = '';
             var dynamicContent = '';
-
             // Se l'id (il codice della presentazione) 
             // viene specificato si mostrano solo le presentazioni di una data sessione
             // altrimenti si mostrano tutte
@@ -731,6 +730,12 @@
                     }
                     
                     dynamicContent += `</tbody></table>`;
+
+                    content.innerHTML = dynamicContent;
+                }
+
+                if(articles.length <= 0 && tutorials.length <= 0) {
+                    dynamicContent += `<p>Non ci sono presentazioni (articoli/tutorial) nel DB</p>`;
                     content.innerHTML = dynamicContent;
                 }
 
@@ -771,7 +776,7 @@
                         }
                     }
                     dynamicContent += `</tbody></table>`;
-                }
+                } 
 
                 if(articles.length > 0) {
                     dynamicContent += `
@@ -812,7 +817,13 @@
                     }
                     
                     dynamicContent += `</tbody></table>`;
+                } 
+
+                if(articles.length <= 0 && tutorials.length <= 0) {
+                    dynamicContent += `<p>Non ci sono presentazioni (articoli/tutorial) per la
+                    sessione specificata</p>`;
                 }
+
                 content.innerHTML = dynamicContent;
             }
         }
@@ -844,7 +855,7 @@
                 dynamicContent += `
                 <tr>
                     <td>${acronimo}</td>
-                    <td><form action="/DBProject2021/chat/chat.php" method="post" class="container">
+                    <td><form action="../chat/chat.php" method="post" class="container">
                         <div class="mb-3 form-group floating">
                             <input type="hidden" class="form-control floating" name="acronimo" value=${acronimo} autocomplete="off">
                         </div>

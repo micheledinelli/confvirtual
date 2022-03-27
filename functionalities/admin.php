@@ -478,116 +478,117 @@
                 idArtificial2 = acr+titleSession.split(" ").join("");
                 dynamicContent += `
                 <tr>
-                    <th scope="row">${i+1}</th>                    
-                        <td>${acr}</td>
-                        <td>${titleSession}</td>
-                        <td>${numPresentazioni}</td>
-                        <td><button type="text" class="btn btn-primary" data-toggle="modal" data-target="#${idArtificial1}" >+ </button></td> 
-                        <td><button type="text" class="btn btn-primary" data-toggle="modal" data-target="#${idArtificial2}" >+ </button></td> 
-                    
-                    <!-- creazione articolo -->
-                    <div id="${idArtificial1}" class="modal fade">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Presentazione</h5>
-                                    <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    Sei sicuro di voler aggiungere la presentazione di un articolo a ${titleSession}? 
-                                    
-                                </div>
-                                <div class="modal-footer">
-                                    <form action="createPresentation.php" method="post" class="container my-5">
-                                        <div class="mb-3 form-group floating">
-                                            <input type="text" class="form-control floating" name="codiceSessione" required autocomplete="off" readonly value=${codiceSessione}>
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="text" class="form-control floating" name="titoloSessione" required autocomplete="off" readonly value=${titleSession}>
-                                            <label for="titoloSessione">Titolo della sessione</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="text" class="form-control floating" name="titolo" required autocomplete="off">
-                                            <label for="titolo">Titolo dell'articolo</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="time" class="form-control floating" name="oraInizio" required autocomplete="off">
-                                            <label for="oraInizio">Ora inizio presentazione</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="time" class="form-control floating" name="oraFine" required autocomplete="off">
-                                            <label for="oraFine">Ora fine presentazione</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="number" class="form-control floating" name="numeroPagine" required autocomplete="off">
-                                            <label for="numeroPagine">numero pagine</label>          
-                                        </div>
-                                        <div class="container text-center my-5">
-                                            <button type="submit" class="btn btn-primary">Crea articolo</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- creazione presentazione -->
-                    <div id="${idArtificial2}" class="modal fade">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Presentazione</h5>
-                                    <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    Sei sicuro di voler aggiungere la presentazione di un tutorial a ${titleSession}? 
-                                    <form action="createPresentation.php" method="post" class="container my-5">
-                                        <div class="mb-3 form-group floating">
-                                            <input type="text" class="form-control floating" name="codiceSessione" required autocomplete="off" readonly value=${codiceSessione}>
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="text" class="form-control floating" name="titoloSessione" required autocomplete="off" readonly value=${titleSession}>
-                                            <label for="titoloSessione">Titolo della sessione</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="text" class="form-control floating" name="titolo" required autocomplete="off">
-                                            <label for="titolo">Titolo della presentazione</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="time" class="form-control floating" name="oraInizio" required autocomplete="off">
-                                            <label for="oraInizio">Ora inizio presentazione</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <input type="time" class="form-control floating" name="oraFine" required autocomplete="off">
-                                            <label for="oraFine">Ora fine presentazione</label>          
-                                        </div>
-                                        <div class="mb-3 form-group floating">
-                                            <textarea type="text" style="height:100px;" placeholder="inserisci il tuo abstract" class="form-control" name="abstract" required autocomplete="off"></textarea>
-                                                    
-                                        </div>
-                                        <div class="container text-center my-5">
-                                            <button type="submit" class="btn btn-primary">Crea tutorial</button>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div class="modal-footer">
+                    <th scope="row">
+                        ${i+1}
+                    </th>                    
+                    <td>${acr}</td>
+                    <td>${titleSession}</td>
+                    <td>${numPresentazioni}</td>
+                    <td><button type="text" class="btn btn-primary" data-toggle="modal" data-target="#${idArtificial1}" >+ </button></td> 
+                    <td><button type="text" class="btn btn-primary" data-toggle="modal" data-target="#${idArtificial2}" >+ </button></td> 
+                    <td>
+                        <!-- creazione articolo -->
+                        <div id="${idArtificial1}" class="modal fade">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Presentazione</h5>
+                                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Sei sicuro di voler aggiungere la presentazione di un articolo a ${titleSession}? 
+                                        <form action="createPresentation.php" method="post" class="container my-5">
+                                            <div class="mb-3 form-group floating">
+                                                <input type="text" class="form-control floating" name="codiceSessione" required autocomplete="off" readonly value=${codiceSessione}>
+                                            </div>
+                                            <div class="mb-3 form-group floating">
+                                                <input type="text" class="form-control floating" name="titoloSessione" required autocomplete="off" readonly value=${titleSession}>
+                                                <label for="titoloSessione">Titolo della sessione</label>          
+                                            </div>
+                                            <div class="mb-3 form-group floating">
+                                                <input type="text" class="form-control floating" name="titolo" required autocomplete="off">
+                                                <label for="titolo">Titolo dell'articolo</label>          
+                                            </div>
+                                            <div class="mb-3 form-group floating">
+                                                <input type="time" class="form-control floating" name="oraInizio" required autocomplete="off">
+                                                <label for="oraInizio">Ora inizio presentazione</label>          
+                                            </div>
+                                            <div class="mb-3 form-group floating">
+                                                <input type="time" class="form-control floating" name="oraFine" required autocomplete="off">
+                                                <label for="oraFine">Ora fine presentazione</label>          
+                                            </div>
+                                            <div class="mb-3 form-group floating">
+                                                <input type="number" class="form-control floating" name="numeroPagine" required autocomplete="off">
+                                                <label for="numeroPagine">numero pagine</label>          
+                                            </div>
+                                            <div class="container text-center my-5">
+                                                <button type="submit" class="btn btn-primary">Crea articolo</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer"> 
+                        
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <!-- creazione presentazione -->
+                        <div id="${idArtificial2}" class="modal fade">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Presentazione</h5>
+                                        <button type="button" class="btn" data-dismiss="modal" aria-label="Close">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Sei sicuro di voler aggiungere la presentazione di un tutorial a ${titleSession}? 
+                                        <form action="createPresentation.php" method="post" class="container my-5">
+                                            <div class="mb-3 form-group floating">
+                                                <input type="text" class="form-control floating" name="codiceSessione" required autocomplete="off" readonly value=${codiceSessione}>
+                                            </div>
+                                            <div class="mb-3 form-group floating">
+                                                <input type="text" class="form-control floating" name="titoloSessione" required autocomplete="off" readonly value=${titleSession}>
+                                                <label for="titoloSessione">Titolo della sessione</label>          
+                                            </div>
+                                            <div class="mb-3 form-group floating">
+                                                <input type="text" class="form-control floating" name="titolo" required autocomplete="off">
+                                                <label for="titolo">Titolo della presentazione</label>          
+                                            </div>
+                                            <div class="mb-3 form-group floating">
+                                                <input type="time" class="form-control floating" name="oraInizio" required autocomplete="off">
+                                                <label for="oraInizio">Ora inizio presentazione</label>          
+                                            </div>
+                                            <div class="mb-3 form-group floating">
+                                                <input type="time" class="form-control floating" name="oraFine" required autocomplete="off">
+                                                <label for="oraFine">Ora fine presentazione</label>          
+                                            </div>
+                                            <div class="mb-3 form-group floating">
+                                                <textarea type="text" style="height:100px;" placeholder="inserisci il tuo abstract" class="form-control" name="abstract" required autocomplete="off"></textarea>
+                                                        
+                                            </div>
+                                            <div class="container text-center my-5">
+                                                <button type="submit" class="btn btn-primary">Crea tutorial</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
                 </tr>`;
             }
-            
-            //dynamicContent += `</tbody></table>`;
+            dynamicContent += `</tbody></table>`;
             content.innerHTML = dynamicContent;
-
         }
         
         function associaSpeaker(){
@@ -909,13 +910,13 @@
             content.append(div);
         
         }
-        //creazione sessione
+
         function visualizzaValutazioni() {
             content.textContent = '';
             let div = document.createElement('div');
             div.classList.add('row');
             var cardContent = "";
-
+            
             if(valutazioni.length === 0) {
                 content.innerHTML = `<p>Non ci sono valutazioni nel DB al momento</p>`;
             }
