@@ -99,7 +99,7 @@
             $collection = $conn -> CONFVIRTUAL_log -> log;
 
             //MySQL
-            $query1 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.CONFERENZA WHERE Svolgimento = 'COMPLETATA'");
+            $query1 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.CONFERENZA");
             $res = $pdo -> prepare($query1);
             $res -> execute();
             $row = $res -> fetch();

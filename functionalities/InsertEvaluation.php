@@ -36,7 +36,7 @@
             $_SESSION["opSuccesfull"] = 0;
 
             // Redirect
-            //header('Location:admin.php');
+            header('Location:admin.php');
             
             $pdo = null;
 
@@ -44,7 +44,7 @@
             
             // Errore
             $_SESSION["error"] = 1;
-            //header('Location:admin.php');
+            header('Location:admin.php');
 
             print "Error!: " . $e->getMessage() . "<br/>";
             die();

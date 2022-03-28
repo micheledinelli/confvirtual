@@ -111,7 +111,7 @@
             
             // Errore
             $_SESSION["error"] = 1;
-            //header('Location:admin.php');
+            header('Location:admin.php');
 
             print "Error!: " . $e->getMessage() . "<br/>";
             die();

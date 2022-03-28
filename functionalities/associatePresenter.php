@@ -28,7 +28,7 @@
             $collection = $conn -> CONFVIRTUAL_log -> log;	
             
             //MySQL
-            $sql = 'call associaPresenter(:lab1, :lab2)';
+            $sql = 'call AssociaPresenter(:lab1, :lab2)';
 
             $stmt = $pdo->prepare($sql);
 

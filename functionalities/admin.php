@@ -196,8 +196,6 @@
             array_push($presenters, $presenter);
         }
 
-        array_push($presenters, $presenter);
-
         //MongoDB
         $insertOneResult = $collection->insertOne([
             'TimeStamp' 		=> time(),
@@ -726,6 +724,7 @@
                                     <option selected>Open this select menu</option>`
                                 for(let j = 0; j < presenters.length; j++) {
                                     username = presenters[j]["username"];
+                                    console.log(username);
                                     dynamicContent += ` 
                                     <option value=${username}>${username}</option>
                                     `;
