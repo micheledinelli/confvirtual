@@ -416,7 +416,9 @@ CREATE PROCEDURE CambiaRuolo(IN username VARCHAR(30), IN newRole ENUM("ADMIN","S
 BEGIN
 	START TRANSACTION;
 		IF(EXISTS(SELECT * FROM UTENTE WHERE UTENTE.Username = username)) THEN
-			UPDATE UTENTE SET UTENTE.Tipologia = newRole WHERE(Utente.Username = username);
+			
+            SET @oldRole = (SELECT TIPOLOGIA FROM UTENTE AS U WHERE U.username = username);
+			            
             IF(newRole = 'ADMIN') THEN
 				INSERT INTO ADMIN(Username) VALUES(username);
 			ELSEIF(newRole = 'PRESENTER') THEN
@@ -424,6 +426,18 @@ BEGIN
 			ELSE 
 				INSERT INTO SPEAKER(Username) VALUES(username);
             END IF;
+            
+			UPDATE UTENTE SET UTENTE.Tipologia = newRole WHERE(Utente.Username = username);
+
+            
+            IF(@oldRole = 'ADMIN') THEN
+				DELETE FROM ADMIN WHERE Username = username;
+			ELSEIF(@oldRole = 'PRESENTER') THEN
+				DELETE FROM PRESENTER WHERE Username = username;
+			ELSEIF(@oldRole = 'SPEAKER') THEN
+				DELETE FROM SPEAKER WHERE Username = username;
+            END IF;
+            
 		END IF;
     COMMIT WORK;
 END;
