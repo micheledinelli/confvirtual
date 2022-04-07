@@ -72,7 +72,6 @@
             
             // Errore
             $_SESSION["error"] = 1;
-
             print "Error!: " . $e->getMessage() . "<br/>";
             die();
         }
