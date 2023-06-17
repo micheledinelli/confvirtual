@@ -2,7 +2,7 @@
 
 Confvirtual is a university project developed and mantained by sayonara team. 
 
-![Landing] (assets/landing.png)
+![Landing](assets/landing.png)
 
 ## Project desription
 
@@ -12,7 +12,7 @@ Confvirtual is made with plain PHP, HTML, CSS and JS. Needs an apache server to 
 
 The database is the main actor of the project beacuse this was made for **Database course** at the University of Bologna (2020/2021).
 
-![Conferences] (assets/conferenze.png)
+![Conferences](assets/conferenze.png)
 
 ## Install and run
 
@@ -31,5 +31,5 @@ You're almost there! before running we suggest to run the scripts **./confvirtua
 K-Means Algorithm has been implemented from scratch in vanilla JS, to clusterize users.
 This feature supports both 2D and 3D visualization
 
-![2D] (assets/clustering2D.png)
-![3D] (assets/clustering3D.png)
+![2D](assets/clustering2D.png)
+![3D](assets/clustering3D.png)
