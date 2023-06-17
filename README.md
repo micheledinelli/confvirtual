@@ -18,7 +18,10 @@ The database is the main actor of the project beacuse this was made for **Databa
 
 Is reccomended to have MAMP install, in order to have Apache and MySQL Server on.
 
-If MAMP is installed run ```git clone https://github.com/micheledinelli/confvirtual.git```
+If MAMP is installed run 
+```
+git clone https://github.com/micheledinelli/confvirtual.git
+```
 
 Once you've cloned the repository change the Apache directory in MAMP, choosing the directory were ypu cloned the project.
 
