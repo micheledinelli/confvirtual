@@ -37,9 +37,9 @@
             $pdo -> exec('SET NAMES "utf8"');
 
             //Connection to MongoDB
-            require '../vendor/autoload.php';
-            $conn = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $conn -> CONFVIRTUAL_log -> log;
+            // require '../vendor/autoload.php';
+            // $conn = new MongoDB\Client("mongodb://localhost:27017");
+            // $collection = $conn -> CONFVIRTUAL_log -> log;
 
             //MySQL
             if( $bothInsert ) {
@@ -57,15 +57,15 @@
                 $res -> execute();
 
                 //MongoDB
-                $DATA = array("NomeSponsor"=>$nomeSponsor, "AnnoEdizione"=>$annoEdizione, 
-                    "AcronimoConferenza"=>$acronimoConferenza, "Importo"=>$importo);
-                $insertOneResult = $collection->insertOne([
-                    'TimeStamp' 		=> time(),
-                    'User'				=> $_SESSION['user'],
-                    'OperationType'		=> 'INSERT',
-                    'InvolvedTable'	    => 'SPONSORIZZAZIONE',
-                    'Input'				=> $DATA
-                ]);
+                // $DATA = array("NomeSponsor"=>$nomeSponsor, "AnnoEdizione"=>$annoEdizione, 
+                //     "AcronimoConferenza"=>$acronimoConferenza, "Importo"=>$importo);
+                // $insertOneResult = $collection->insertOne([
+                //     'TimeStamp' 		=> time(),
+                //     'User'				=> $_SESSION['user'],
+                //     'OperationType'		=> 'INSERT',
+                //     'InvolvedTable'	    => 'SPONSORIZZAZIONE',
+                //     'Input'				=> $DATA
+                // ]);
 
                 $_SESSION["opSuccesfull"] = 0;
 
@@ -81,14 +81,14 @@
                 $res -> execute();
 
                 //MongoDB
-                $DATA = array("Nome"=>$nomeSponsor, "Logo"=>$logo);
-                $insertOneResult = $collection->insertOne([
-                    'TimeStamp' 		=> time(),
-                    'User'				=> $_SESSION['user'],
-                    'OperationType'		=> 'INSERT',
-                    'InvolvedTable'	    => 'SPONSOR',
-                    'Input'				=> $DATA
-                ]);
+                // $DATA = array("Nome"=>$nomeSponsor, "Logo"=>$logo);
+                // $insertOneResult = $collection->insertOne([
+                //     'TimeStamp' 		=> time(),
+                //     'User'				=> $_SESSION['user'],
+                //     'OperationType'		=> 'INSERT',
+                //     'InvolvedTable'	    => 'SPONSOR',
+                //     'Input'				=> $DATA
+                // ]);
                 
                 $_SESSION["opSuccesfull"] = 0;
 
@@ -102,13 +102,13 @@
                 $res -> execute();
 
                 //MongoDB
-                $insertOneResult = $collection->insertOne([
-                    'TimeStamp' 		=> time(),
-                    'User'				=> $_SESSION['user'],
-                    'OperationType'		=> 'INSERT',
-                    'InvolvedTable'	    => 'SPONSOR',
-                    'Input'				=> $nomeSponsor
-                ]);
+                // $insertOneResult = $collection->insertOne([
+                //     'TimeStamp' 		=> time(),
+                //     'User'				=> $_SESSION['user'],
+                //     'OperationType'		=> 'INSERT',
+                //     'InvolvedTable'	    => 'SPONSOR',
+                //     'Input'				=> $nomeSponsor
+                // ]);
 
                 $_SESSION["opSuccesfull"] = 0;
 

@@ -27,9 +27,9 @@
             $pdo -> exec('SET NAMES "utf8"');
 
             //Connetion to MongoDB
-            require '../vendor/autoload.php';
-            $conn = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $conn -> CONFVIRTUAL_log -> log;	
+            // require '../vendor/autoload.php';
+            // $conn = new MongoDB\Client("mongodb://localhost:27017");
+            // $collection = $conn -> CONFVIRTUAL_log -> log;	
 
             //MySQL
             if($_SESSION["userType"] == "SPEAKER") {
@@ -40,12 +40,12 @@
                 $res -> execute();
 
                 //MongoDB
-                $insertOneResult = $collection->insertOne([
-                    'TimeStamp' 		=> time(),
-                    'User'				=> $_SESSION['user'],
-                    'OperationType'		=> 'SELECT',
-                    'InvolvedTable'	    => 'SPEAKER'
-                ]);
+                // $insertOneResult = $collection->insertOne([
+                //     'TimeStamp' 		=> time(),
+                //     'User'				=> $_SESSION['user'],
+                //     'OperationType'		=> 'SELECT',
+                //     'InvolvedTable'	    => 'SPEAKER'
+                // ]);
             
             } elseif($_SESSION["userType"] == "PRESENTER") {
                 $query = 'SELECT CurriculumVitae FROM PRESENTER WHERE Username = :lab1';
@@ -55,12 +55,12 @@
                 $res -> execute();
 
                 //MongoDB
-                $insertOneResult = $collection->insertOne([
-                    'TimeStamp' 		=> time(),
-                    'User'				=> $_SESSION['user'],
-                    'OperationType'		=> 'SELECT',
-                    'InvolvedTable'	    => 'PRESENTER'
-                ]);
+                // $insertOneResult = $collection->insertOne([
+                //     'TimeStamp' 		=> time(),
+                //     'User'				=> $_SESSION['user'],
+                //     'OperationType'		=> 'SELECT',
+                //     'InvolvedTable'	    => 'PRESENTER'
+                // ]);
             }
 
             while($row = $res -> fetch()) {
@@ -72,12 +72,12 @@
             $res -> execute();
 
             //MongoDB
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'SELECT',
-                'InvolvedTable'	    => 'UNIVERSITA'
-            ]);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'SELECT',
+            //     'InvolvedTable'	    => 'UNIVERSITA'
+            // ]);
 
             $università = array(); 
             while($row = $res -> fetch()) {
@@ -95,12 +95,12 @@
                 $res -> execute();
 
                 //MongoDB
-                $insertOneResult = $collection->insertOne([
-                    'TimeStamp' 		=> time(),
-                    'User'				=> $_SESSION['user'],
-                    'OperationType'		=> 'SELECT',
-                    'InvolvedTable'	    => 'SPEAKER'
-                ]);
+                // $insertOneResult = $collection->insertOne([
+                //     'TimeStamp' 		=> time(),
+                //     'User'				=> $_SESSION['user'],
+                //     'OperationType'		=> 'SELECT',
+                //     'InvolvedTable'	    => 'SPEAKER'
+                // ]);
 
             } else {
                 $queryUniAttuale = 'SELECT * FROM  PRESENTER AS P WHERE P.Username = :lab1';
@@ -110,12 +110,12 @@
                 $res -> execute();
 
                 //MongoDB
-                $insertOneResult = $collection->insertOne([
-                    'TimeStamp' 		=> time(),
-                    'User'				=> $_SESSION['user'],
-                    'OperationType'		=> 'SELECT',
-                    'InvolvedTable'	    => 'PRESENTER'
-                ]);
+                // $insertOneResult = $collection->insertOne([
+                //     'TimeStamp' 		=> time(),
+                //     'User'				=> $_SESSION['user'],
+                //     'OperationType'		=> 'SELECT',
+                //     'InvolvedTable'	    => 'PRESENTER'
+                // ]);
             }
             
             while($row = $res -> fetch()) {
@@ -131,13 +131,13 @@
             $res -> execute();
 
             //MongoDB
-            $DATA = array("SPEAKER_TUTORIAL", "P_TUTORIAL");
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'SELECT',
-                'InvolvedTable'	    => $DATA
-            ]);
+            // $DATA = array("SPEAKER_TUTORIAL", "P_TUTORIAL");
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'SELECT',
+            //     'InvolvedTable'	    => $DATA
+            // ]);
 
             //MySQL
             $tutorialsPermitted = array();
@@ -157,13 +157,13 @@
             $res -> execute();
 
             //MongoDB
-            $DATA = array("RISORSA", "P_TUTORIAL");
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'SELECT',
-                'InvolvedTable'	    => $DATA
-            ]);
+            // $DATA = array("RISORSA", "P_TUTORIAL");
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'SELECT',
+            //     'InvolvedTable'	    => $DATA
+            // ]);
 
             $risorse = array();
             while($row = $res -> fetch()) {

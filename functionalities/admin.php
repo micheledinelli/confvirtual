@@ -24,9 +24,9 @@
         $pdo -> exec('SET NAMES "utf8"');
 
         //Connection to MongoDB
-        require '../vendor/autoload.php';
-        $conn = new MongoDB\Client("mongodb://localhost:27017");
-        $collection = $conn -> CONFVIRTUAL_log -> log;	
+        // require '../vendor/autoload.php';
+        // $conn = new MongoDB\Client("mongodb://localhost:27017");
+        // $collection = $conn -> CONFVIRTUAL_log -> log;	
 
         //MySQL
         //creating query for active conferences
@@ -45,12 +45,12 @@
         }
 
         //MongoDB
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => 'CONFERENZA'
-        ]);
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => 'CONFERENZA'
+        // ]);
 
         //MySQL
         //creating query for sessions
@@ -96,12 +96,12 @@
         }
 
         //MongoDB
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => 'SESSIONE'
-        ]);
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => 'SESSIONE'
+        // ]);
 
         //MySQL
         //creating query for tutorials
@@ -123,13 +123,13 @@
         }
 
         //MongoDB
-        $DATA = array("P_TUTORIAL", "PRESENTAZIONE");
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => $DATA
-        ]);
+        // $DATA = array("P_TUTORIAL", "PRESENTAZIONE");
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => $DATA
+        // ]);
 
         //MySQL
         //creating query for articoli
@@ -151,13 +151,13 @@
         }
 
         //MongoDB
-        $DATA = array("P_ARTICOLO", "PRESENTAZIONE");
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => $DATA
-        ]);
+        // $DATA = array("P_ARTICOLO", "PRESENTAZIONE");
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => $DATA
+        // ]);
 
         //MySQL
         //creating query for speakers
@@ -175,12 +175,12 @@
             array_push($speakers, $speaker);
         }
         //MongoDB
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => 'SPEAKER'
-        ]);
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => 'SPEAKER'
+        // ]);
 
         //MySQL
         //creating query for presenters
@@ -197,12 +197,12 @@
         }
 
         //MongoDB
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => 'PRESENTER'
-        ]);
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => 'PRESENTER'
+        // ]);
 
         //MySQL
         //creating query for valutazioni

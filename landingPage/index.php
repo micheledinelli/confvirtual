@@ -94,9 +94,9 @@
             $pdo -> exec('SET NAMES "utf8"');
             
             //MongoDB
-            require '../vendor/autoload.php';
-            $conn = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $conn -> CONFVIRTUAL_log -> log;
+            // require '../vendor/autoload.php';
+            // $conn = new MongoDB\Client("mongodb://localhost:27017");
+            // $collection = $conn -> CONFVIRTUAL_log -> log;
 
             //MySQL
             $query1 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.CONFERENZA");
@@ -106,12 +106,12 @@
             $conf = $row["Counter"];
 
             //MongoDB
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'SELECT',
-                'InvolvedTable'	=> 'CONFERENZA'
-            ]);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'SELECT',
+            //     'InvolvedTable'	=> 'CONFERENZA'
+            // ]);
 
             //MySQL
             $query2 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.CONFERENZA WHERE Svolgimento = 'ATTIVA'");
@@ -121,12 +121,12 @@
             $confAttive = $row["Counter"];
 
             //MongoDB
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'SELECT',
-                'InvolvedTable'	=> 'CONFERENZA'
-            ]);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'SELECT',
+            //     'InvolvedTable'	=> 'CONFERENZA'
+            // ]);
 
             //MySQL
             $query3 = ("SELECT COUNT(*) AS Counter FROM CONFVIRTUAL.UTENTE");
@@ -136,12 +136,12 @@
             $numUtenti = $row["Counter"];
 
             //MongoDB
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'SELECT',
-                'InvolvedTable'	=> 'CONFERENZA'
-            ]);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'SELECT',
+            //     'InvolvedTable'	=> 'CONFERENZA'
+            // ]);
 
             $queryClassifica = '
             SELECT ROUND(AVG(Voto),1) AS MediaVoto, Username, Tipologia
@@ -154,12 +154,12 @@
             $res -> execute();
 
             //MongoDB
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'SELECT',
-                'InvolvedTable'	=> 'VIEW CLASSIFICA'
-            ]);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'SELECT',
+            //     'InvolvedTable'	=> 'VIEW CLASSIFICA'
+            // ]);
 
             $classificati = array();
             while($row = $res -> fetch()) {

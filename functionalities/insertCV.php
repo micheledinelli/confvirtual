@@ -23,9 +23,9 @@
         $pdo -> exec('SET NAMES "utf8"');
         
         //MongoDB
-        require '../vendor/autoload.php';
-        $conn = new MongoDB\Client("mongodb://localhost:27017");
-        $collection = $conn -> CONFVIRTUAL_log -> log;
+        // require '../vendor/autoload.php';
+        // $conn = new MongoDB\Client("mongodb://localhost:27017");
+        // $collection = $conn -> CONFVIRTUAL_log -> log;
 
         //MySQL
         if($_SESSION["userType"] == "SPEAKER") {
@@ -38,13 +38,13 @@
             $res -> execute();
     
             //MongoDB
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'UPDATE',
-                'InvolvedTable'	    => 'SPEAKER',
-                'Input'				=> $cv
-            ]);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'UPDATE',
+            //     'InvolvedTable'	    => 'SPEAKER',
+            //     'Input'				=> $cv
+            // ]);
 
             $_SESSION["opSuccesfull"] = 0;
         
@@ -57,13 +57,13 @@
             $res -> execute();
     
             //MongoDB
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'UPDATE',
-                'InvolvedTable'	    => 'PRESENTER',
-                'Input'				=> $cv
-            ]);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'UPDATE',
+            //     'InvolvedTable'	    => 'PRESENTER',
+            //     'Input'				=> $cv
+            // ]);
 
             $_SESSION["opSuccesfull"] = 0;
         } 

@@ -26,9 +26,9 @@
             $pdo -> exec('SET NAMES "utf8"');
             
             //Connection to MongoDB
-            require '../vendor/autoload.php';
-            $conn = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $conn -> CONFVIRTUAL_log -> log;	
+            // require '../vendor/autoload.php';
+            // $conn = new MongoDB\Client("mongodb://localhost:27017");
+            // $collection = $conn -> CONFVIRTUAL_log -> log;	
 
             //MySQL
             $query = 'call confvirtual.InserisiciMessaggio(:lab1, :lab2, :lab3, :lab4)';
@@ -41,14 +41,14 @@
             $res -> execute();
 
             //MongoDB
-            $DATA = array("UsernameMittente"=>$username, "Testo"=>$text, "Ts"=>$currentDate, "ChatId"=>$currentDate);
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'INSERT',
-                'InvolvedTable'	    => 'MESSAGGIO',
-                'Input'				=> $DATA
-            ]);
+            // $DATA = array("UsernameMittente"=>$username, "Testo"=>$text, "Ts"=>$currentDate, "ChatId"=>$currentDate);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'INSERT',
+            //     'InvolvedTable'	    => 'MESSAGGIO',
+            //     'Input'				=> $DATA
+            // ]);
 
             header('Location:chat.php');
 

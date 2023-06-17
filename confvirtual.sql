@@ -240,8 +240,6 @@ BEGIN
 END;
 $ DELIMITER ;
 
-
-
 # Aggiunge una nuova sponsorizzazione, se lo sponsor esiste già si inserisce solo 
 # la sponsorizzazione, altrimenti si salva anche il nuovo sponsor
 DELIMITER $
@@ -428,7 +426,6 @@ BEGIN
             END IF;
             
 			UPDATE UTENTE SET UTENTE.Tipologia = newRole WHERE(Utente.Username = username);
-
             
             IF(@oldRole = 'ADMIN') THEN
 				DELETE FROM ADMIN WHERE Username = username;

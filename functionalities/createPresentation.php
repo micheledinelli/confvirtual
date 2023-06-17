@@ -36,9 +36,9 @@
             $pdo -> exec('SET NAMES "utf8"');
             
             //Connection to MongoDB
-            require '../vendor/autoload.php';
-            $conn = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $conn -> CONFVIRTUAL_log -> log;	
+            // require '../vendor/autoload.php';
+            // $conn = new MongoDB\Client("mongodb://localhost:27017");
+            // $collection = $conn -> CONFVIRTUAL_log -> log;	
 
             //MySQL
             if($articolo){
@@ -53,14 +53,14 @@
                 $stmt->execute();
 
                 //MongoDB
-                $DATA = array("Titolo"=>$titolo, "NumeroPagine"=>$numeroPagine);
-                $insertOneResult = $collection->insertOne([
-                    'TimeStamp' 		=> time(),
-                    'User'				=> $_SESSION['user'],
-                    'OperationType'		=> 'INSERT',
-                    'InvolvedTable'	    => 'P_ARTICOLO',
-                    'Input'				=> $DATA
-                ]);
+                // $DATA = array("Titolo"=>$titolo, "NumeroPagine"=>$numeroPagine);
+                // $insertOneResult = $collection->insertOne([
+                //     'TimeStamp' 		=> time(),
+                //     'User'				=> $_SESSION['user'],
+                //     'OperationType'		=> 'INSERT',
+                //     'InvolvedTable'	    => 'P_ARTICOLO',
+                //     'Input'				=> $DATA
+                // ]);
 
             }else{
                 $sql = 'call inserisciTutorial(:lab1, :lab2, :lab3, :lab4, :lab5)';
@@ -74,25 +74,25 @@
                 $stmt->execute();
 
                 //MongoDB
-                $DATA = array("Titolo"=>$titolo, "Abstract"=>$abstract);
-                $insertOneResult = $collection->insertOne([
-                    'TimeStamp' 		=> time(),
-                    'User'				=> $_SESSION['user'],
-                    'OperationType'		=> 'INSERT',
-                    'InvolvedTable'	    => 'P_TUTORIAL',
-                    'Input'				=> $DATA
-                ]);
+                // $DATA = array("Titolo"=>$titolo, "Abstract"=>$abstract);
+                // $insertOneResult = $collection->insertOne([
+                //     'TimeStamp' 		=> time(),
+                //     'User'				=> $_SESSION['user'],
+                //     'OperationType'		=> 'INSERT',
+                //     'InvolvedTable'	    => 'P_TUTORIAL',
+                //     'Input'				=> $DATA
+                // ]);
             }
             //MongoDB
-            $DATA = array("CodiceSessione"=>$codiceSessione, "OraInizio"=>$oraInizio, 
-                    "OraFine"=>$oraFine);
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'INSERT',
-                'InvolvedTable'	    => 'PRESENTAZIONE',
-                'Input'				=> $DATA
-            ]);
+            // $DATA = array("CodiceSessione"=>$codiceSessione, "OraInizio"=>$oraInizio, 
+            //         "OraFine"=>$oraFine);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'INSERT',
+            //     'InvolvedTable'	    => 'PRESENTAZIONE',
+            //     'Input'				=> $DATA
+            // ]);
 
             // L'ultima operazione è andata a buon fine
             $_SESSION["opSuccesfull"] = 0;

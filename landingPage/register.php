@@ -32,9 +32,9 @@
             $pdo -> exec('SET NAMES "utf8"');
             
             //MongoDB
-            require '../vendor/autoload.php';
-            $conn = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $conn -> CONFVIRTUAL_log -> log;	
+            // require '../vendor/autoload.php';
+            // $conn = new MongoDB\Client("mongodb://localhost:27017");
+            // $collection = $conn -> CONFVIRTUAL_log -> log;	
 
             // Check if the username already exists, if not is inserted into UTENTE
             // Eventually possible to use stored procedure defined in the db
@@ -53,15 +53,15 @@
             $_SESSION['userType'] = "BASE";
 
             //MongoDB
-            $DATA = array("Username"=>$username, "Password"=>$password, "Nome"=>$name, "Cognome"=>$surname,
-                "DataNascita"=>$date, "Luogo"=>$birthplace);
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'INSERT',
-                'InvolvedTable'	    => 'UTENTE',
-                'Input'				=> $DATA
-            ]);
+            // $DATA = array("Username"=>$username, "Password"=>$password, "Nome"=>$name, "Cognome"=>$surname,
+            //     "DataNascita"=>$date, "Luogo"=>$birthplace);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'INSERT',
+            //     'InvolvedTable'	    => 'UTENTE',
+            //     'Input'				=> $DATA
+            // ]);
             
             // Redirect
             header('Location:index.php');

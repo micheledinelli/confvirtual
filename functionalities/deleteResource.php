@@ -13,9 +13,9 @@
         $pdo -> exec('SET NAMES "utf8"');
         
         //Connection to MongoDB
-        require '../vendor/autoload.php';
-        $conn = new MongoDB\Client("mongodb://localhost:27017");
-        $collection = $conn -> CONFVIRTUAL_log -> log;	
+        // require '../vendor/autoload.php';
+        // $conn = new MongoDB\Client("mongodb://localhost:27017");
+        // $collection = $conn -> CONFVIRTUAL_log -> log;	
 
         //MySQL
         echo $link;
@@ -29,12 +29,12 @@
         $res -> execute();
 
         //MongoDB
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'DELETE',
-            'InvolvedTable'	    => 'RISORSA'
-        ]);
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'DELETE',
+        //     'InvolvedTable'	    => 'RISORSA'
+        // ]);
 
         $_SESSION["opSuccesfull"] = 0;
         

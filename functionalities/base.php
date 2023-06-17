@@ -27,9 +27,9 @@
             $pdo -> exec('SET NAMES "utf8"');
 
             //Connection to MongoDB
-            require '../vendor/autoload.php';
-            $conn = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $conn -> CONFVIRTUAL_log -> log;	
+            // require '../vendor/autoload.php';
+            // $conn = new MongoDB\Client("mongodb://localhost:27017");
+            // $collection = $conn -> CONFVIRTUAL_log -> log;	
 
             //MySQL
             // CONFERENCES
@@ -172,12 +172,12 @@
         }
 
         //MongoDB
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => 'CONFERENZA'
-        ]);
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => 'CONFERENZA'
+        // ]);
         
         //MySQL
         // SESSIONS
@@ -200,12 +200,12 @@
         }
 
         //MongoDB
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => 'SESSIONE'
-        ]);
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => 'SESSIONE'
+        // ]);
 
         //MySQL
         $querySessionsPermitted = ('SELECT *
@@ -228,13 +228,13 @@
         }
 
         //MongoDB
-        $DATA = array("REGISTRAZIONE", "SESSIONE");
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => $DATA
-        ]);
+        // $DATA = array("REGISTRAZIONE", "SESSIONE");
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => $DATA
+        // ]);
 
         //MySQL
         // PRESENTATIONS
@@ -262,13 +262,13 @@
         }
 
         //MongoDB
-        $DATA = array("PRESENTAZIONE", "P_ARTICOLO");
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => $DATA
-        ]);
+        // $DATA = array("PRESENTAZIONE", "P_ARTICOLO");
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => $DATA
+        // ]);
 
         //MySQL
         $queryPresTutorial = 'SELECT * 
@@ -291,13 +291,13 @@
         }
 
         //MongoDB
-        $DATA = array("PRESENTAZIONE", "P_TUTORIAL");
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => $DATA
-        ]);
+        // $DATA = array("PRESENTAZIONE", "P_TUTORIAL");
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => $DATA
+        // ]);
 
         // FAVORITES
         $query = ('SELECT * 
@@ -320,13 +320,13 @@
         }
 
         //MongoDB
-        $DATA = array("FAVORITE", "P_ARTICOLO", "PRESENTAZIONE");
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => $DATA
-        ]);
+        // $DATA = array("FAVORITE", "P_ARTICOLO", "PRESENTAZIONE");
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => $DATA
+        // ]);
 
         //MySQL
         $query = ('SELECT * 
@@ -349,13 +349,13 @@
         }
 
         //MongoDB
-        $DATA = array("FAVORITE", "P_TUTORIAL", "PRESENTAZIONE");
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'SELECT',
-            'InvolvedTable'	    => $DATA
-        ]);
+        // $DATA = array("FAVORITE", "P_TUTORIAL", "PRESENTAZIONE");
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'SELECT',
+        //     'InvolvedTable'	    => $DATA
+        // ]);
 
     ?>
     

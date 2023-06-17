@@ -15,9 +15,9 @@
         $pdo -> exec('SET NAMES "utf8"');
 
         //Connection to MongoDB
-        require '../vendor/autoload.php';
-        $conn = new MongoDB\Client("mongodb://localhost:27017");
-        $collection = $conn -> CONFVIRTUAL_log -> log;
+        // require '../vendor/autoload.php';
+        // $conn = new MongoDB\Client("mongodb://localhost:27017");
+        // $collection = $conn -> CONFVIRTUAL_log -> log;
         
         //MySQL
         if($resourceAddOpt == "add") {
@@ -32,15 +32,15 @@
             $res -> execute();
 
             //MongoDB
-            $DATA = array("UsernameSpeaker"=>$username, "Link"=>$link, "Descrizione"=>$descrizione, 
-                "CodiceTutorial"=>$codiceTutorial);
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'INSERT',
-                'InvolvedTable'	    => 'RISORSA',
-                'Input'				=> $DATA
-            ]);
+            // $DATA = array("UsernameSpeaker"=>$username, "Link"=>$link, "Descrizione"=>$descrizione, 
+            //     "CodiceTutorial"=>$codiceTutorial);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'INSERT',
+            //     'InvolvedTable'	    => 'RISORSA',
+            //     'Input'				=> $DATA
+            // ]);
 
             $_SESSION["opSuccesfull"] = 0;
             
@@ -58,14 +58,14 @@
             $res -> execute();
 
             //MongoDB
-            $DATA = array("Link"=>$link, "Descrizione"=>$descrizione);
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'UPDATE',
-                'InvolvedTable'	    => 'RISORSA',
-                'Input'				=> $DATA
-            ]);
+            // $DATA = array("Link"=>$link, "Descrizione"=>$descrizione);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'UPDATE',
+            //     'InvolvedTable'	    => 'RISORSA',
+            //     'Input'				=> $DATA
+            // ]);
 
             $_SESSION["opSuccesfull"] = 0;
             

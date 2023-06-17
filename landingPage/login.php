@@ -28,9 +28,9 @@
             $pdo -> exec('SET NAMES "utf8"');
 
             //MongoDB
-            require '../vendor/autoload.php';
-            $conn = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $conn -> CONFVIRTUAL_log -> log;	
+            // require '../vendor/autoload.php';
+            // $conn = new MongoDB\Client("mongodb://localhost:27017");
+            // $collection = $conn -> CONFVIRTUAL_log -> log;	
             
             //MySQL
             $query = ("SELECT COUNT(*) AS Counter, Tipologia 
@@ -43,12 +43,12 @@
             $res -> execute();
             
             //MongoDB
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'SELECT',
-                'InvolvedTable'	    => 'UTENTE'
-            ]);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'SELECT',
+            //     'InvolvedTable'	    => 'UTENTE'
+            // ]);
 
             $row = $res -> fetch();
             $_SESSION['userType'] = $row["Tipologia"];

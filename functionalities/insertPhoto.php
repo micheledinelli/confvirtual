@@ -30,13 +30,13 @@
                     $res -> execute();
 
                     //MongoDB
-                    $insertOneResult = $collection->insertOne([
-                        'TimeStamp' 		=> time(),
-                        'User'				=> $_SESSION['user'],
-                        'OperationType'		=> 'UPDATE',
-                        'InvolvedTable'	    => 'SPEAKER',
-                        'Input'				=> $file
-                    ]);
+                    // $insertOneResult = $collection->insertOne([
+                    //     'TimeStamp' 		=> time(),
+                    //     'User'				=> $_SESSION['user'],
+                    //     'OperationType'		=> 'UPDATE',
+                    //     'InvolvedTable'	    => 'SPEAKER',
+                    //     'Input'				=> $file
+                    // ]);
 
                     $_SESSION["opSuccesfull"] = 0;
             
@@ -50,13 +50,13 @@
                     $res -> execute();
                     
                     //MongoDB
-                    $insertOneResult = $collection->insertOne([
-                        'TimeStamp' 		=> time(),
-                        'User'				=> $_SESSION['user'],
-                        'OperationType'		=> 'UPDATE',
-                        'InvolvedTable'	    => 'PRESENTER',
-                        'Input'				=> $file
-                    ]);
+                    // $insertOneResult = $collection->insertOne([
+                    //     'TimeStamp' 		=> time(),
+                    //     'User'				=> $_SESSION['user'],
+                    //     'OperationType'		=> 'UPDATE',
+                    //     'InvolvedTable'	    => 'PRESENTER',
+                    //     'Input'				=> $file
+                    // ]);
 
                     $_SESSION["opSuccesfull"] = 0;
                 }

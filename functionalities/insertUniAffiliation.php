@@ -17,9 +17,9 @@
             $pdo -> exec('SET NAMES "utf8"');
 
             //Connection to MongoDB
-            require '../vendor/autoload.php';
-            $conn = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $conn -> CONFVIRTUAL_log -> log;	
+            // require '../vendor/autoload.php';
+            // $conn = new MongoDB\Client("mongodb://localhost:27017");
+            // $collection = $conn -> CONFVIRTUAL_log -> log;	
 
             //MySQL
             $query = 'call confvirtual.AffiliazioneUni(:lab1, :lab2, :lab3)';
@@ -31,14 +31,14 @@
             $res -> execute();
            
             //MongoDB
-            $DATA = array("NomeUniversità"=>$uni, "Diparimento"=>$dip);
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'UPDATE',
-                'InvolvedTable'	    => 'SPEAKER/PRESENTER',
-                'Input'				=> $DATA
-            ]);
+            // $DATA = array("NomeUniversità"=>$uni, "Diparimento"=>$dip);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'UPDATE',
+            //     'InvolvedTable'	    => 'SPEAKER/PRESENTER',
+            //     'Input'				=> $DATA
+            // ]);
 
             $_SESSION['opSuccesfull'] = 1;
             header('Location: speaker_presenter.php');

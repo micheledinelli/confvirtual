@@ -25,9 +25,9 @@
             $pdo -> exec('SET NAMES "utf8"');
 
             //Connection to MongoDB
-            require '../vendor/autoload.php';
-            $conn = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $conn -> CONFVIRTUAL_log -> log;	
+            // require '../vendor/autoload.php';
+            // $conn = new MongoDB\Client("mongodb://localhost:27017");
+            // $collection = $conn -> CONFVIRTUAL_log -> log;	
             
             //MySQL
             $query = ('INSERT INTO REGISTRAZIONE(Username, AcronimoConferenza, AnnoEdizione) 
@@ -41,14 +41,14 @@
             $res -> execute();
 
             //MongoDB
-            $DATA = array("Username"=>$username, "AcronimoConferenza"=>$acronimo, "AnnoEdizione"=>$annoEdizione); 
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'INSERT',
-                'InvolvedTable'	    => 'RESGISTRAZIONE',
-                'Input'				=> $DATA
-            ]);
+            // $DATA = array("Username"=>$username, "AcronimoConferenza"=>$acronimo, "AnnoEdizione"=>$annoEdizione); 
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'INSERT',
+            //     'InvolvedTable'	    => 'RESGISTRAZIONE',
+            //     'Input'				=> $DATA
+            // ]);
 
             // L'ultima operazione è andata a buon fine
             $_SESSION["opSuccesfull"] = 0;

@@ -17,9 +17,9 @@
         $pdo -> exec('SET NAMES "utf8"');
         
         //Connection to MongoDB
-        require '../vendor/autoload.php';
-        $conn = new MongoDB\Client("mongodb://localhost:27017");
-        $collection = $conn -> CONFVIRTUAL_log -> log;	
+        // require '../vendor/autoload.php';
+        // $conn = new MongoDB\Client("mongodb://localhost:27017");
+        // $collection = $conn -> CONFVIRTUAL_log -> log;	
 
         //MySQL
         $sql = 'call confvirtual.CreaSessione(:lab1, :lab2, :lab3, :lab4, :lab5, :lab6, :lab7)';
@@ -37,15 +37,15 @@
         $stmt->execute();
 
         //MongoDB
-        $DATA = array("AcronimoConferenza"=>$acronimo, "Titolo"=>$titoloSessione, "Data"=>$dataSessione, 
-            "Anno"=>$annoEdizione, "OraInizio"=>$oraInizio, "OraFine"=>$oraFine, "Link"=>$linkSessione);
-        $insertOneResult = $collection->insertOne([
-            'TimeStamp' 		=> time(),
-            'User'				=> $_SESSION['user'],
-            'OperationType'		=> 'INSERT',
-            'InvolvedTable'	    => 'SESSIONE',
-            'Input'				=> $DATA
-        ]);
+        // $DATA = array("AcronimoConferenza"=>$acronimo, "Titolo"=>$titoloSessione, "Data"=>$dataSessione, 
+        //     "Anno"=>$annoEdizione, "OraInizio"=>$oraInizio, "OraFine"=>$oraFine, "Link"=>$linkSessione);
+        // $insertOneResult = $collection->insertOne([
+        //     'TimeStamp' 		=> time(),
+        //     'User'				=> $_SESSION['user'],
+        //     'OperationType'		=> 'INSERT',
+        //     'InvolvedTable'	    => 'SESSIONE',
+        //     'Input'				=> $DATA
+        // ]);
 
         // L'ultima operazione è andata a buon fine
         $_SESSION["opSuccesfull"] = 0;

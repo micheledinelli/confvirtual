@@ -23,9 +23,9 @@
             $pdo -> exec('SET NAMES "utf8"');
             
             //Connection to MongoDB
-            require '../vendor/autoload.php';
-            $conn = new MongoDB\Client("mongodb://localhost:27017");
-            $collection = $conn -> CONFVIRTUAL_log -> log;	
+            // require '../vendor/autoload.php';
+            // $conn = new MongoDB\Client("mongodb://localhost:27017");
+            // $collection = $conn -> CONFVIRTUAL_log -> log;	
 
             //MySQL
             $sql = 'call associaSpeaker(:lab1, :lab2)';
@@ -38,14 +38,14 @@
             $stmt->execute();
 
             //MongoDB
-            $DATA = array("UsernameSpeaker"=>$usernameSpeaker, "CodiceTutorial"=>$codiceTutorial);
-            $insertOneResult = $collection->insertOne([
-                'TimeStamp' 		=> time(),
-                'User'				=> $_SESSION['user'],
-                'OperationType'		=> 'INSERT',
-                'InvolvedTable'	    => 'SPEAKER_TUTORIAL',
-                'Input'				=> $DATA
-            ]);
+            // $DATA = array("UsernameSpeaker"=>$usernameSpeaker, "CodiceTutorial"=>$codiceTutorial);
+            // $insertOneResult = $collection->insertOne([
+            //     'TimeStamp' 		=> time(),
+            //     'User'				=> $_SESSION['user'],
+            //     'OperationType'		=> 'INSERT',
+            //     'InvolvedTable'	    => 'SPEAKER_TUTORIAL',
+            //     'Input'				=> $DATA
+            // ]);
 
             // L'ultima operazione è andata a buon fine
             $_SESSION["opSuccesfull"] = 0;
